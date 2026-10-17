@@ -92,8 +92,50 @@ stretch with guests give real litres per guest per day (fall in level plus rain 
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, fully booked, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
-| Tanker | On; ordered at 5%, arrives after 2 days; 12 m³ loads | Small rigid tanker suits the access |
-| Water price | €2.80/m³ | SISPEA, Lot (46) average, 2025 |
-| Call-out | €270 per delivery | Makes a 12 m³ delivery about €300, in line with published prices for small loads |
+| Tanker | On; ordered at 5%, arrives after 2 days | |
+| Supplier | Transports Delrieu, Parnac, 15.6 km by road | Nearest haulier with food-grade tanks |
+| Tanker size | Small rigid lorry, 12 m³ | Cautious until access for a bigger lorry is checked; presets for 16, 20 and 28 m³ |
+| Delivery cost | €150 fixed + €3/km on the round trip + €2.80/m³ water | See below |
 | Climate | No change | "2050 outlook" preset: summer −15%, winter +12% (Météo-France, Occitanie) |
 | Period | From 2010 | Selectable back to 1994 |
+
+## Tanker deliveries
+
+Cost per delivery = fixed charge + €/km × 2 × road distance + water price × m³ delivered.
+
+- **Fixed charge, €150:** loading at a hydrant, hooking up and pumping off, about 1 to
+  1.5 hours of lorry and driver. Lorries with a driver hire at €90 to €130 an hour.
+- **€3 per km, round trip:** CNR (the French road-haulage cost observatory) puts the full
+  cost of a lorry at about €1.80 to €2.30 per km; delivery firms quote €2 to €4 per km.
+- **Water, €2.80 per m³:** SISPEA average drinking-water price for the Lot, 2025.
+
+Checked against two real prices: about €300 for a small private delivery (French price
+guides), and about €10 per m³ for 30 m³ loads, which is what Figeac paid when trucking in
+drinking water in August 2026 (€10,000 a day for about 1,000 m³; France 3, 14 August 2026).
+The model gives €277 for 12 m³ and €322 for 28 m³ from Parnac.
+
+Water weighs a tonne per m³, so the legal weight limit sets the load: about 12 m³ on a
+two-axle lorry (19 t), 16 m³ on three axles (26 t), 20 m³ on four (32 t), 25 to 30 m³ on an
+articulated tanker (44 t). An articulated tanker needs a lane at least 3 m wide, 4 m
+headroom, firm ground, room to turn and no weight limits on the way; the hose reaches
+about 30 m.
+
+### Hauliers near the house (researched October 2026)
+
+No firm in the Lot advertises water deliveries to homes. These run tankers near the house;
+none has been asked for a quote yet. Road distances are from OSRM to Prayssac.
+
+| Haulier | Base | Road distance | What they run | Contact |
+|---|---|---|---|---|
+| Transports Delrieu | 91 chemin de la Combe du Tic, 46140 Parnac | 15.6 km, 19 min | 4 food-grade tanker semi-trailers (bulk wine, also to private customers); 2 × 28 m³ other-water tankers | 05 65 30 70 51 |
+| SARL Cassan | Rue des Charmes, Le Nouel, 46220 Prayssac | 1.6 km, 3 min | Fuel and liquids tankers, within 40 km. Not usable for washing water unless they have a food-grade tank | 05 65 36 20 13, cassanpetrolier@orange.fr |
+| Établissements Imbert | ZAE Les Falguières, 46230 Fontanes | 42.7 km, 47 min | Haulage incl. bulk tanker work (directories); tank type not confirmed | 05 65 22 13 60 |
+| Amichauf | 52 avenue de Sarlat, 46200 Souillac | 86.7 km, 78 min | Listed for water treatment, transport and distribution; no tanker details | — |
+| Transports Veynat | 62 avenue de Branne, 33370 Tresses | 196.5 km, 2 h 43 | Drinking-water tanker specialist (food-grade liquids since the 1880s) | 05 57 97 70 30, transport-eau@veynat.fr |
+
+Ruled out: Transports Daurat (Cancon, liquidated 2023), Transports Roquemauroux (Duravel,
+solid bulk only), Flocea and Eau Source Distribution (brokers based on the Mediterranean
+coast).
+
+In a drought, towns in the Lot compete for the same tankers (Figeac had public contracts
+ready in August 2026), so book early or arrange a standing agreement.

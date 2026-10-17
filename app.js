@@ -8,7 +8,31 @@
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
   const TOILET_LITRES = { std: 9, low: 6, dual: 4.5, dry: 0, grey: 9 };
-  const STRING_KEYS = new Set(['src', 'mode', 'toilet']);
+  const STRING_KEYS = new Set(['src', 'mode', 'toilet', 'supplier', 'truck']);
+
+  // Hauliers near the house that run tankers (researched October 2026), with the road
+  // distance from their base to Prayssac. Picking one sets the distance; 'custom' keeps yours.
+  const SUPPLIERS = [
+    { id: 'delrieu', name: 'Transports Delrieu, Parnac', km: 15.6,
+      note: 'Runs food-grade tanker semi-trailers (bulk wine) and two 28 m³ water tankers. The nearest firm with food-grade tanks; ask whether they can send a smaller lorry.' },
+    { id: 'cassan', name: 'SARL Cassan, Prayssac', km: 1.6,
+      note: 'Runs fuel and liquids tankers. Only suitable if they have a separate food-grade tank.' },
+    { id: 'imbert', name: 'Établissements Imbert, Fontanes', km: 42.7,
+      note: 'Haulier listed for bulk tanker work; tank type not confirmed.' },
+    { id: 'amichauf', name: 'Amichauf, Souillac', km: 86.7,
+      note: 'Listed for water transport and distribution; no tanker details found.' },
+    { id: 'veynat', name: 'Transports Veynat, Tresses (Gironde)', km: 196.5,
+      note: 'Drinking-water tanker specialist, but nearly 200 km away.' },
+    { id: 'custom', name: 'Other (enter the distance)', km: null, note: '' },
+  ];
+  // Tanker sizes: water weighs a tonne per m³, so the legal weight limit sets the load.
+  const TRUCKS = [
+    { id: 'rigid2', name: 'Small rigid lorry, 2 axles (19 t)', load: 12 },
+    { id: 'rigid3', name: 'Rigid lorry, 3 axles (26 t)', load: 16 },
+    { id: 'rigid4', name: 'Large rigid lorry, 4 axles (32 t)', load: 20 },
+    { id: 'semi', name: 'Articulated tanker (44 t)', load: 28 },
+    { id: 'custom', name: 'Other (enter the load)', load: null },
+  ];
   // The comparison setup always sees the same weather as the current settings.
   const WEATHER_KEYS = ['src', 'from', 'sumAdj', 'winAdj'];
 
@@ -35,7 +59,9 @@
     // tanks (their sizes are in the tank list)
     usable: 90, fill: 100,
     // tanker
-    tanker: 1, trig: 5, lead: 2, load: 12, price: 2.8, callout: 270,
+    tanker: 1, trig: 5, lead: 2,
+    supplier: 'delrieu', km: 15.6, truck: 'rigid2', load: 12,
+    fixed: 150, perKm: 3, price: 2.8,
     // weather
     src: 'anglars', from: 2010, sumAdj: 0, winAdj: 0,
     // payback
@@ -98,6 +124,13 @@
   const usableVolume = (s) => tankVolume(s) * s.usable / 100;
   // Water surface area of the linked tanks: 1 cm of depth is this many m² × 0.01 m³.
   const planArea = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) : 0), 0);
+  // A delivery costs the fixed charge and the round trip whatever the load, plus the water.
+  const tripCost = (s) => s.fixed + s.perKm * 2 * s.km;
+  const deliveryCost = (s) => tripCost(s) + s.load * s.price;
+  const supplierName = (s) => {
+    const p = SUPPLIERS.find((x) => x.id === s.supplier);
+    return p && p.id !== 'custom' ? p.name.split(',')[0] : `a supplier ${fmt(s.km, 1)} km away`;
+  };
   const inSeason = (m, a, b) => (a <= b ? m >= a && m <= b : m >= a || m <= b);
 
   function usage(s) {
@@ -170,7 +203,7 @@
       v += add;
       Y.deliveries++;
       Y.delivered += add;
-      Y.cost += add * s.price + s.callout;
+      Y.cost += add * s.price + tripCost(s);
       deliveryDays.push(j);
       return true;
     };
@@ -328,9 +361,16 @@
     setHTML('o_tankvol', m3(tankVolume(s)));
     setHTML('o_usable', m3(r.cap));
     setHTML('o_tanker', s.tanker
-      ? `Each delivery brings ${fmt(s.load)} m³ and costs about <b>${eur(s.load * s.price + s.callout)}</b>. ` +
+      ? `Each delivery brings ${fmt(s.load)} m³ from ${supplierName(s)} and costs about <b>${eur(deliveryCost(s))}</b> ` +
+        `(€${fmt(deliveryCost(s) / s.load, 1)} per m³). ` +
         `It's ordered when the tanks fall to ${s.trig}% and arrives ${s.lead} ${plural(s.lead, 'day', 'days')} later.`
       : 'With no tanker, the results show how often the house would run dry.');
+    const sup = SUPPLIERS.find((x) => x.id === s.supplier);
+    setHTML('o_supplier', sup && sup.note ? sup.note : '');
+    const perM3 = (x) => '€' + fmt(x, 1);
+    setHTML('o_cost_breakdown', `Each delivery: ${eur(s.fixed)} fixed + ${eur(s.perKm * 2 * s.km)} for ` +
+      `${fmt(2 * s.km, 1)} km there and back + ${eur(s.load * s.price)} for ${fmt(s.load)} m³ of water ` +
+      `= <b>${eur(deliveryCost(s))}</b>, or ${perM3(deliveryCost(s) / s.load)} per m³.`);
     setHTML('o_off', String(s.offPeople));
     setHTML('o_eff', s.eff + '%');
     setHTML('o_loss', s.loss > 0 ? fmt(s.loss, 1) + ' mm' : 'none');
@@ -862,6 +902,15 @@
       s.tanklist = Array.from({ length: count }, (_, k) => (
         { n: 'Tank ' + (k + 1), shape: 'box', l: num('tl', 4), w: num('tw', 4), d: num('td', 4), on: 1 }));
     }
+    // Links made before supplier and distance existed had one call-out charge per delivery.
+    if (p.has('callout') && !p.has('fixed') && !p.has('km')) {
+      const c = parseFloat(p.get('callout'));
+      if (isFinite(c)) { s.fixed = c; s.km = 0; s.supplier = 'custom'; }
+    }
+    const sup = SUPPLIERS.find((x) => x.id === s.supplier);
+    if (!sup || (sup.km !== null && sup.km !== s.km)) s.supplier = 'custom';
+    const truck = TRUCKS.find((x) => x.id === s.truck);
+    if (!truck || (truck.load !== null && truck.load !== s.load)) s.truck = 'custom';
     if (!R.sources[s.src]) s.src = DEFAULTS.src;
     if (!(s.toilet in TOILET_LITRES)) s.toilet = DEFAULTS.toilet;
     if (s.mode !== 'direct') s.mode = 'build';
@@ -958,6 +1007,24 @@
     renderTanks();
   }
 
+  // Picking a supplier sets the distance and picking a tanker sets the load; typing your own
+  // distance or load switches the choice to 'Other'.
+  function linkPresets(k) {
+    if (k === 'supplier') {
+      const p = SUPPLIERS.find((x) => x.id === state.supplier);
+      if (p && p.km !== null) { state.km = p.km; document.querySelector('[data-k=km]').value = p.km; }
+    } else if (k === 'truck') {
+      const t = TRUCKS.find((x) => x.id === state.truck);
+      if (t && t.load !== null) { state.load = t.load; document.querySelector('[data-k=load]').value = t.load; }
+    } else if (k === 'km') {
+      const p = SUPPLIERS.find((x) => x.id === state.supplier);
+      if (!p || p.km !== state.km) { state.supplier = 'custom'; $('supplier_select').value = 'custom'; }
+    } else if (k === 'load') {
+      const t = TRUCKS.find((x) => x.id === state.truck);
+      if (!t || t.load !== state.load) { state.truck = 'custom'; $('truck_select').value = 'custom'; }
+    }
+  }
+
   function readInput(el) {
     const k = el.dataset.k;
     if (el.type === 'checkbox') state[k] = el.checked ? 1 : 0;
@@ -1005,6 +1072,10 @@
     let years = '';
     for (let y = FIRST_YEAR; y <= LAST_FULL_YEAR; y++) years += `<option value="${y}">${y}</option>`;
     $('from_select').innerHTML = years;
+    $('supplier_select').innerHTML = SUPPLIERS
+      .map((x) => `<option value="${x.id}">${x.name}${x.km !== null ? ` (${fmt(x.km, 1)} km)` : ''}</option>`).join('');
+    $('truck_select').innerHTML = TRUCKS
+      .map((x) => `<option value="${x.id}">${x.name}${x.load !== null ? `: ${x.load} m³` : ''}</option>`).join('');
 
     state = fromHash(location.hash);
     view = viewFromHash(location.hash);
@@ -1013,7 +1084,7 @@
 
     document.querySelectorAll('[data-k]').forEach((el) => {
       const evt = el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio' ? 'change' : 'input';
-      el.addEventListener(evt, () => { readInput(el); schedule(); });
+      el.addEventListener(evt, () => { readInput(el); linkPresets(el.dataset.k); schedule(); });
     });
     $('add_surface').addEventListener('click', () => {
       state.surfaces.push({ n: 'Other surface', l: 5, w: 4, on: 1 });

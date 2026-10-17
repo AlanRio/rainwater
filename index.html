@@ -183,7 +183,7 @@
           <tr><td>Tanks</td><td>2 tanks, 4 × 4 × 4 m, 90% usable</td><td>Estimated size, still to be measured. The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
           <tr><td>Water use</td><td>120 litres per guest per day</td><td>Built up from showers, toilets, taps, laundry and dishwasher under <i>Water use in detail</i>. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
           <tr><td>Water price</td><td>€2.80 per m³</td><td>Official average price of drinking water in the Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
-          <tr><td>Tanker delivery</td><td>12 m³ load, €270 call-out</td><td>Published French prices put a small delivery of about 10 m³ at around €300 including water and transport (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Replace with a local quote.</td></tr>
+          <tr><td>Tanker delivery</td><td>12 m³ from Parnac (15.6 km): €150 fixed + €3 per km + water</td><td>Each delivery costs a fixed charge, plus a charge per kilometre on the round trip, plus the water. The fixed charge is about 1 to 1.5 hours of lorry and driver at the €90 to €130 an hour that hauliers charge. The per-km rate is the French road-haulage cost of about €1.80 to €2.30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus a margin, in line with the €2 to €4 per km that delivery firms quote (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Two real prices check it: about €300 for a small private delivery, and the roughly €10 per m³ Figeac paid for 30 m³ tanker loads in the August 2026 drought (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). The local hauliers and their distances are under <i>Tanker in detail</i>. Replace with a real quote when you have one.</td></tr>
           <tr><td>Climate outlook</td><td>Off (recent weather)</td><td>Météo-France projections for Occitanie around 2050: summer rain −15%, winter rain +12% (<a href="https://meteofrance.com/changement-climatique/quel-climat-futur-en-occitanie" target="_blank" rel="noopener">Météo-France</a>).</td></tr>
         </tbody>
       </table>
@@ -337,17 +337,56 @@
 
   <details>
     <summary>Tanker in detail</summary>
-    <div class="body grid">
-      <label class="f">Order a tanker when the tanks fall to: <span class="val" id="o_trig"></span>
-        <input type="range" data-k="trig" min="0" max="50" step="1"></label>
-      <label class="f">Days from ordering to delivery: <span class="val" id="o_lead"></span>
-        <input type="range" data-k="lead" min="0" max="14" step="1"></label>
-      <label class="f">Water per delivery (m³)
-        <input type="number" data-k="load" min="1" max="40" step="1"></label>
-      <label class="f">Water price (€ per m³)
-        <input type="number" data-k="price" min="0" max="50" step="0.1"></label>
-      <label class="f">Call-out charge per delivery (€)
-        <input type="number" data-k="callout" min="0" max="2000" step="10"></label>
+    <div class="body">
+      <div class="grid">
+        <label class="f">Supplier
+          <select data-k="supplier" id="supplier_select"></select></label>
+        <label class="f">Road distance from their base (km, one way)
+          <input type="number" data-k="km" min="0" max="1000" step="0.1"></label>
+        <label class="f">Tanker
+          <select data-k="truck" id="truck_select"></select></label>
+        <label class="f">Water per delivery (m³)
+          <input type="number" data-k="load" min="1" max="40" step="1"></label>
+      </div>
+      <p class="tiny" id="o_supplier" style="margin-top:6px"></p>
+
+      <div class="grid" style="margin-top:10px">
+        <label class="f">Fixed charge per delivery (€)
+          <input type="number" data-k="fixed" min="0" max="3000" step="10">
+          <span class="tiny">Loading, hooking up and pumping: about 1 to 1.5 hours of lorry and driver.</span></label>
+        <label class="f">Charge per kilometre (€)
+          <input type="number" data-k="perKm" min="0" max="20" step="0.1">
+          <span class="tiny">Charged on the round trip, as the lorry drives back empty.</span></label>
+        <label class="f">Water price (€ per m³)
+          <input type="number" data-k="price" min="0" max="50" step="0.1"></label>
+      </div>
+      <p class="derived" id="o_cost_breakdown"></p>
+
+      <div class="grid" style="margin-top:6px">
+        <label class="f">Order a tanker when the tanks fall to: <span class="val" id="o_trig"></span>
+          <input type="range" data-k="trig" min="0" max="50" step="1"></label>
+        <label class="f">Days from ordering to delivery: <span class="val" id="o_lead"></span>
+          <input type="range" data-k="lead" min="0" max="14" step="1"></label>
+      </div>
+
+      <h3 style="margin-top:14px">Who could deliver</h3>
+      <p class="small muted">Researched October 2026. No firm in the Lot advertises water deliveries to homes, so these are hauliers near the house that run tankers. None has been asked for a quote yet.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Haulier</th><th>Base</th><th class="num">Road distance</th><th>What they run</th></tr></thead>
+          <tbody>
+            <tr><td>Transports Delrieu</td><td>Parnac</td><td class="num">15.6 km, 19 min</td><td>Four food-grade tanker semi-trailers (they carry bulk wine, including to private customers) and two 28 m³ tankers for other water. The nearest firm with food-grade tanks.</td></tr>
+            <tr><td>SARL Cassan</td><td>Prayssac</td><td class="num">1.6 km, 3 min</td><td>Fuel and liquids tankers within 40 km of Prayssac. A fuel tank can't be used for washing water, so only if they have a separate food-grade one.</td></tr>
+            <tr><td>Établissements Imbert</td><td>Fontanes</td><td class="num">42.7 km, 47 min</td><td>Haulage including bulk tanker work, per business directories. Tank type not confirmed.</td></tr>
+            <tr><td>Amichauf</td><td>Souillac</td><td class="num">86.7 km, 78 min</td><td>Listed as water treatment, transport and distribution. No tanker details found.</td></tr>
+            <tr><td>Transports Veynat</td><td>Tresses (Gironde)</td><td class="num">197 km, 2 h 43</td><td>Drinking-water tanker specialist, food-grade since the 1880s. Supplies towns in droughts. Far away, so the distance dominates the price.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tiny" style="margin-top:6px">Distances are by road from each base to Prayssac. The lorry also has to fill up at a hydrant or standpipe, usually near the delivery.</p>
+
+      <h3 style="margin-top:14px">Which tanker can get to the house</h3>
+      <p class="small">Water weighs a tonne per cubic metre, so the lorry's legal weight limit sets how much it can carry: about 12 m³ on a two-axle lorry, 16 m³ on three axles, 20 m³ on four, and 25 to 30 m³ on an articulated tanker. A bigger load costs much less per cubic metre, because the fixed charge and the drive are the same. An articulated tanker needs a lane at least 3 m wide, 4 m of headroom, firm ground, somewhere to turn, and no weight limits on the road or bridges. The hose reaches about 30 m.</p>
     </div>
   </details>
 
