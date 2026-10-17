@@ -1,0 +1,58 @@
+name: Refresh rainfall and publish
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 5 * * 1"   # every Monday, 05:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit the refreshed rainfall.js
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # On the weekly schedule (or a manual run), pull the latest rain gauge and ERA5 data.
+      - name: Refresh rainfall data
+        if: github.event_name != 'push'
+        run: python3 scripts/update_rainfall.py
+
+      - name: Commit new data
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rainfall.js
+          if git diff --cached --quiet; then
+            echo "No new data."
+          else
+            git commit -m "Update rainfall data"
+            git push
+          fi
+
+      - name: Collect the site files
+        run: |
+          mkdir _site
+          cp index.html app.js rainfall.js .nojekyll _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

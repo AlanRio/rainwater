@@ -3,142 +3,441 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Off-grid rainwater simulator — Prayssac, Lot</title>
+<title>Will the rainwater last the summer? — Prayssac, Lot</title>
+<meta name="description" content="Day-by-day check of an off-grid house's rainwater tanks against real measured rainfall near Prayssac (Lot, France).">
 <style>
-:root{
---color-text-primary:#1f1f1d;--color-text-secondary:#5f5e5a;--color-text-tertiary:#8a8980;
---color-text-danger:#a32d2d;--color-text-warning:#854f0b;--color-text-success:#0f6e56;--color-text-info:#185fa5;
---color-background-primary:#ffffff;--color-background-secondary:#f3f1ea;--color-background-info:#e6f1fb;
---color-border-tertiary:rgba(0,0,0,0.12);--color-border-secondary:rgba(0,0,0,0.22);--color-border-info:#378add;
---border-radius-md:8px;--border-radius-lg:12px;
---font-sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
-*{box-sizing:border-box}
-body{font-family:var(--font-sans);color:var(--color-text-primary);background:#fafafa;margin:0;padding:20px;line-height:1.5;}
-.wrap{max-width:720px;margin:0 auto;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:20px 22px;}
-h1{font-size:20px;font-weight:500;margin:0 0 3px;}
-.sub{font-size:13px;color:var(--color-text-secondary);margin:0 0 18px;}
-.ctlgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px 18px;margin:0 0 1.1rem}
-.ctl label{display:block;font-size:13px;color:var(--color-text-secondary);margin-bottom:4px}
-.ctl .val{color:var(--color-text-primary);font-weight:500}
-input[type=range]{width:100%}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:10px;margin:0 0 1.1rem}
-.card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem .85rem}
-.card .k{font-size:12px;color:var(--color-text-secondary)}
-.card .v{font-size:20px;font-weight:500;margin-top:2px}
-.fixed{font-size:12px;color:var(--color-text-tertiary);margin:0 0 1rem}
-.surf{padding:7px 13px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary)}
-.surf b{font-weight:500;margin-left:4px}
-.foot{font-size:11px;color:var(--color-text-tertiary);margin-top:14px;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px}
+  :root {
+    color-scheme: light;
+    --text: #1f1f1d;
+    --text-2: #5f5e5a;
+    --text-3: #8a8980;
+    --danger: #a32d2d;
+    --warning: #854f0b;
+    --success: #0f6e56;
+    --accent: #185fa5;
+    --bg: #f6f5f1;
+    --surface: #ffffff;
+    --surface-2: #f3f1ea;
+    --accent-bg: #e6f1fb;
+    --border: rgba(0, 0, 0, 0.12);
+    --border-2: rgba(0, 0, 0, 0.24);
+    --water: #1D9E75;
+    --tanker: #D85A30;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: var(--font); color: var(--text); background: var(--bg); margin: 0; padding: 16px; line-height: 1.55; font-size: 15px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  section, header { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 14px; }
+  h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; line-height: 1.25; }
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 10px; }
+  h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+  p { margin: 0 0 10px; }
+  a { color: var(--accent); }
+  .sub { color: var(--text-2); margin: 0; }
+  .muted { color: var(--text-2); }
+  .small { font-size: 13px; }
+  .tiny { font-size: 12px; color: var(--text-3); }
+  b, strong { font-weight: 600; }
+
+  /* The answer */
+  .answer { border: 2px solid var(--accent); background: #fbfdff; }
+  .answer-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+  .headline { font-size: 18px; line-height: 1.45; margin: 0 0 8px; }
+  .compare { color: var(--text-2); margin: 0; }
+
+  /* How it works */
+  .flow { display: flex; align-items: stretch; gap: 6px; margin: 6px 0 14px; }
+  .flow .box { flex: 1; background: var(--surface-2); border-radius: var(--radius); padding: 10px 11px; font-size: 13px; }
+  .flow .box .t { font-weight: 600; font-size: 14px; display: block; margin-bottom: 2px; }
+  .flow .box .v { display: block; margin-top: 6px; font-weight: 600; color: var(--accent); }
+  .flow .arrow { align-self: center; color: var(--text-3); font-size: 20px; }
+  .tanker-note { font-size: 13px; color: var(--text-2); margin: -6px 0 12px; }
+  ol.steps { padding-left: 20px; margin: 0 0 10px; }
+  ol.steps li { margin-bottom: 8px; }
+  details { border-top: 0.5px solid var(--border); padding: 10px 0 2px; }
+  details > summary { cursor: pointer; font-weight: 600; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: "▸"; display: inline-block; width: 1.1em; color: var(--text-3); transition: transform 0.15s; }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > .body { padding: 8px 0 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 0.5px solid var(--border); vertical-align: top; }
+  th { font-weight: 600; color: var(--text-2); }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  ul.checks { padding-left: 18px; margin: 0; }
+  ul.checks li { margin-bottom: 8px; }
+
+  /* Settings */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  button { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: var(--radius); border: 0.5px solid var(--border-2); background: var(--surface); color: var(--text); cursor: pointer; }
+  button:hover { background: var(--surface-2); }
+  button.small-btn { padding: 4px 9px; font-size: 12px; }
+  .panel { border-top: 0.5px solid var(--border); padding: 12px 0 4px; }
+  .panel:first-of-type { border-top: 0; padding-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 18px; }
+  label.f { display: block; font-size: 13px; color: var(--text-2); }
+  label.f .val { color: var(--text); font-weight: 600; }
+  input[type=range] { width: 100%; margin: 4px 0 0; }
+  input[type=number], input[type=text], input[type=date], select { font: inherit; font-size: 14px; padding: 5px 7px; border: 0.5px solid var(--border-2); border-radius: 6px; background: var(--surface); color: var(--text); }
+  input[type=number] { width: 5.5em; }
+  label.f input[type=number], label.f select { display: block; margin-top: 3px; }
+  .surf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 6px 0; border-bottom: 0.5px dashed var(--border); }
+  .surf-row input[type=text] { width: 11em; }
+  .surf-row input[type=number] { width: 4.5em; }
+  .surf-row .area { min-width: 5.5em; font-weight: 600; }
+  .inline { display: inline-flex; align-items: center; gap: 6px; }
+  .derived { font-size: 14px; margin-top: 8px; }
+  .derived b { color: var(--accent); }
+  .radio-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; }
+  .builder td, .builder th { padding: 5px 6px; }
+  .builder input[type=number] { width: 4.8em; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+
+  /* Results */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .card { background: var(--surface-2); border-radius: var(--radius); padding: 10px 12px; }
+  .card .k { font-size: 12px; color: var(--text-2); }
+  .card .v { font-size: 22px; font-weight: 600; margin-top: 2px; line-height: 1.2; }
+  .card .s { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
+  .chart-wrap { position: relative; touch-action: pan-y; }
+  #chart { width: 100%; height: 320px; display: block; }
+  .hair { position: absolute; top: 10px; bottom: 22px; width: 1px; background: rgba(0, 0, 0, 0.35); pointer-events: none; display: none; }
+  .tip { position: absolute; top: 12px; pointer-events: none; background: rgba(31, 31, 29, 0.92); color: #fff; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 6px; white-space: nowrap; display: none; }
+  .comparebox { background: var(--surface-2); border-radius: var(--radius); padding: 12px; margin: 14px 0; font-size: 14px; }
+  .comparebox .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  #years tr.worst td { background: #fdf0ec; }
+  #years td.num, #years th.num { text-align: right; }
+  .warn { color: var(--warning); }
+  .bad { color: var(--danger); }
+  .good { color: var(--success); }
+
+  footer { font-size: 12px; color: var(--text-3); padding: 4px 4px 24px; }
+
+  @media (max-width: 640px) {
+    body { padding: 10px; font-size: 15px; }
+    section, header { padding: 14px 14px; }
+    h1 { font-size: 21px; }
+    .headline { font-size: 17px; }
+    .flow { flex-direction: column; }
+    .flow .arrow { transform: rotate(90deg); }
+    #chart { height: 260px; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Off-grid rainwater simulator</h1>
-<p class="sub">House near Prayssac (Lot, France) · real daily rainfall 2010–2026 · every assumption below is adjustable</p>
 
-<p class="fixed">Fixed — base roof 150 m² · measured ERA5 daily rainfall, 1 Jan 2010 → 18 Jun 2026 (6,013 days / 16.46 yr). Tank state carries continuously.</p>
+<header>
+  <h1>Will the rainwater last the summer?</h1>
+  <p class="sub">An off-grid house near Prayssac (Lot, France) runs entirely on rain collected from its roofs. This page checks, day by day, whether its tanks can supply guests through the summer, using the rain that actually fell.</p>
+</header>
 
-<div style="margin-bottom:1rem">
-  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:7px">Add collection surfaces:</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px">
-    <button type="button" class="surf" data-area="100" aria-pressed="false">Roof 10×10<b>+100 m²</b></button>
-    <button type="button" class="surf" data-area="40" aria-pressed="false">Terrace 4×10<b>+40 m²</b></button>
-    <button type="button" class="surf" data-area="15" aria-pressed="false">Terrace 3×5<b>+15 m²</b></button>
+<section class="answer" aria-live="polite">
+  <div class="answer-label">The answer, with the settings below</div>
+  <p class="headline" id="headline">Calculating…</p>
+  <p class="compare" id="compare"></p>
+</section>
+
+<section>
+  <h2>How this works</h2>
+  <div class="flow" aria-hidden="true">
+    <div class="box"><span class="t">1. Rain</span>Measured every day at Anglars, 2 km away<span class="v" id="fl_rain"></span></div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="t">2. Roofs</span><span id="fl_area"></span><span class="v" id="fl_collect"></span></div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="t">3. Tanks</span>Excess overflows when full<span class="v" id="fl_tank"></span></div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="t">4. Guests</span><span id="fl_season"></span><span class="v" id="fl_use"></span></div>
   </div>
-  <div style="margin-top:8px;font-size:14px">Total catchment: <span class="val" id="roof_o">150 m²</span></div>
-</div>
+  <p class="tanker-note" id="fl_tanker"></p>
 
-<div style="margin-bottom:1.1rem">
-  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:7px">Mid-summer tanker top-up:</div>
-  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-    <button type="button" id="rf" class="surf" aria-pressed="true">Refill when tank hits 5%</button>
-    <span style="font-size:13px;color:var(--color-text-secondary)">trigger level = <span class="val" id="thx_o">6 m³</span> · ~<span class="val" id="perdel_o">€300</span>/delivery</span>
+  <ol class="steps">
+    <li><b>Rain falls on the roofs.</b> The page uses the rain actually measured each day by Météo-France's rain gauge at Anglars-Juillac, 2 km from the house: <span id="ex_rain"></span> a year on average since <span class="ex_from"></span>. One millimetre of rain on one square metre of roof is one litre of water.</li>
+    <li><b>Most of it reaches the tanks.</b> Of the rain landing on <span id="ex_area"></span> of roof, <span id="ex_eff"></span> is counted as reaching the tanks. The rest is lost wetting the tiles, in the first rinse that washes dirt off the roof, and when gutters and filters spill in heavy downpours.</li>
+    <li><b>The tanks store it, up to a limit.</b> They hold <span id="ex_usable"></span> of usable water. Rain that arrives when they're already full overflows and is lost, which is why a wet winter can't be saved up for a dry summer.</li>
+    <li><b>Guests use it.</b> <span id="ex_use"></span> <span id="ex_tanker"></span></li>
+  </ol>
+  <p>The water level carries over from each day to the next, through every day since <span class="ex_from"></span>, wet years and dry. So the results below are what would have happened at this house, with these settings, in the weather that actually fell.</p>
+
+  <details>
+    <summary>Where the numbers come from</summary>
+    <div class="body table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Default</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Daily rainfall</td><td><span class="ex_range"></span></td><td>Météo-France rain gauge 46005001, Anglars-Juillac, 2.1 km from the house and at the same height (104 m). Published as <a href="https://www.data.gouv.fr/fr/datasets/donnees-climatologiques-de-base-quotidiennes/" target="_blank" rel="noopener">open data on data.gouv.fr</a>. Refreshed on this page every week.</td></tr>
+          <tr><td>Roof areas</td><td>2 roofs, 15 × 5 m each</td><td>Footprint of each roof. It's the area seen from above that catches rain, not the larger sloping tiled surface.</td></tr>
+          <tr><td>Collection efficiency</td><td>75%</td><td>Design standards for rainwater systems (BS 8515 in the UK, DIN 1989 in Germany) assume roughly 80–90% runs off a pitched roof and about 90% gets through the filter. Set a little lower here for clay tiles and summer cloudbursts. You can measure the real figure with your own tanks at the bottom of the page.</td></tr>
+          <tr><td>Tanks</td><td>2 tanks, 4 × 4 × 4 m, 90% usable</td><td>Estimated size, still to be measured. The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
+          <tr><td>Water use</td><td>120 litres per guest per day</td><td>Built up from showers, toilets, taps, laundry and dishwasher under <i>Water use in detail</i>. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
+          <tr><td>Water price</td><td>€2.80 per m³</td><td>Official average price of drinking water in the Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
+          <tr><td>Tanker delivery</td><td>12 m³ load, €270 call-out</td><td>Published French prices put a small delivery of about 10 m³ at around €300 including water and transport (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Replace with a local quote.</td></tr>
+          <tr><td>Climate outlook</td><td>Off (recent weather)</td><td>Météo-France projections for Occitanie around 2050: summer rain −15%, winter rain +12% (<a href="https://meteofrance.com/changement-climatique/quel-climat-futur-en-occitanie" target="_blank" rel="noopener">Météo-France</a>).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>How we checked it</summary>
+    <div class="body">
+      <ul class="checks">
+        <li><b>The rain gauge agrees with its neighbours.</b> From 2010 to 2025, rain between May and October averaged 384 mm at Anglars, 381 mm at Montcuq, 374 mm at Le Montat and 382 mm at Gourdon, all Météo-France gauges within 31 km.</li>
+        <li><b>An independent source tells the same story.</b> ERA5, a completely separate reconstruction of the weather from satellites and weather models, averages <span id="chk_era"></span> a year here, against the gauge's <span id="chk_gauge"></span> (<span id="chk_years"></span>). With the settings on this page it gives <span id="chk_alt"></span>. It reads wetter than the gauge in several recent summers, so the gauge is the cautious choice. You can switch to it under <i>Rainfall data and climate</i>.</li>
+        <li><b>It matches what's been seen at the house.</b> With light use (a few guests for part of the season), the model has the tanks full again by January 2026, which is what happened. With full bookings, the same winter would have left them only about a fifth full.</li>
+        <li><b>You can check it against your own tanks.</b> The tool at the bottom of the page turns a few dipstick readings into this house's real collection and water use, and plugs them in.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>What it doesn't capture</summary>
+    <div class="body">
+      <ul class="checks">
+        <li>Rain is measured 2 km away. A single summer storm can soak one village and miss the next, but over months and years the totals agree closely.</li>
+        <li>Occupancy below 100% is spread evenly through the season rather than modelled as empty weeks. The seasonal total is the same; a fully booked fortnight in a dry spell is slightly harder than shown.</li>
+        <li>The weather won't repeat itself exactly. The record covers more than 30 wet and dry years, and the climate setting shifts all of them towards the expected future, but nobody can say which coming years will be dry.</li>
+        <li>Tank size, roof areas and collection efficiency are estimates until they're measured.</li>
+        <li>Only the amount of water is modelled, not its quality.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<section id="settings">
+  <h2>Settings</h2>
+  <div class="toolbar">
+    <span class="small muted">Change anything and the results update straight away.</span>
+    <button type="button" id="share">Copy link to these settings</button>
+    <button type="button" id="reset">Reset to defaults</button>
+    <span class="small good" id="share_o"></span>
   </div>
+  <input type="text" id="share_url" readonly style="display:none;width:100%;margin-bottom:10px">
+
+  <div class="panel">
+    <h3>Guests</h3>
+    <div class="grid">
+      <label class="f">Guests in the house: <span class="val" id="o_guests"></span>
+        <input type="range" data-k="guests" min="0" max="16" step="1"></label>
+      <label class="f">Share of the season booked: <span class="val" id="o_occ"></span>
+        <input type="range" data-k="occ" min="0" max="100" step="5"></label>
+      <label class="f">Season starts
+        <select data-k="s0" class="months"></select></label>
+      <label class="f">Season ends
+        <select data-k="s1" class="months"></select></label>
+    </div>
+    <p class="derived">Water use: <b id="o_lpd"></b> litres per guest per day, <b id="o_day"></b> litres a day for the house. <a href="#d_water" id="open_water">Adjust water use</a></p>
+  </div>
+
+  <div class="panel">
+    <h3>Roofs and terraces collecting rain</h3>
+    <p class="small muted">Tick what's connected to the tanks. Sizes are length × width seen from above, in metres.</p>
+    <div id="surfaces"></div>
+    <div class="toolbar" style="margin:8px 0 0">
+      <button type="button" id="add_surface">Add another surface</button>
+      <span class="derived" style="margin:0">Total collecting area: <b id="o_area"></b></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Tanks</h3>
+    <div class="inline small" style="flex-wrap:wrap">
+      <input type="number" data-k="tanks" min="1" max="10" step="1" aria-label="Number of tanks"> tanks, each
+      <input type="number" data-k="tl" min="0.5" max="20" step="0.1" aria-label="Inside length in metres"> ×
+      <input type="number" data-k="tw" min="0.5" max="20" step="0.1" aria-label="Inside width in metres"> ×
+      <input type="number" data-k="td" min="0.5" max="10" step="0.1" aria-label="Inside depth in metres"> m deep inside
+    </div>
+    <p class="derived">Total <b id="o_tankvol"></b>, of which <b id="o_usable"></b> usable.</p>
+  </div>
+
+  <div class="panel">
+    <h3>Tanker top-ups</h3>
+    <label class="inline small"><input type="checkbox" data-k="tanker"> Call a tanker when the tanks run low</label>
+    <p class="derived" id="o_tanker"></p>
+  </div>
+
+  <details id="d_water">
+    <summary>Water use in detail</summary>
+    <div class="body">
+      <div class="radio-row small">
+        <label class="inline"><input type="radio" name="mode" data-k="mode" value="build"> Build it up from showers, toilets and so on</label>
+        <label class="inline"><input type="radio" name="mode" data-k="mode" value="direct"> Enter one figure per guest</label>
+      </div>
+      <div id="direct_box">
+        <label class="f">Litres per guest per day
+          <input type="number" data-k="direct" min="0" max="500" step="1"></label>
+      </div>
+      <div id="build_box" class="table-wrap">
+        <table class="builder">
+          <thead><tr><th>Use</th><th>Setting</th><th class="num">Litres a day</th></tr></thead>
+          <tbody>
+            <tr><td>Showers</td><td><span class="inline"><input type="number" data-k="shN" min="0" max="5" step="0.1"> per guest per day ×
+              <input type="number" data-k="shL" min="0" max="200" step="1"> litres each</span><br><span class="tiny">An 8-minute shower at 6 litres a minute is about 50 litres.</span></td><td class="num" id="b_shower"></td></tr>
+            <tr><td>Toilets</td><td><span class="inline"><select data-k="toilet">
+                <option value="std">Standard flush (9 L)</option>
+                <option value="low">Low flush (6 L)</option>
+                <option value="dual">Dual flush (average 4.5 L)</option>
+                <option value="dry">Dry / composting (no water)</option>
+                <option value="grey">Flushed with used shower water</option>
+              </select> ×
+              <input type="number" data-k="flush" min="0" max="20" step="1"> flushes per guest per day</span></td><td class="num" id="b_toilet"></td></tr>
+            <tr><td>Taps</td><td><span class="inline"><input type="number" data-k="taps" min="0" max="100" step="1"> litres per guest per day</span><br><span class="tiny">Washing hands, teeth, kitchen sink, cooking.</span></td><td class="num" id="b_taps"></td></tr>
+            <tr><td>Washing machine</td><td><span class="inline"><input type="number" data-k="wmLoads" min="0" max="50" step="1"> loads a week ×
+              <input type="number" data-k="wmL" min="0" max="150" step="1"> litres each</span><br><span class="tiny">For the whole house.</span></td><td class="num" id="b_wm"></td></tr>
+            <tr><td>Dishwasher</td><td><span class="inline"><input type="number" data-k="dwRuns" min="0" max="10" step="0.5"> runs a day ×
+              <input type="number" data-k="dwL" min="0" max="50" step="1"> litres each</span></td><td class="num" id="b_dw"></td></tr>
+            <tr><td>Anything else</td><td><span class="inline"><input type="number" data-k="otherL" min="0" max="5000" step="10"> litres a day for the house</span><br><span class="tiny">Watering, cleaning, a hot tub top-up…</span></td><td class="num" id="b_other"></td></tr>
+            <tr><th>Total</th><th id="b_pp"></th><th class="num" id="b_total"></th></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <label class="f">People in the house outside the season (average): <span class="val" id="o_off"></span>
+          <input type="range" data-k="offPeople" min="0" max="8" step="0.5"></label>
+      </div>
+      <p class="tiny" style="margin-top:6px">Outside the season each person uses the same per-guest amount, without laundry or dishwasher.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Collection in detail</summary>
+    <div class="body grid">
+      <label class="f">Share of rain that reaches the tanks: <span class="val" id="o_eff"></span>
+        <input type="range" data-k="eff" min="40" max="100" step="1"></label>
+      <label class="f">Rain lost at the start of each wet day: <span class="val" id="o_loss"></span>
+        <input type="range" data-k="loss" min="0" max="5" step="0.1">
+        <span class="tiny">Wetting the roof, first-flush diverter. 0 = included in the share above.</span></label>
+      <label class="f">Gutters and filter overflow above: <span class="val" id="o_cap"></span>
+        <input type="range" data-k="cap" min="0" max="80" step="1">
+        <span class="tiny">Daily rain beyond this is lost. 0 = no limit.</span></label>
+    </div>
+  </details>
+
+  <details>
+    <summary>Tanks in detail</summary>
+    <div class="body grid">
+      <label class="f">Usable share of the tank volume: <span class="val" id="o_usable_pct"></span>
+        <input type="range" data-k="usable" min="50" max="100" step="1">
+        <span class="tiny">Water below the pump intake and above the overflow pipe can't be used.</span></label>
+      <label class="f">How full the tanks were at the start: <span class="val" id="o_fill"></span>
+        <input type="range" data-k="fill" min="0" max="100" step="5"></label>
+    </div>
+  </details>
+
+  <details>
+    <summary>Tanker in detail</summary>
+    <div class="body grid">
+      <label class="f">Order a tanker when the tanks fall to: <span class="val" id="o_trig"></span>
+        <input type="range" data-k="trig" min="0" max="50" step="1"></label>
+      <label class="f">Days from ordering to delivery: <span class="val" id="o_lead"></span>
+        <input type="range" data-k="lead" min="0" max="14" step="1"></label>
+      <label class="f">Water per delivery (m³)
+        <input type="number" data-k="load" min="1" max="40" step="1"></label>
+      <label class="f">Water price (€ per m³)
+        <input type="number" data-k="price" min="0" max="50" step="0.1"></label>
+      <label class="f">Call-out charge per delivery (€)
+        <input type="number" data-k="callout" min="0" max="2000" step="10"></label>
+    </div>
+  </details>
+
+  <details>
+    <summary>Rainfall data and climate</summary>
+    <div class="body">
+      <div class="grid">
+        <label class="f">Rainfall source
+          <select data-k="src" id="src_select"></select></label>
+        <label class="f">Start from the year
+          <select data-k="from" id="from_select"></select></label>
+      </div>
+      <p class="small" style="margin:12px 0 4px">Climate: shift the rainfall towards the expected future.</p>
+      <div class="presets">
+        <button type="button" data-preset="recent">Recent weather (no change)</button>
+        <button type="button" data-preset="2050">Météo-France 2050 outlook</button>
+      </div>
+      <div class="grid">
+        <label class="f">Summer rain (June to August): <span class="val" id="o_sum"></span>
+          <input type="range" data-k="sumAdj" min="-50" max="50" step="1"></label>
+        <label class="f">Winter rain (December to February): <span class="val" id="o_win"></span>
+          <input type="range" data-k="winAdj" min="-50" max="50" step="1"></label>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <div class="cards">
+    <div class="card"><div class="k">Tanker deliveries</div><div class="v" id="c_del"></div><div class="s" id="c_del_s"></div></div>
+    <div class="card"><div class="k">Tanker cost</div><div class="v" id="c_cost"></div><div class="s" id="c_cost_s"></div></div>
+    <div class="card"><div class="k">Worst summer</div><div class="v" id="c_worst"></div><div class="s" id="c_worst_s"></div></div>
+    <div class="card"><div class="k">Days without water</div><div class="v" id="c_dry"></div><div class="s" id="c_dry_s"></div></div>
+    <div class="card"><div class="k">Lowest the tanks got</div><div class="v" id="c_min"></div><div class="s" id="c_min_s"></div></div>
+    <div class="card"><div class="k">Collected and used</div><div class="v" id="c_bal"></div><div class="s" id="c_bal_s"></div></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw" style="background:var(--water)"></i>Water in the tanks</span>
+    <span id="lg_base"><i class="sw" style="background:none;border-top:2px dashed #8a8980;height:0"></i>Comparison setup</span>
+    <span><i class="sw" style="background:rgba(216,90,48,0.12)"></i>Guest season</span>
+    <span id="lg_tanker"><span style="color:var(--tanker)">▲</span>Tanker delivery</span>
+  </div>
+  <div class="chart-wrap" id="chart_wrap">
+    <canvas id="chart" role="img" aria-label="Water in the tanks every day over the whole period"></canvas>
+    <div class="hair" id="hair"></div>
+    <div class="tip" id="tip"></div>
+  </div>
+  <p class="tiny">Move your finger or mouse over the chart to see any day.</p>
+
+  <div class="comparebox">
+    <div><b>Comparing with:</b> <span id="base_o"></span></div>
+    <div class="row">
+      <button type="button" id="pin">Compare against the current settings</button>
+      <button type="button" id="unpin">Compare against the default setup</button>
+    </div>
+    <div class="row">
+      <label class="inline">Cost of the changes (€) <input type="number" data-k="upCost" min="0" step="100" style="width:7em"></label>
+      <span id="payback_o"></span>
+    </div>
+  </div>
+
+  <h3>Year by year</h3>
+  <div class="table-wrap"><table id="years"></table></div>
+  <p class="tiny" id="years_note"></p>
+</section>
+
+<section>
+  <details id="calib">
+    <summary>Check it against your own tanks</summary>
+    <div class="body">
+      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. If there are two linked tanks, measure both and use the average. The page looks up the rain measured at Anglars between your readings.</p>
+
+      <h3>1. How much rain actually reaches the tanks</h3>
+      <p class="small muted">Take a reading before and after a rainy spell, when nobody is using water and the tanks aren't full (so nothing overflows). Morning readings line up best with the gauge.</p>
+      <div class="table-wrap"><table id="cal_rain"></table></div>
+      <div class="toolbar" style="margin-top:8px"><button type="button" id="cal_rain_add">Add another rainy spell</button></div>
+      <p class="derived" id="cal_rain_out"></p>
+
+      <h3 style="margin-top:14px">2. How much water guests actually use</h3>
+      <p class="small muted">Take a reading at the start and end of a stretch with guests in the house, ideally a dry week.</p>
+      <div class="table-wrap"><table id="cal_use"></table></div>
+      <p class="derived" id="cal_use_out"></p>
+    </div>
+  </details>
+</section>
+
+<footer>
+  Rainfall: Météo-France (Anglars-Juillac gauge, open data) and ERA5 via Open-Meteo. Data runs <span class="ex_range"></span>, last updated <span id="updated_o"></span>.
+  Everything this page needs is contained in it, so it also works offline.
+</footer>
 </div>
-
-<div class="ctlgrid">
-  <div class="ctl"><label>Guests: <span class="val" id="g_o">8</span></label><input type="range" id="g" min="1" max="12" step="1" value="8"></div>
-  <div class="ctl"><label>Use per person: <span class="val" id="cap_o">120 L/day</span></label><input type="range" id="cap" min="40" max="160" step="5" value="120"></div>
-  <div class="ctl"><label>Tank size: <span class="val" id="tank_o">128 m³</span></label><input type="range" id="tank" min="24" max="256" step="4" value="128"></div>
-  <div class="ctl"><label>Collection efficiency: <span class="val" id="eff_o">80%</span></label><input type="range" id="eff" min="60" max="95" step="5" value="80"></div>
-  <div class="ctl"><label>Season start: <span class="val" id="ss_o">May</span></label><input type="range" id="ss" min="1" max="12" step="1" value="5"></div>
-  <div class="ctl"><label>Season end: <span class="val" id="se_o">Oct</span></label><input type="range" id="se" min="1" max="12" step="1" value="10"></div>
-  <div class="ctl"><label>Starting fill (2010): <span class="val" id="sf_o">100%</span></label><input type="range" id="sf" min="0" max="100" step="5" value="100"></div>
-  <div class="ctl"><label>Load per delivery: <span class="val" id="load_o">12 m³</span></label><input type="range" id="load" min="8" max="40" step="1" value="12"></div>
-  <div class="ctl"><label>Water price: <span class="val" id="price_o">€2.80/m³</span></label><input type="range" id="price" min="1" max="15" step="0.1" value="2.8"></div>
-  <div class="ctl"><label>Call-out / delivery: <span class="val" id="co_o">€270</span></label><input type="range" id="co" min="0" max="500" step="10" value="270"></div>
-  <div class="ctl"><label>Demand while occupied</label><div class="val" id="dem_o" style="font-size:18px;padding-top:6px">1.0 m³/day</div></div>
-</div>
-
-<div class="cards">
-  <div class="card"><div class="k">Lowest level ever</div><div class="v" id="m_min">—</div></div>
-  <div class="card"><div class="k" id="k_dry">Summers topped up</div><div class="v" id="m_dry">—</div></div>
-  <div class="card"><div class="k">Refills needed</div><div class="v" id="m_del">—</div></div>
-  <div class="card"><div class="k">Water delivered</div><div class="v" id="m_vol">—</div></div>
-  <div class="card"><div class="k">Avg cost / summer</div><div class="v" id="m_costyr">—</div></div>
-  <div class="card"><div class="k">Cost total (16½ yr)</div><div class="v" id="m_costtot">—</div></div>
-</div>
-
-<canvas id="chart" style="width:100%;height:300px;display:block"></canvas>
-
-<p class="foot">Daily water-balance model · rainfall from the Open-Meteo ERA5 historical archive · self-contained file, works offline.</p>
-</div>
-
-<script>
-const PRECIP=[6.1,2,5,1.3,0.1,1,0,0.2,2.6,0,0,9.4,3.9,15.2,0.5,4.7,0.9,0,5.1,8.7,0.4,0,0,0,0,0,0,2.3,4.3,5.2,0,0,0,0,0.4,11,13.5,0.1,0,0.3,0,0.7,0,0,0,0,0.6,6.6,0.3,0,2.1,1.2,2,2.4,3.5,12,1.5,2.2,3.3,1.5,0,4.9,2,0,0,0,5.4,0,0,0,0,0,0,0,0,0,0,1,3,4,0,0,0,11.6,14.1,8.1,0.1,5.7,12.4,7.2,3.9,1.2,10.9,2.6,0,0,6.8,0.1,0,0,0,0,0,0,0,0,0,0,2.6,0.3,0,0.9,2.4,0,0,0,0,0,0.3,4.9,13.1,0.9,1.4,12.6,12.9,8.7,0,4.3,2.6,1.1,16.8,6,1.3,0.2,0,1.2,0.6,0,0,0,0,0,0,0,0.6,14.5,1,0,1.7,3.2,3.2,1.9,0.7,0,0,0,8.8,0,12.4,65,33.1,13.4,1.2,3.6,5.3,4.9,18.8,0.4,1.1,10.9,0.2,0,0,0,0,0,0,0,0.3,1.6,0,0,0.9,5.4,1.6,0,0,0,0,2.5,0,0,0.1,0,1.3,0,0,0,0,0,0,9.9,17.1,0,0,0,0.8,0,0,0,0,0,9.2,8.4,1,0.6,0.8,0,0,0,0,0,0.1,0.2,0.1,0.1,1,0,0,0,0,0.8,0,0,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,3.3,29.9,8.9,4.1,0,0,0.1,0,0,0,1.2,0,0,0,0,0,0,6.8,6.2,1.1,0,0,0,0,4,0,0.4,0.7,21.1,0.6,0,0,0,0,25.3,17.3,0,0,0,0,1.1,0,0,0,0.2,0,0,0,26.6,0.3,0,0,0,0,3.8,3.7,3.8,0.1,0.8,0,0,0.5,6.7,19.1,5.2,3,2.9,2,0,5.5,8.3,0,5.5,3.5,0,4.2,4.6,3,0,0,3.5,0,5.5,0.5,0,3.5,2.8,0.8,0.6,0,4.1,13.7,2.6,0.7,0,0,0,0,0,0,0,1.1,7.3,0,0.2,0,2.1,1.5,13.3,7.9,0,0,0,0,2.9,0,1.4,0,0,0,0.1,0,8.5,0.6,0,3.1,0,7.9,0.7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.5,8.9,0.8,0,0,0,0.2,0,0,0,0,0,0,0,0,0.4,0,10.7,2.9,0.9,1,0,2.3,0.3,10.6,4.5,0.5,0.2,0,0.5,1.3,0.5,0,0,0,0,0,0,0,0,0,0,0,5.1,2.4,0,2.7,9,4.3,0.1,0.7,0,0,0,0,0,0,0,8.5,1.5,7.1,3.1,0.7,0,0,5.1,1.7,0,0,0,0,0,0.1,0,0,0.1,0,0,0,0,0,0,0,0.1,0,5,0.2,0.6,0,0.1,0.3,0,0,0,0.2,4.2,0.1,0,0,0,0,0,0,0,3.4,0,4.8,0,0,0,0,0,0,0,0,0,0,0,0.6,0,0,0,16.4,1.8,1.9,1.2,0.1,9,0,1.1,8.4,0.7,0.3,1.7,0,0.2,2,0,0,4.2,1.2,3.9,0,0,0,0.8,0,0,0,0,0,9.4,2.5,0,0,0,0,0,0,0,1.3,0,1.2,5.5,0,4.3,21.6,0,0,0.4,10.4,0,25.3,0.9,2.6,1.9,1.2,0.3,9.2,6,2.2,0.2,0,0,0,0,8,5.9,0,2.5,8.4,0,0,0.3,0,0,0,0,2,1.9,0,0.8,1.1,0,0,0,0.1,0,5,1.5,19.7,0.2,0,0,0,0.7,6,0,0.7,1.6,0,0,0,0.5,0,0.3,0.5,0,0,0,0,0.5,0,2.7,1.5,0,0,0,0,0.3,0,0,0,0,0,0,0,0,0,0,0,0.4,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,13.8,8.6,0,11.8,16.2,0,0,0,4.6,0,13,6,10.3,19.7,0,0.1,0,2,0,0,0,0,0,0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.1,3.6,4.9,6.3,4.8,1.7,0.1,0.6,0.8,0.4,5.9,3.6,4.7,6.8,15.3,1.8,0.9,1.8,8.4,6.8,1,0,0.7,0,0,0,0.2,1.2,2.2,12.1,2.2,14.3,0,3.6,3.4,0.7,0,0.1,0,0,0,0,0,0,0,0,0,0,0,2.2,0,0.9,0,0,0,3,1.4,3.6,0,0.1,9.2,0,0,0,0,5.2,0,0,0,0,0,0,0,0,2.5,0.3,0,0,0,2.5,0,0,0,0,0,0,0,0,0,0,0,0,0,3.4,0,0,0.2,1.2,0,0,0,0,0,0,0,0,3.2,10,0.8,0.2,2.5,0.8,0,0,0,0,0,0,0,0,0,0,0,7.1,0.7,2.3,5.7,9.4,0.2,0,12.1,4.6,8.7,0.6,0.6,1,0,0.5,10.1,8.4,5.2,10.1,3,7.7,8.1,0.4,15.9,9.8,9.4,18.4,12.6,0,0.1,0,5.8,5.2,0.4,0,1.5,8.3,0,0,0.7,0,0,0.4,0,0.7,6.5,23.4,18.2,15.2,9.5,0,0,0,0.3,0,0.1,0,0.3,0,0,0,13.9,0,0,0,8.5,0.9,0.3,14.4,7.4,6.4,1.7,0,0,0,1.1,0,8.2,0,1.2,0,0,0,0,0,0,0.9,0,1.2,3,0,0,2.8,10,0,1.5,11.8,0,0.5,0,0,1.5,2.2,0.7,0,0,0,0,0,0.5,0,0,0,0,0,0.6,5,0,0,0,0,0,0,0.1,13.2,0.4,0,0,0,0,0,0,0,0,1.1,0,0,0,0.1,0,0.7,0,0.1,17.8,0.5,0,0,2.4,15.3,2,0,0,0,0,0,0,0,0,0,0,0,1.1,0.3,1.5,0,0,0,0,2.2,0,0,0,5.8,3.6,4.6,1.2,13.1,0.1,0,7,0,0,0,0,0.1,0,0.3,6.9,5.1,1.9,0,6.5,0.3,0,6.9,0,0,0,0,25.3,10.7,3.4,0,0,0,2.7,8.6,0.1,0,0,0,1.7,3.4,0.6,0.8,11,1.2,2.2,0,0,0.4,18.3,1.4,0,0,0,0,0,0,2.3,0.3,0,1.6,0,0,0,2.5,18.7,0.2,0,1.1,0,0,1.9,4.5,7.4,1.6,0,4.4,0.3,0,0,0,0,7.6,15.3,9.1,6.6,10.2,3,0,5.9,7.1,0,0,0,0.1,0.5,2.5,0,1.5,0.8,0,10.1,0,0,0,0,0,0,0,0,1.6,0,4.3,4.8,1.7,6,18.7,0,8.2,15.3,21.5,3.5,2,0,4.7,0,6.7,12.9,2.8,0,1.4,0.3,4.7,5.6,0,0.7,7,7.6,0,0.5,2.5,15.6,8.7,3,0,3.2,0.4,0,0,0,0,0,0,0,0,0.2,3.3,0,0,0,0,0,0,0,0.2,6.4,2.5,2.5,5.8,0.1,1.3,1,2,0.4,0,1.8,6,4.3,0.4,4.2,0,2.6,13.2,0.1,1.2,0.1,0,3.8,8,26.6,0,3.4,8.4,0,7.3,0.1,0.1,0,5.4,4.7,0.4,5.9,6.1,0,0,1.3,0,0,0,0.5,0,0,0,0,0,0,6.1,2.7,0,4.1,1,9.2,3.8,2.5,0,0,0,0,2.5,9.1,0.2,0,0.3,0,2.3,14.7,2.2,0.5,12.5,4.6,0.2,9,2.3,1.2,1.4,4,0,0,10,10.8,9.7,8.5,0.5,0,0,0,0,0,0,16.6,2.6,0.8,0,0,3.8,0,0,0,0.7,9.6,4.8,2.1,3.2,0.3,1.2,0,0,0,0,0.2,0.2,0,0,3.6,5.3,0,0,0,0,0,0,1.4,0,0,0,0,0,0.1,0,0,0.5,0,0,0,2.9,1.6,0,0,19.1,5.7,0.1,0,0,0,0,0,0.7,1.2,13.1,2.3,2,0.2,0,0,0,0,0,0,0,0.1,0,1.6,0,0,0,0,2.4,2.4,1.1,0,0,0,0,0,0,0,0,0,0,16.8,14.6,2.5,0.7,0.3,0,0.2,0.7,6.2,5.5,5.2,0,4.4,0,2.7,0,0,0,0,0,0,0,7.8,5.9,2.1,3.6,0.8,0.7,28.2,2.5,0.2,0,0,0,1.2,0.3,14.6,1.3,1.6,2.8,1.5,0,0,4.6,5.4,0,1.1,1.3,0,0,8.4,0.9,4.2,0.3,0,0,1.2,18.4,5.5,24.8,13.9,1.3,0.5,5.5,5.7,10.5,0,0.3,0,1.1,4.3,0,0.7,6.7,0.8,1.4,17.3,2.6,0,0,0,0,0,0,0,2.1,0,0,0,0,0,0,0,0,0,0,0,0,0,2.1,0,0,0,0,17.8,0,0,0,0,5.5,8.4,1,0,10.1,1,0,0.2,0.9,7.1,12.5,9.6,2.4,1.2,0,0,0,0,0,0,3.9,6.5,0.6,4.9,0,6.3,1.8,2.5,0,1.8,1.8,21.2,13.6,7.3,5.7,4,11,2.7,0,10.7,1.6,1.7,0.2,9.8,0,1.7,11,0.6,7.9,4.2,0.7,5,0.7,6.8,0.8,0,0,1.4,2.2,6,0.5,0,0,4.5,3.6,3.5,15.7,0.9,0.7,15.8,2.8,1.4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.8,12.3,4.8,5.2,10.9,4.4,0,0,0,0.8,0.4,0,0.1,20.5,3.6,0,0,1.6,5.9,0,0,0.1,0,0,0,0,0,0,0,0,6,0.1,3.8,0,7.3,4.7,6.8,4.6,4,3.3,3.6,1.7,4,0,0,0,1.2,1.4,0,0.2,0,0.2,0,1.6,0,0,0,0,0,0,1.2,16.6,3,6.9,0,2,18.5,0.3,1.7,1.1,0.8,0.5,0,0,0.2,4.5,0,0,0,0,0,0,0,0,0.3,0.1,0,0,0.2,0,0,0,0,1,19.8,0,0,0.6,0,2.5,1.1,0,0.6,4.2,0.1,13,0,4.7,3.4,0.1,0.5,0.4,0,1.3,5.9,2.3,0,0,0,0,8.9,6,1.1,0,0.7,0,4.8,0.6,0,12.2,0.3,0.1,0,2.3,13.3,2.9,5.3,0,0,2,18,0,2.8,0.4,0,14.9,0,0.2,0.8,0,0,0,0,0,0,0.1,0,0,3.6,1.3,0,16.5,0,0,0,0,0,0.3,0,0,0,7,0.5,0,0,0,0,0,0.4,0,1,2.3,10.1,3.8,0,0,0,0,0.1,0,0,1.8,12.3,5.4,0,0,0,0,3.7,1.2,0.3,1.4,8.5,10.3,0,3.8,3.3,1.4,0.2,0.2,0,0,0,0,0.2,0,0,0,0,0,0,0,0,0,0,0,5,8.2,14.2,0.6,0,2.3,0,4.5,0.1,0.4,1.6,0,20.4,1.1,2.5,2.5,1.2,0,0,0,0,0,7.7,1.3,8.5,1.5,0,2.4,7.1,0,0,0.2,0,0,1.3,0,2,0,1.6,0.4,0,0,0.2,0,2.9,4.3,5.4,0,1.4,0,0,0,0,0.5,0,10.4,1.5,0,0,0,0,0,0.7,2.5,0,0.1,0,0,0.1,0.7,2.7,0,0.1,0.5,0,4.8,1.4,0,1.5,0.2,0.6,0,0,2.3,0,0.7,1.3,2.5,21.6,5.6,7.2,0.7,0,1.3,0,0.1,0.1,0,0,0,0,0,0,3.1,11.4,0.3,0,0,0,0,2.7,16.6,0,7.5,3.3,4.1,5.3,8,0.2,10.6,3.8,2.5,2.6,0,0,0,0,0,0,0.3,0,1.9,0.7,2.2,1.1,0,0,0,1.8,2.3,2.2,0,2.5,1,0.2,1.4,3.4,1.7,2.7,3.2,0,0,0,1.3,0,0,0,0,0,0.2,0.2,0,0,0,0,6,0.7,0,13.4,0,0,0.6,4.9,0,7.8,11.8,17.4,0,0,0,12.1,3.1,1.9,4.7,0,0,0,4.7,0.1,0,0,0,0,0,7.4,0,0.4,0,0.3,0.8,0,0,0,0,1.5,0,0,0,0,0,0,0.5,0,0,0.2,0,0,1,0.5,1,13.3,1,9.9,9.7,15,0,1.5,0,0,1.1,0,0,0,0,0,0,0,0,0,0,0,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.8,6.6,0,0,3.3,0,0,0,0,0.2,0,1.8,0,1.5,0,0,0.1,18,0,0,0,9.8,17.4,0,0,0,38.2,5.3,0.6,0,0.2,0,0,0,0,0,18.6,1.1,0,0,0,0,0,0,26.8,4,0,0,0,0.2,0,0,0,0,0,0,16.4,9.7,1.7,0.7,6.8,18.5,0.5,0.3,0,0,1.8,0.3,0,0,0,0,0,0.3,0,0.4,1.5,6.5,1.1,3.5,4.6,0.1,0,0,0,0.7,4.2,1.9,0,0.5,0,0,10.7,0,0,0,0.5,0,0,0,0,23.4,13,0,0,0,0,0.6,21.8,0,0,0,0,0,0,0,0,0,0.3,0.3,0,0,0,0.9,1.4,2.8,17.9,0,0,1.5,6.5,1.8,0,1.5,0,0,0,0,0,0,0,0,0,0.9,0,0,0,0,0,0,0.2,0,0,0,0,0,1,0,0,0,0,0,0,0,5.2,0,3.8,0.1,14.1,14.9,9.2,2.9,8.3,20,9.2,8,23.6,12.4,8.7,0.2,12.2,0.1,0,0,5.7,5.3,1.1,0,3,0,0,0,0,0,0.5,0,0.5,4.5,0.2,0,3.9,0,0,0,12.1,0.5,21.1,6.7,5.3,19.1,10.1,14.4,0,0,0,2.3,0.1,0,0,0.6,3.5,0,5.7,0,2.7,5.3,0,0,12.7,3.3,16.8,5.6,1.1,1,0,11,0,0,0,0.6,0,0,0.9,3.2,10.4,0,9.3,0,0,0,0,1,0,6.5,1.2,4.2,0,4.9,1.1,0.4,5.5,9,7.1,0,1.5,1,2.4,1,8.5,5.7,3.1,0.8,6.2,12.2,5.4,0,0,0,6.8,0.7,7.1,0,0,1.9,0,0,0,13.9,0,0,0,0,0,0,0,0,6,4.8,2.9,0,2.2,0.6,0,0,0,0,0.9,0,0,23,2.3,0.2,1.4,0.7,0.3,10,11.3,3.5,12.7,8.8,1.2,0.2,0,0.1,0.2,0.9,0,0,6.9,0.4,0,4.8,3.6,10,12.2,6.2,6,0.9,0,0,0,0,0.1,0.1,0,0,0,0,0,0,0.2,0,0.7,1.1,0,0,0,0,0,1.5,7.8,0,0.5,0,0,0,0,0,0.8,0,3.5,0.2,0,0,0,0,0,0,0.9,1.8,0,0,0,5.7,0,0,0,0,0.4,0,0,0,0,0,0,0.3,0,1.6,0,11.4,0,0,0,0,0,0,0,1.7,0,0,0,0,0,0,0,0,0,0,0.8,0.7,0,0,0,0.8,26.8,0.1,2.4,0.6,0.4,0,0,0,0,0,0,5.2,0,0,0,0,0.2,5.2,0,0,0.6,0.3,0,0,0,0,0,0,0.8,8.1,26.1,0,0,1.3,0,0.2,0,0,0,0.3,10.1,2.4,0.5,0,0,0,0,0,0,0,0,0.9,13.8,1.2,0,0.3,10.4,8.5,2.5,0.8,1.1,0,0,0,0,6.8,5.2,0.9,5.2,11.3,7.6,18.7,4.9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.7,0,0,3,0.5,0,0.4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.3,7.5,0.4,5.7,2.4,0.3,1.5,2.2,0,0,0,0,0,0,0,0,0,0,0,6.4,0,2.7,0,0,11.1,4.2,7.7,13.5,0.1,4.6,9.3,0,0,0,0,0.8,20.3,0,0,0,0,0,0,0,0,0,0,0,0,1.8,16.9,1.5,0.9,1.2,22.8,4.9,7.7,8.9,3.3,0,0,0,6.2,0.8,0,0,0,0,0,0,0,1.7,0.5,11.6,5.9,1.8,0,0.2,0.3,0,0,10.6,10.9,2,0,0,0.1,0,0,0,0,0.2,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,16.5,0.2,0.4,0,0,14.5,4.6,6.4,0,0,0.1,16.6,0.4,0,0,1.5,16.1,0.5,3.3,0.2,0,0,5.7,30,4.3,1.3,0,6.4,0,0,0,0,0,0,0.1,13.4,9.3,0,0.2,23.8,0,0.4,2.9,0,0,6.3,0,0.1,0,7.2,3.4,0,0,0,0,0,0.9,0.2,0,1.3,0,0,4.3,12.1,12.6,5.3,5.6,1.9,0,0,0,0,0,0,0.3,2.4,4.9,0.7,0.1,0,0,0,0,0,0,19.4,20.8,2.4,0,0,5.3,1,0,0.2,0,0,2,0.1,0.7,0,0,0,0.1,0.2,0,24.1,3.5,10.6,0.7,0,0,0,2,2.5,0,0.5,0,0,0,0,0,0,0,0,1.2,0,0.1,8.9,5.2,1.6,0,1.1,2,0,0,0,0,17.5,0.7,1.4,0,0,3.9,4.4,2.7,3.7,3.2,0.1,0,0,0,0,0,2.8,0,0,0,0,6.8,0.3,1.2,3.1,0,0,0.6,0,0,0.4,0.1,0,0,0,0,0,0,0,0.2,3.8,0,0.2,0.4,0,0,0,0,0.2,0,0,0.7,0,0,0,0.3,9.5,6.1,0,0,1.5,1.4,0,0.8,2.3,0,0,0,0,0,0,0,0,0,0,0.2,3.1,9.3,0,0,3.4,0.8,1.3,3.9,0,0,0,0,0,1.2,5.6,0,25.8,6.7,1.9,2.6,4.3,9.6,0,0.7,7,0,0,0,0,0,0,0,2.1,16.3,0.4,7.7,3.9,1.4,10.3,10.6,8.1,4.8,4.3,12.8,4.5,3.2,0.4,5.7,2.3,0.4,0,0.7,2.1,5.1,4.2,0,3.5,18.7,8.1,2.3,0,0,2.3,4.7,0,0,0,0,0,6.6,0.8,2.7,0,7.1,1,0,0,1.4,0,4.2,0.7,2.8,9.1,2.5,5.4,5.4,0.7,0,4.4,0.1,0,0,0,0.4,0,0,0.9,3.5,10.3,4.5,3,1.3,3.7,4.2,0,0,10.2,6.3,5.1,0.2,0,7.4,2.4,1.2,3.4,5.7,0.8,0,0,0,6.2,1.9,2.7,10,3.5,1.2,3.5,4.5,0,0,9.5,7.2,1.2,0,1,6.7,6.2,25.1,5.2,0,1.4,0.2,0,0.3,0,0,0,0,0,0,0.9,0,0.1,0,0,6.3,32.3,5.6,0.4,0.1,0.8,0,0,0,0.7,1.6,2.4,0.2,0,10.3,2.7,6.8,0.9,2.3,0.5,0,0.3,0,3.4,1.2,0,0,0.2,0,13.3,16.6,7.4,12,5.6,0,1.7,2.6,2.3,13.9,9.4,1.6,0,0,19.4,12.7,11.4,0.8,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9.8,0.8,22.5,12.5,0.9,0,0,0,0,0,0,0,0,0.3,2.8,0,0.6,0,3.1,0.2,0,0,0,0,0,1.6,5.7,0.4,0,0,0,0,0,0,0,0,4.3,4.3,0.6,0,0,1.9,6.1,0.1,0,0,3.9,0.2,0,0,0,0.3,0.7,0.6,1,0,0,0,8,0,0,0,0,0,0,0.6,16.4,0.5,0,0,0,0,0.6,0,0.3,0,0,0,0.2,0,0,0.5,0,0,0.7,0,0,0,0,0,0,0,0,0,0,0,3.2,8.4,0,0.3,8.9,8.7,0,0,13.5,26.9,0.7,0.1,0.1,0,0,0,0,0,0,0,0,0,4.1,2.1,0,3,2.6,5.2,0,0,0.6,23.5,5.3,0,0.3,10.5,3.3,2.4,7,0,0.1,0,0,0,0,0,0.7,0,0.4,0,9.7,0.3,0,0,0.3,15.3,1,24,6.8,0.8,0,1.4,1.5,0.3,2.8,0.1,0,0,5.5,0,2.3,33.4,2.3,0,4.8,2,3.5,3.3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.8,0,0,0,0.1,0,0.6,0,0,4.2,0,0.4,1,0,5.5,9.4,0,0.3,0,7.5,9.1,10.7,6.7,19.3,12.8,7.3,0,1.8,5.6,0.4,1.1,0,0.5,1.4,0.4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.7,0,0.6,0,9.9,2.9,0.8,1.5,1.2,0.1,0,4.9,0.7,0.5,0,0.8,1,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4.9,6.7,1.8,0.2,7.8,1.4,0,0.1,0.3,0.2,0,0,0,0.3,9.4,0,0,0,0.4,1.7,0.2,1.4,17.4,17.1,8.2,2.1,0,0,0,0.5,1.4,2.8,2.6,0,0,0.2,10,2.5,0.6,4,0,0,0,0,0,19.3,6.6,0.8,1.8,0.2,0,0.1,10.2,1.4,0,0.8,0.2,0,0,0,0,0.2,0,3.8,22.4,0,3.5,0,1.9,0.8,1.6,1,0,3.5,11.2,0,0,0,0.2,0.8,18.2,0,0,0,0,0,0,0,2.5,0,0.3,0,0,0,0.1,1.3,0.3,0,2.7,0,0,0,0,0,0,0,0,0,0,2.7,0.8,0,0.3,0,1.7,2.5,19.4,0.7,0,1.2,0,1,0,0,0,0,0,11.4,0,5,4.2,14.1,1.4,0,0,0.8,0,0,3.7,6.7,4.4,0,0,0,0,0,0,2.6,0.2,0,0,0,1,0,0,0,0.6,0,0,0,0,2.8,0,0,0,0,0,0,0,0.3,0,0.2,1.2,8.9,0.1,6.6,4.1,0.3,0.3,0,0,0.1,3.4,2,0,1.1,0.1,1.6,0.1,0.2,2.8,0,0,0.6,0,19,17.5,0,1,1.7,5.3,5.3,0,8.8,11,9.9,0,0,0,0.1,0,0,5.5,9.8,12.4,18.5,28.5,4.7,3.5,7.5,4.7,3.2,2.6,2.3,2,0.1,9.5,5.1,6.8,0.6,0,0,0,0,2.4,8.3,0.7,0.6,0.2,6.6,10.3,1.2,11.4,2.4,0,0,0,0,0.4,0,5.9,5.8,0,7.6,15,20.6,5.3,0,0,5.3,0.3,0.9,8.1,15.3,21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0,2.4,2.8,0,0,0,0,0,0,9.6,0.5,0,0,0,5.7,0.6,0.2,0,1.7,3.2,6.9,1.6,10.8,0.8,3.6,0.4,0,1,0,0,0,0,0,1.2,1.8,0,5.7,0,0,0,3.2,0.2,0.3,0,0,0,0,0,4.5,4.4,17.7,0,0.5,9,14.2,14.3,4.3,13.8,8.3,0,1.2,2.1,3.7,0,3.4,1.9,0,0,9,0.9,0,0,0,0,0,1,0,0,3.8,0,0,0,0.9,0,0,0,0,0,0,0,0,1.7,0,0,0,0.4,1.7,0,0,0,1.1,0.3,1.5,6.1,9.8,0.5,0.9,0.2,0,4,10.9,5.8,0.4,11.2,16.4,10.6,0,0,3.7,0,0,0,0,7.8,5.8,1.6,9.4,4.4,0.1,0,0,0,0,0,0,0,1.6,0,0,0,0,0,0,0,0,7.7,0,3.3,13.2,0.1,2.7,0.9,1.3,2.4,0,13.5,10.8,3.9,0,0.8,2,1.5,3.7,0,0,0,0.2,0,0,1.1,16.8,6.3,1.3,0,0,0.6,0.4,0,0,0,0.1,0,0,0,0,0,0,0,0,0.6,0,0,0,0,0.1,0,3.1,4.8,0,0,0,0,0.4,0,0,0.6,0.1,0.7,0.1,0,0,0,0,0,0.2,1.6,1.3,8,7.7,0,0,8.5,0,0.5,0,0,7.7,11.4,0.3,0,0,0,0,9.3,1.4,4.4,0.3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.4,0,0,0.1,23,2.2,9.6,5.5,1.7,4.2,6.4,8.7,3.2,0.1,0,0,3.7,19.5,19.9,11.6,2.6,12.1,0.3,0,0,1,3.1,0,2.5,8.3,0.2,0,0,0,0,1.2,1.5,1.6,13.7,0,11.3,8.5,2.6,2.1,0,0,0,0,0,2.8,0,0,0,4.6,2.7,1.1,4.1,0,0,0,0,13.9,0.6,0,0,0.8,0,0,0,0,0,0,0,0.2,0,0,0,2.1,0.1,7,9.3,1.2,5.1,7.5,7.1,0.3,13.5,19.5,5.9,0,0.8,7.6,0,0,0,0,0.6,2.2,0,2,2.7,0.1,0,8.8,19.8,2.9,1.6,15.7,0,0,0,0.3,0,0,0,0,0,0,0,0,0,3,1,0,5.8,0,0,0,7.7,15.9,12.5,9.9,1.9,0.2,6.3,1,4.8,14.9,17.4,19.3,3.6,2,2.1,1,8,5.7,5.8,7.9,2.6,0,9.9,0,0,0,0,0,1.1,0,0,0,9.9,0.1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1.9,2.4,2.9,2.1,0.8,0,0.2,0,3.1,0,0,0,0,0,0,0.8,0,0,0,0,0,0,0,0,0,0,0.2,0,0,2.2,2.3,9.4,0,0,0,0,0,0,0,0,0.1,4.2,0,0,0,0,1.6,0.3,2.7,3,2,4.4,0.5,0,0,5.3,1.7,2.9,0,2.1,10.3,9,6.9,7.3,3.2,20,9.1,0.1,1.9,0.8,0,3.7,1.6,0,2.2,0.1,0,0,0,0,0.3,0.2,3,4.2,0,24.4,0,0,0,0,0,0,0,0,0,0,0,1.4,9.3,0.5,20.9,14.8,11.4,6.2,8.2,13.6,0,12.2,10.5,23.9,5.1,0,0,0.1,6.3,10,0,5.6,2.6,0.6,0,0,0.6,8.7,11.5,5.8,0.5,0.1,0,0,0,0,0,0,13,15.8,0.2,0.1,2.1,0.1,0,2,4.7,1.7,0,2.5,11,0.6,0,7.4,0,0,0,0,3.1,1.1,0,0,0,0,0,0,0,0.2,0,0,0,0,0,0,0,0,0,0,0,1,1.3,1,0,0,0,13.5,29.4,2.4,0,0,0,10.7,12.7,2.4,0,11.1,1.1,7.2,0.1,0,0,0,13.9,0.1,0,0.2,2.4,0,1.3,0.3,15.1,0.1,4.6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3.3,0.4,0,0,0,0.6,0,0,1.7,2.9,12.5,7.8,18.2,6.9,0,0.3,0,1.1,0.9,0,0.5,0.5,0,0.9,1.7,0.3,0,0,0,0,0,0,0,0,15.4,8.7,1.1,9.4,2.9,0.7,0,7.3,2.1,3,8.6,5,2.8,11.7,11.3,3.1,16.8,0,0,0,0,0,0,0,0,0,0,0,0,0,0.3,0.1,1.9,19.2,12,1.1,0,0,0,0,0,1.9,0.8,0,2,8.6,18,14,0,0,0,0,0,0,0,0,0.9,1,0,0,0,0,0,0,0,0,0,0,0.9,0.3,1.1,0.1,0.3,0.6,0.1,2,0,0,0,1.2,0,0,15,4.4,7.1,2.6,0.2,0,0,3.5,0,0,0,0.1,0,0,0,0,3.5,0.1,0.7,3.9,1,0,5.2,0,4.2,7.1,20.7,17.4,0.8,3.1,0,3.3,0.2,0,1.3,0.2,0,0,0,0,0,0,0,2.6,7,5.2,3,2.1,0.4,0,0,0.8,7.7,1.5,1.3,0,0,1.7,6.1,0,0,0,0,0,4,15.1,5.4,0.1,17.1,11.6,0,0,0.1,2.2,1.1,0,0,0,3.8,0.6,0.1,0,0.1,0.2,0,0,0,12.6,0,0,10.6,0.1,0,0,0.2,0,0,0,7.8,1,0,0.2,0,0,0,0,1.2,0,11.9,5.8,17.2,1.7,0.2,0.1,7.5,0.5,0,0,0.2,1.4,0,0.8,0,0,0,13.1,3.5,4.9,9.5,5,9.9,8.9,11.6,3.8,0,0,15.3,0,0.1,10.6,4.2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.7,13.5,0,0.1,0,0,0,0,0,0,0.2,0,0,0,0,0,0.2,1.6,0,0,0,0,0,0,0.3,2.4,26.3,0,4.5,6.1,0.3,0.1,0,0.1,0.8,0,0,0.8,0.8,0,0,1.5,1.6,0.3,0.2,14,0.9,0,7,1.7,0.7,0.1,1.7,0,0,0,0.5,7.7,0.6,0.2,0,0,0,0,0,0,8,1.1,1.3,0.2,5.5,7.3,9.2,0.1,0.6,0.2,0,0,0,0.1,0,5.4,0,0,0,1.2,3.9,2.7,0,0,1.2,0,0.2,5.7,4.6,0,0.3,0.1,0.7,0.1,0,0.1,0,0,4.2,4,0,1,10.9,0,0,0,2.5,9.8,0,0,0,0,5.2,5.7,2.1,3.2,5.4,6.3,0.9,12.8,7.5,13.7,0.1,7.6,0,0,18.2,0.8,0,0,0.4,1.6,2.4,0,0,0,0.9,4.2,0,0,5.6,5.8,5.6,0.8,3,0,0,0,2.4,4.1,6.7,2.3,0,0,0.3,0,0,12.4,3.6,0,0,0.5,0,0.1,0,0,0.8,15.2,8.3,0.1,3.5,0,1.9,0,3,10,15.6,2.5,20.3,1.4,0.5,0,0,0,0,0,0.1,0,0,0,0.5,0.5,0,0,0,0,0,1.7,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,8,4.1,7.1,0,0,0.4,0,0,0,0,0,0,0,8.2,8.4,6.3,9.7,20.1,0.7,3.3,6.8,2.1,0,0.5,11.2,4.2,0,0.1,0.2,0,2,0.2,10.3,0.2,0,0,0,2.6,2.2,0.8,0.5,0,0,0,0,0,0,0,0.1,4.5,8.4,10.5,1,0,0,0,0,0,0,9.3,6.7,4,4,3.9,0.9,0,15.6,5.9,3,0,0,0.2,0.7,5.8,3.1,0.2,10.9,1.4,6.8,5.8,0.5,0.7,1.5,0.5,0,0,0.2,0.5,4.5,4.7,3.4,0.8,0.1,0,0.2,6.6,0.5,0.4,5.7,0.9,2,5.5,3.3,1.1,0.3,0.3,0.2,14.6,0.8,0.5,2.5,6.9,0.3,0.1,0,0,14.7,1.3,6.7,10.8,48.3,0.6,0,0,0,0,0,0.1,1.9,5.5,1.4,0,0.8,2,0.1,0,0.1,0,0,0.5,1.1,0,0,1.4,0,0,0,0,0,0.3,0,1,26.5,0.4,0.2,0,0.2,0.7,0,0,0.4,1.6,1.6,3.9,0.2,0,0,0,0,0.3,0,0,0.3,9.6,17.9,18.7,0,0,0,0,0,0,2.2,0.1,1.6,7.4,6.3,1.2,0.4,0.1,0.2,0,5.5,0,0,0,0,0,0,0,0,1.1,3.5,4.3,0,0.1,3.9,23.1,1.2,0,0.2,6,3.7,0.4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.2,0,0,0,9.3,9.4,15.8,1.9,0,17.4,8.9,8.2,25.3,7,0.7,8.9,11.6,1.9,3,17.7,11.8,18.9,7.2,1.1,0.5,1.4,18.8,13.6,9.6,7.3,0.2,1.8,0.2,1.7,0.6,0,0,0.5,5.4,0.2,0,0.4,0.2,0,8,1.7,10.2,22.7,11,0,0,3.5,4.3,0,7,16.8,5,6.4,9.4,6.3,10.7,2,0.9,0,0,0,0.3,4.3,1.1,1.8,0.6,0.1,0,0,0,0,0.2,0.5,4,2.3,1,2.8,0.3,5.3,0.6,0,0,0,2.2,1.4,0,0,0.2,2.5,5.9,3.5,11.2,0,0,0,2.9,0,0.2,0,0,0,0,0,0,0,0.5,0,0,0,0,0,0.8,2.7,6.1,13.7,7.2,9.7,0,0,0.5,12.5,0,0,0.9,0,0,5,7.9,2.2,23.6,8.2,0.5,0,4,3.9,16.6,4.8,1.6,7.7,6.1,0,14.5,4.7,3.6,10.1,0.3,0,0,1.6,0.5,0,1.9,0,0,0,0,2.2,1.1,0.3,20.7,0.9,1.5,24.9,6.1,10.6,2.2,0.4,2.9,0,0,0,1.4,17.5,6.3,0.2,0,0,0,0,0,1.5,0.5,1.6,0,0,0,0,0.5,2.4,3.5,3.5,14.9,0.6,8.9,5.6,13.5,6.6,1.6,5.1,9.6,13.4,11,0,0,0,0,5.2,0,21.9,5,1.3,1.2,5.9,1.5,7.5,3.4,3.3,7.2,0.3,0,1.6,0,0,0,2.7,0.1,0.7,0.7,0,0,0,0.2,4.7,1.1,5.4,0.2,0.7,0,0,8,6.2,0.2,0.3,0,9.8,19.1,11.8,3.4,0.2,0.1,0,0,0.8,4.4,5.8,0.3,0.1,0.8,0.1,0.7,0,28.5,0,0,0.2,11,4.7,3.3,0,0,0.7,0.3,0,0,0,1.3,13.6,0,0,0,0,0,0,0.1,0,0,0,0,0,0,0,0,0,0.1,0,0,0,0,0,0.3,3.4,1,0,1,0,0,0,0,0,0,11.1,0.8,0,0,0,0,5.8,0,11.9,0.4,13.6,3.9,0.2,21,20.9,6,2.1,0,5.3,0.4,0,0,0,0,0,0.1,0,0.3,0.3,13.8,5.4,4.2,0.1,22.4,5.8,0.3,0,0,6.2,0.2,0.9,0,0.1,4.1,9.2,5.9,11.2,3.5,0.2,3.3,0,2.2,0.6,3.8,30.8,33.3,0.2,0.6,0.3,0.1,0,0,3.8,20.2,0.1,0.5,0.1,0,0,0,0,0,0,0.1,0,0,0,2.9,1.1,0,2.5,0,0,0,0,0.2,0,2,18,16.8,0,0,0,7.9,0.5,0,0,0,0,0,5.7,0.2,0,0.5,8.1,10.9,2.6,1.1,0,0,0,0.5,3.3,0.2,0,0,0,18,0.1,7.1,8,0.1,0.9,0,0,0,0,0,0,0,0,4.1,5.5,4.2,0.7,2.1,6,4.1,3.3,5.1,6.8,0,0,0,0,0,0,0,0,0.1,0.5,5,7.6,0,4.9,3.1,17.2,7.3,6.6,0.9,0,5.1,0.1,0,0,0,0,4.9,10.6,2.4,6.4,4,0.5,1.4,1.9,0,0,0,0,0,0,0,5.9,0,0,4.1,0.3,0,0,0,0.1,0,0,0,0,0,0.5,23.1,0.1,0.6,6.8,0,0.4,3.1,0.3,0,0,0.9,0,10.3,11.1,2,0.3,0.3,0.4,0,0.7,1.7,0,0,0,6.5,2.1,0,0,0.1,0,0,0,0,0,9.3,3,11.7,14.5,8.2,0.7,0,24.6,12.7,2.2,1.2,5.9,1.3,0,2.7,6.5,0,0,0,0,0.1,8.2,18.5,0.7,2.5,0,0,1,1.2,13.8,0.9,0.5,0.1,0,0,0,0,31.9,13.6,2.1,2.5,0.7,0,0,0,0,0,0,0,0,0.2,15.9,8.7,12,0.9,1.3,1.1,0.4,0,0,0,0.6,0,4.5,3.1,0,0,0,0,0,0,0,0,0,8.6,0.5,0,0,0,0,0,0,0.2,0,0,3.3,2.1,0,0,0,0,5.4,1.6,0,0.7,0,0,0,53.3,0.6,0.3,0.2,4.2,0.4,0.3,1.3,1.4,0,0.2,0.5,0,0.2,0,0,0,0,0,0,0,0,0,0,0,5.5,0,0,0,0,0.5,11.7,3.9,7.7,0.6,0,0,0.3,0,9.7,9.6,6.6,1.3,18.2,4.4,0.5,0.1,17.1,0.2,0,3.5,18.5,1.2,2.2,1.3,0.6,1.7,1.8,0.7,0,0,0,0,2,27.8,8.9,2,1.4,0.2,0.1,0,0.1,0,0,0,0,0,2.5,0.1,0,0,0,0.1,0,0,0,0,0,0,0,0,0,1.5,17.8,17.7,24.6,13,2.8,4.9,0,0.3,0,2.8,0.8,0,4.2,3.4,0.1,0,0.1,32.1,4.1,14.8,0,1.6,0,0,0,3.9,0.4,4.4,0.3,0,2.3,0.8,0.7,0,9.9,15.4,0.7,0,0,0,0,3.3,0,5,1.6,10.1,2,2.7,0.2,0,0.6,3.6,0,0,0,0,0.8,1.3,0.1,0,0.4,0,9.8,13.9,3,0,0.1,1.6,0.1,0,0,0,0,0,0,0,0,0,0,2.2,9.3,13.7,3.7,0,0.1,0,0.2,0.2,9.4,4.7,6.7,6.1,6.6,7.3,4.2,6.4,1.2,4.7,0.5,9.2,2.6,4.7,5.4,11.1,3.4,6.9,6.4,2.5,6.4,4.2,5.4,0.6,4.8,30,12.7,24.6,4.2,3.4,8.8,14.1,1.8,5.7,11.6,3.2,0,0,0,0,0,0,0.1,6,0,0,0,0,2.7,2.3,0.4,6.2,1.5,0.1,5.3,0.2,3,8,0,0.2,0,0,0,0,0,0.1,0,0,0.6,0,0,3.1,0,2.3,0.1,3.2,2.1,0.2,0,0,0,0,0,0,0,4.1,23,2,0,0,0,0,0,0.1,0,0,3,0.2,0,1.1,1.1,0,3.4,0.8,3.5,2.5,0.9,10.4,17,9.1,7.8,0.2,0.2,0.2,6.3,0.9,0,0.8,8.3,8.7,1.6,3.7,0.7,0.6,0,0,0,0,0,0,0,0,0,0,0,0.7,0,1.8,0.4,13,0.2,0.2,0,0.2,0,0.3,0,0,0,0,0,0,0,0];
-const N=PRECIP.length, YEARS=N/365.25, MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const MONTH=new Array(N),YEAR=new Array(N),JAN1=new Array(N);
-{let d=new Date(2010,0,1);for(let i=0;i<N;i++){const m=d.getMonth(),da=d.getDate();YEAR[i]=d.getFullYear();MONTH[i]=m+1;JAN1[i]=(m===0&&da===1);d.setDate(da+1);}}
-const inSeason=(m,s,e)=> s<=e?(m>=s&&m<=e):(m>=s||m<=e);
-let occSpans=[];
-function spans(s,e){const out=[];let a=-1;for(let i=0;i<N;i++){const o=inSeason(MONTH[i],s,e);if(o&&a<0)a=i;if((!o||i===N-1)&&a>=0){out.push([a,o?i:i-1]);a=-1;}}return out;}
-function simulate(p){const k=p.roof*p.eff/1000,thresh=0.05*p.tank,dem=p.guests*p.cap/1000;let v=p.tank*p.startFill;const vol=new Array(N);
- let minV=Infinity,minY=null,volD=0,deliveries=0,over=0;const yt={};const occYears=new Set();
- for(let i=0;i<N;i++){v+=PRECIP[i]*k;if(v>p.tank){over+=v-p.tank;v=p.tank;}
-   if(inSeason(MONTH[i],p.s,p.e)){occYears.add(YEAR[i]);v-=dem;
-     if(p.refill){if(v<minV){minV=v;minY=YEAR[i];}let g=0;while(v<=thresh&&g<60){const give=Math.min(p.load,p.tank-v);if(give<=0.001)break;v+=give;volD+=give;deliveries++;yt[YEAR[i]]=(yt[YEAR[i]]||0)+1;g++;}}
-     else{if(v<0){volD+=-v;yt[YEAR[i]]=(yt[YEAR[i]]||0)+1;v=0;}if(v<minV){minV=v;minY=YEAR[i];}}
-   }vol[i]=v;}
- return{vol,minV:minV===Infinity?p.tank:minV,minY,volD,deliveries,over,yrs:Object.keys(yt).length,ns:occYears.size||1};}
-function drawChart(vol,tankMax,refill,thresh){
- const cv=document.getElementById('chart');const w=cv.clientWidth||680,h=300,dpr=window.devicePixelRatio||1;
- cv.width=w*dpr;cv.height=h*dpr;const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
- const pL=46,pR=8,pT=8,pB=20,pw=w-pL-pR,ph=h-pT-pB;
- const X=i=>pL+(i/(N-1))*pw, Y=v=>pT+(1-v/tankMax)*ph;
- ctx.fillStyle='rgba(216,90,48,0.07)';occSpans.forEach(([s,e])=>{const xa=X(s),xb=X(e);ctx.fillRect(xa,pT,Math.max(1,xb-xa),ph);});
- ctx.strokeStyle='rgba(130,130,130,0.18)';ctx.fillStyle='#5f5e5a';ctx.font='11px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
- for(let g=0;g<=4;g++){const val=tankMax*g/4,yy=Y(val);ctx.beginPath();ctx.moveTo(pL,yy);ctx.lineTo(w-pR,yy);ctx.stroke();ctx.fillText(Math.round(val)+' m³',pL-4,yy);}
- ctx.textAlign='center';ctx.textBaseline='top';for(let i=0;i<N;i++){if(JAN1[i])ctx.fillText(YEAR[i],X(i),h-pB+4);}
- if(refill){ctx.strokeStyle='rgba(216,90,48,0.7)';ctx.setLineDash([5,4]);const yy=Y(thresh);ctx.beginPath();ctx.moveTo(pL,yy);ctx.lineTo(w-pR,yy);ctx.stroke();ctx.setLineDash([]);}
- ctx.beginPath();ctx.moveTo(X(0),Y(vol[0]));for(let i=1;i<N;i++)ctx.lineTo(X(i),Y(vol[i]));ctx.lineTo(X(N-1),Y(0));ctx.lineTo(X(0),Y(0));ctx.closePath();ctx.fillStyle='rgba(29,158,117,0.10)';ctx.fill();
- ctx.beginPath();ctx.moveTo(X(0),Y(vol[0]));for(let i=1;i<N;i++)ctx.lineTo(X(i),Y(vol[i]));ctx.strokeStyle='#1D9E75';ctx.lineWidth=1.2;ctx.stroke();
-}
-const $=id=>document.getElementById(id);
-function paint(b){const on=b.getAttribute('aria-pressed')==='true';b.style.background=on?'var(--color-background-info)':'transparent';b.style.borderColor=on?'var(--color-border-info)':'var(--color-border-secondary)';b.style.color=on?'var(--color-text-info)':'var(--color-text-primary)';}
-function roofArea(){let e=0;document.querySelectorAll('.surf[data-area][aria-pressed="true"]').forEach(b=>e+=+b.dataset.area);return 150+e;}
-function read(){return{roof:roofArea(),guests:+$('g').value,cap:+$('cap').value,tank:+$('tank').value,eff:+$('eff').value/100,s:+$('ss').value,e:+$('se').value,startFill:+$('sf').value/100,refill:$('rf').getAttribute('aria-pressed')==='true',load:+$('load').value};}
-function eur(x){return '€'+Math.round(x).toLocaleString('en-US');}
-function update(){const p=read();
- $('roof_o').textContent=p.roof+' m²';$('g_o').textContent=p.guests;$('cap_o').textContent=p.cap+' L/day';$('tank_o').textContent=p.tank+' m³ ('+Math.round(p.tank/2)+' each)';
- $('eff_o').textContent=Math.round(p.eff*100)+'%';$('ss_o').textContent=MN[p.s-1];$('se_o').textContent=MN[p.e-1];$('sf_o').textContent=Math.round(p.startFill*100)+'%';
- $('load_o').textContent=p.load+' m³';$('price_o').textContent='€'+(+$('price').value).toFixed(2)+'/m³';$('co_o').textContent='€'+$('co').value;
- const price=+$('price').value,co=+$('co').value;$('perdel_o').textContent=eur(p.load*price+co);
- $('dem_o').textContent=(p.guests*p.cap)+' L/day = '+(p.guests*p.cap/1000).toFixed(2)+' m³/day';
- $('thx_o').textContent=Math.round(0.05*p.tank)+' m³';
- occSpans=spans(p.s,p.e);const r=simulate(p);
- drawChart(r.vol,p.tank,p.refill,0.05*p.tank);
- const cost=r.volD*price+(p.refill?r.deliveries*co:0);
- const mm=$('m_min');mm.textContent=Math.max(0,Math.round(r.minV))+' m³';mm.style.color=r.minV<1?'var(--color-text-danger)':r.minV<p.tank*0.15?'var(--color-text-warning)':'var(--color-text-success)';
- $('k_dry').textContent=p.refill?'Summers topped up':'Summers run dry';const md=$('m_dry');md.textContent=r.yrs+' / '+r.ns;md.style.color=r.yrs>0?(p.refill?'var(--color-text-warning)':'var(--color-text-danger)'):'var(--color-text-success)';
- const del=$('m_del');if(p.refill){del.textContent=r.deliveries+' ('+(r.deliveries/YEARS).toFixed(1)+'/yr)';del.style.color=r.deliveries>0?'var(--color-text-primary)':'var(--color-text-success)';}else{del.textContent='continuous';del.style.color='var(--color-text-tertiary)';}
- $('m_vol').textContent=Math.round(r.volD)+' m³';
- const cy=$('m_costyr');cy.textContent=eur(cost/YEARS);cy.style.color=cost>0?'var(--color-text-danger)':'var(--color-text-success)';
- $('m_costtot').textContent=eur(cost);}
-let pend=false;function sched(){if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;update();});}
-document.querySelectorAll('.surf').forEach(b=>{paint(b);b.addEventListener('click',()=>{b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');paint(b);sched();});});
-['g','cap','tank','eff','ss','se','sf','load','price','co'].forEach(id=>$(id).addEventListener('input',sched));
-window.addEventListener('resize',sched);
-update();
-</script>
+<script src="rainfall.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
