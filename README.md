@@ -103,7 +103,7 @@ stretch with guests give real litres per guest per day (fall in level plus rain 
 
 Cost per delivery = fixed charge + €/km × 2 × road distance + water price × m³ delivered.
 
-- **Fixed charge, €150:** loading at a hydrant, hooking up and pumping off, about 1 to
+- **Fixed charge, €150:** filling up at an authorised point on the water network, hooking up and pumping off, about 1 to
   1.5 hours of lorry and driver. Lorries with a driver hire at €90 to €130 an hour.
 - **€3 per km, round trip:** CNR (the French road-haulage cost observatory) puts the full
   cost of a lorry at about €1.80 to €2.30 per km; delivery firms quote €2 to €4 per km.
@@ -139,3 +139,22 @@ coast).
 
 In a drought, towns in the Lot compete for the same tankers (Figeac had public contracts
 ready in August 2026), so book early or arrange a standing agreement.
+
+### Where the water comes from
+
+None of the hauliers above sells water. A tanker has to fill up from the public network at
+a point the operator authorises. Taking water from fire hydrants without written permission
+is prohibited and can be prosecuted as theft. The usual legal routes are a pre-paid filling
+station for professionals (*borne de puisage*; the neighbouring Lot-et-Garonne syndicate
+Eau47 runs several at €2/m³ excl. VAT), a temporary metered connection agreed with the
+operator, or a supply agreement with the syndicate.
+
+Prayssac's drinking water comes from the **Aquareso** syndicate (33 communes of the Lot
+valley and Bouriane, including Prayssac, Anglars-Juillac and Puy-l'Évêque), which contracts
+the network out to **SOGEDO** (SAUR until the end of 2025).
+
+- Aquareso: ZA de La Paganie, 46700 Puy-l'Évêque, 05 65 36 06 54, accueil@aquareso.fr
+- SOGEDO (24 h): 05 53 30 21 98
+
+No public filling station in the Aquareso area was found online. Ask Aquareso where a
+tanker can fill near Prayssac, which hauliers already do it, and at what price.
