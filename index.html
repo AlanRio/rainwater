@@ -110,6 +110,10 @@
   .chart-wrap { position: relative; touch-action: pan-y; }
   #chart { width: 100%; height: 320px; display: block; }
   .hair { position: absolute; top: 10px; bottom: 22px; width: 1px; background: rgba(0, 0, 0, 0.35); pointer-events: none; display: none; }
+  .sel { position: absolute; top: 10px; bottom: 22px; background: rgba(24, 95, 165, 0.14); border-left: 1px solid rgba(24, 95, 165, 0.5); border-right: 1px solid rgba(24, 95, 165, 0.5); pointer-events: none; display: none; }
+  .viewbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 10px; }
+  .viewbar input[type=date], .viewbar select { font-size: 13px; padding: 4px 6px; }
+  #chart_wrap { cursor: crosshair; user-select: none; -webkit-user-select: none; }
   .tip { position: absolute; top: 12px; pointer-events: none; background: rgba(31, 31, 29, 0.92); color: #fff; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 6px; white-space: nowrap; display: none; }
   .comparebox { background: var(--surface-2); border-radius: var(--radius); padding: 12px; margin: 14px 0; font-size: 14px; }
   .comparebox .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
@@ -382,6 +386,13 @@
     <div class="card"><div class="k">Collected and used</div><div class="v" id="c_bal"></div><div class="s" id="c_bal_s"></div></div>
   </div>
 
+  <div class="viewbar">
+    <span class="inline small">Chart from <input type="date" id="view_from" aria-label="Show the chart from"> to <input type="date" id="view_to" aria-label="Show the chart to"></span>
+    <span class="inline small">Year <select id="view_year" aria-label="Show one year"></select></span>
+    <button type="button" class="small-btn" data-view="12m">Last 12 months</button>
+    <button type="button" class="small-btn" data-view="5y">Last 5 years</button>
+    <button type="button" class="small-btn" data-view="all">Whole period</button>
+  </div>
   <div class="legend">
     <span><i class="sw" style="background:var(--water)"></i>Water in the tanks</span>
     <span id="lg_base"><i class="sw" style="background:none;border-top:2px dashed #8a8980;height:0"></i>Comparison setup</span>
@@ -391,9 +402,10 @@
   <div class="chart-wrap" id="chart_wrap">
     <canvas id="chart" role="img" aria-label="Water in the tanks every day over the whole period"></canvas>
     <div class="hair" id="hair"></div>
+    <div class="sel" id="sel"></div>
     <div class="tip" id="tip"></div>
   </div>
-  <p class="tiny">Move your finger or mouse over the chart to see any day.</p>
+  <p class="tiny">Move your finger or mouse over the chart to see any day. With a mouse, drag across the chart to zoom in on that stretch, and double-click to see the whole period again.</p>
 
   <div class="comparebox">
     <div><b>Comparing with:</b> <span id="base_o"></span></div>
