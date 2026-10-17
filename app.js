@@ -15,7 +15,7 @@
   const DEFAULT_SURFACES = [
     { n: 'Roof 1', l: 15, w: 5, on: 1 },
     { n: 'Roof 2', l: 15, w: 5, on: 1 },
-    { n: 'New 10×10 roof', l: 10, w: 10, on: 0 },
+    { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
   ];
@@ -293,7 +293,7 @@
     if (same) {
       return pinned
         ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try ticking the new 10×10 roof, or switching the toilets to dual flush, to see what changes.';
+        : 'These are the default settings for the house as it is now. Try ticking the yoga building roof, or switching the toilets to dual flush, to see what changes.';
     }
     const intro = `Compared with ${who} (${describe(bs)}): `;
     if (r.s.tanker && bs.tanker) {
