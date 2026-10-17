@@ -87,7 +87,7 @@ stretch with guests give real litres per guest per day (fall in level plus rain 
 | Setting | Default | Basis |
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
-| Optional surfaces | New 10 × 10 m roof, terraces 10 × 4 m and 5 × 3 m | Off by default |
+| Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, fully booked, May to October | |
