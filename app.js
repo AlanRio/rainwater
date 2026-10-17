@@ -49,10 +49,12 @@
   const N = R.sources.anglars.mm.length;
   const YEAR = new Int16Array(N);
   const MONTH = new Int8Array(N);
+  const DOM = new Int8Array(N); // day of the month
   for (let i = 0; i < N; i++) {
     const d = new Date(T0 + i * DAY);
     YEAR[i] = d.getUTCFullYear();
     MONTH[i] = d.getUTCMonth() + 1;
+    DOM[i] = d.getUTCDate();
   }
   const FIRST_YEAR = YEAR[0];
   const LAST_YEAR = YEAR[N - 1];
@@ -501,6 +503,55 @@
 
   let chartData = null;
   let layout = null;
+  // The stretch of time shown on the chart, as ISO dates; null means the start or end of the period.
+  let view = { from: null, to: null };
+  const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
+  const MIN_VIEW_DAYS = 14;
+
+  // Visible range as day offsets [a, b] into the simulation, clamped to the simulated period.
+  function viewRange(r) {
+    const last = r.L - 1;
+    let a = view.from ? indexOf(view.from) - r.i0 : 0;
+    let b = view.to ? indexOf(view.to) - r.i0 : last;
+    if (a > b) [a, b] = [b, a];
+    a = Math.max(0, Math.min(last, a));
+    b = Math.max(0, Math.min(last, b));
+    if (b - a < MIN_VIEW_DAYS) {
+      b = Math.min(last, a + MIN_VIEW_DAYS);
+      a = Math.max(0, b - MIN_VIEW_DAYS);
+    }
+    return [a, b];
+  }
+
+  function setView(from, to) {
+    view = { from: from || null, to: to || null };
+    $('hair').style.display = 'none';
+    $('tip').style.display = 'none';
+    syncViewInputs();
+    drawChart();
+    writeHash();
+  }
+
+  function syncViewInputs() {
+    if (!chartData) return;
+    const { r } = chartData;
+    const [a, b] = viewRange(r);
+    const fromEl = $('view_from');
+    const toEl = $('view_to');
+    fromEl.min = toEl.min = isoAt(r.i0);
+    fromEl.max = toEl.max = isoAt(r.i0 + r.L - 1);
+    fromEl.value = isoAt(r.i0 + a);
+    toEl.value = isoAt(r.i0 + b);
+    const sel = $('view_year');
+    const first = String(YEAR[r.i0]);
+    if (sel.dataset.first !== first) {
+      let options = '<option value="">choose…</option>';
+      for (let y = LAST_YEAR; y >= YEAR[r.i0]; y--) options += `<option value="${y}">${y}</option>`;
+      sel.innerHTML = options;
+      sel.dataset.first = first;
+    }
+    sel.value = '';
+  }
 
   function drawChart() {
     if (!chartData) return;
@@ -518,41 +569,34 @@
     const pad = { l: 50, r: 8, t: 10, b: 22 };
     const pw = w - pad.l - pad.r;
     const ph = h - pad.t - pad.b;
-    const L = r.L;
+    const [a, b] = viewRange(r);
+    const span = b - a;
     const ymax = Math.max(r.cap, rb ? rb.cap : 0) || 1;
-    const X = (j) => pad.l + (L > 1 ? j / (L - 1) : 0) * pw;
+    const X = (j) => pad.l + (j - a) / span * pw;
     const Y = (v) => pad.t + (1 - v / ymax) * ph;
-    layout = { pad, pw, ph, L, X, Y };
+    layout = { pad, pw, ph, a, b, X, Y };
+
+    // Everything inside the plot is clipped to it.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(pad.l, 0, pw, h);
+    ctx.clip();
 
     // Guest season
     ctx.fillStyle = 'rgba(216, 90, 48, 0.08)';
     let open = -1;
-    for (let j = 0; j <= L; j++) {
-      const on = j < L && inSeason(MONTH[r.i0 + j], r.s.s0, r.s.s1);
+    for (let j = a; j <= b + 1; j++) {
+      const on = j <= b && inSeason(MONTH[r.i0 + j], r.s.s0, r.s.s1);
       if (on && open < 0) open = j;
-      if (!on && open >= 0) { ctx.fillRect(X(open), pad.t, Math.max(1, X(j - 1) - X(open)), ph); open = -1; }
+      if (!on && open >= 0) { ctx.fillRect(X(open), pad.t, Math.max(1, X(Math.min(j, b)) - X(open)), ph); open = -1; }
     }
 
-    // Grid and axes
+    // Horizontal grid
     ctx.strokeStyle = 'rgba(130, 130, 130, 0.2)';
-    ctx.fillStyle = '#5f5e5a';
-    ctx.font = '11px system-ui, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
     ctx.lineWidth = 1;
     for (let g = 0; g <= 4; g++) {
-      const val = ymax * g / 4;
-      const y = Y(val);
+      const y = Y(ymax * g / 4);
       ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-      ctx.fillText(fmt(val) + ' m³', pad.l - 5, y);
-    }
-    const perYear = pw / (L / 365.25);
-    const step = [1, 2, 5, 10].find((k) => k * perYear >= 34) || 10;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    for (let j = 0; j < L; j++) {
-      const i = r.i0 + j;
-      if (MONTH[i] === 1 && isoAt(i).endsWith('-01-01') && YEAR[i] % step === 0) ctx.fillText(String(YEAR[i]), X(j), h - pad.b + 5);
     }
 
     // Tanker trigger
@@ -565,20 +609,20 @@
 
     const trace = (vol) => {
       ctx.beginPath();
-      ctx.moveTo(X(0), Y(vol[0]));
-      for (let j = 1; j < L; j++) ctx.lineTo(X(j), Y(vol[j]));
+      ctx.moveTo(X(a), Y(vol[a]));
+      for (let j = a + 1; j <= b; j++) ctx.lineTo(X(j), Y(vol[j]));
     };
 
     // Current settings
     trace(r.vol);
-    ctx.lineTo(X(L - 1), Y(0));
-    ctx.lineTo(X(0), Y(0));
+    ctx.lineTo(X(b), Y(0));
+    ctx.lineTo(X(a), Y(0));
     ctx.closePath();
     ctx.fillStyle = 'rgba(29, 158, 117, 0.12)';
     ctx.fill();
     trace(r.vol);
     ctx.strokeStyle = '#1D9E75';
-    ctx.lineWidth = 1.3;
+    ctx.lineWidth = span < 800 ? 1.8 : 1.3;
     ctx.stroke();
 
     // Comparison setup
@@ -595,24 +639,60 @@
     if (r.s.tanker) {
       ctx.fillStyle = '#D85A30';
       const base = pad.t + ph;
+      const size = span < 800 ? 5 : 3.5;
       for (const j of r.deliveryDays) {
+        if (j < a || j > b) continue;
         const x = X(j);
-        ctx.beginPath(); ctx.moveTo(x - 3.5, base); ctx.lineTo(x + 3.5, base); ctx.lineTo(x, base - 7); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x - size, base); ctx.lineTo(x + size, base); ctx.lineTo(x, base - size * 2); ctx.closePath(); ctx.fill();
       }
     }
+    ctx.restore();
+
+    // Axis labels
+    ctx.fillStyle = '#5f5e5a';
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let g = 0; g <= 4; g++) ctx.fillText(fmt(ymax * g / 4) + ' m³', pad.l - 5, Y(ymax * g / 4));
+
+    // Time labels: years for long views, months for a few years or less, days for a few weeks.
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const label = (j, text) => ctx.fillText(text, Math.min(w - pad.r - 12, Math.max(pad.l + 12, X(j))), h - pad.b + 5);
+    if (span > 1100) {
+      const step = [1, 2, 5, 10].find((k) => k * pw / (span / 365.25) >= 34) || 10;
+      for (let j = a; j <= b; j++) {
+        const i = r.i0 + j;
+        if (MONTH[i] === 1 && DOM[i] === 1 && YEAR[i] % step === 0) label(j, String(YEAR[i]));
+      }
+    } else if (span > 75) {
+      const step = [1, 2, 3, 6].find((k) => k * pw / (span / 30.44) >= 40) || 6;
+      for (let j = a; j <= b; j++) {
+        const i = r.i0 + j;
+        if (DOM[i] === 1 && (MONTH[i] - 1) % step === 0) label(j, MONTH[i] === 1 ? String(YEAR[i]) : MONTHS_SHORT[MONTH[i] - 1]);
+      }
+    } else {
+      const step = [1, 2, 7].find((k) => k * pw / span >= 44) || 7;
+      for (let j = a; j <= b; j += step) label(j, DOM[r.i0 + j] + ' ' + MONTHS_SHORT[MONTH[r.i0 + j] - 1]);
+    }
+  }
+
+  // Day offset in the simulation under a screen x position.
+  function dayAt(clientX) {
+    const rect = $('chart').getBoundingClientRect();
+    const { pad, pw, a, b } = layout;
+    return a + Math.round((clientX - rect.left - pad.l) / pw * (b - a));
   }
 
   function showTip(clientX) {
     if (!chartData || !layout) return;
     const { r, rb } = chartData;
-    const canvas = $('chart');
-    const rect = canvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const { pad, pw, L, X } = layout;
-    const j = Math.round((x - pad.l) / pw * (L - 1));
+    const rect = $('chart').getBoundingClientRect();
+    const { a, b, X } = layout;
+    const j = dayAt(clientX);
     const hair = $('hair');
     const tip = $('tip');
-    if (j < 0 || j >= L) { hair.style.display = 'none'; tip.style.display = 'none'; return; }
+    if (j < a || j > b) { hair.style.display = 'none'; tip.style.display = 'none'; return; }
     const i = r.i0 + j;
     const rain = R.sources[r.s.src].mm[i] * climateFactor(MONTH[i], r.s);
     tip.innerHTML = `<b>${longDate(isoAt(i))}</b><br>In the tanks: ${m3(r.vol[j])}` +
@@ -736,7 +816,15 @@
         return parts.join('~');
       }).join('|'));
     }
+    if (view.from) p.set('vf', view.from);
+    if (view.to) p.set('vt', view.to);
     return p.toString();
+  }
+
+  function viewFromHash(hash) {
+    const p = new URLSearchParams(hash.replace(/^#/, ''));
+    const date = (v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+    return { from: date(p.get('vf')), to: date(p.get('vt')) };
   }
 
   function fromHash(hash) {
@@ -893,6 +981,7 @@
     renderYears(r);
     renderCompare(r, rb, bs, same);
     chartData = { r, rb };
+    syncViewInputs();
     drawChart();
     renderCalibration();
     writeHash();
@@ -918,6 +1007,7 @@
     $('from_select').innerHTML = years;
 
     state = fromHash(location.hash);
+    view = viewFromHash(location.hash);
     setInputs();
     buildCalibration();
 
@@ -945,6 +1035,7 @@
     $('reset').addEventListener('click', () => {
       state = freshDefaults();
       pinned = null;
+      view = { from: null, to: null };
       setInputs();
       schedule();
     });
@@ -1002,15 +1093,64 @@
       }
     });
 
-    // Chart hover and touch
+    // Chart time range
+    const lastIso = isoAt(N - 1);
+    const daysBefore = (n) => isoAt(Math.max(0, N - 1 - n));
+    document.querySelectorAll('[data-view]').forEach((btn) => btn.addEventListener('click', () => {
+      const v = btn.dataset.view;
+      if (v === 'all') setView(null, null);
+      else if (v === '12m') setView(daysBefore(365), lastIso);
+      else if (v === '5y') setView(daysBefore(Math.round(5 * 365.25)), lastIso);
+    }));
+    $('view_year').addEventListener('change', (e) => {
+      const y = e.target.value;
+      if (y) setView(`${y}-01-01`, `${y}-12-31`);
+    });
+    const fromRange = () => setView($('view_from').value || null, $('view_to').value || null);
+    $('view_from').addEventListener('change', fromRange);
+    $('view_to').addEventListener('change', fromRange);
+
+    // Chart hover and touch; with a mouse, drag across the chart to zoom in, double-click to zoom out.
     const wrap = $('chart_wrap');
-    wrap.addEventListener('pointermove', (e) => showTip(e.clientX));
-    wrap.addEventListener('pointerdown', (e) => showTip(e.clientX));
-    wrap.addEventListener('pointerleave', () => { $('hair').style.display = 'none'; $('tip').style.display = 'none'; });
+    const sel = $('sel');
+    const hideTip = () => { $('hair').style.display = 'none'; $('tip').style.display = 'none'; };
+    let drag = null;
+    wrap.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button === 0 && layout) {
+        drag = { x0: e.clientX };
+        e.preventDefault();
+      } else showTip(e.clientX);
+    });
+    wrap.addEventListener('pointermove', (e) => {
+      if (!drag) { showTip(e.clientX); return; }
+      const rect = wrap.getBoundingClientRect();
+      const x0 = Math.max(layout.pad.l, Math.min(drag.x0, e.clientX) - rect.left);
+      const x1 = Math.min(rect.width - layout.pad.r, Math.max(drag.x0, e.clientX) - rect.left);
+      if (x1 - x0 > 3) {
+        sel.style.left = x0 + 'px';
+        sel.style.width = (x1 - x0) + 'px';
+        sel.style.display = 'block';
+        hideTip();
+      }
+    });
+    window.addEventListener('pointerup', (e) => {
+      if (!drag) return;
+      const { x0 } = drag;
+      drag = null;
+      sel.style.display = 'none';
+      if (Math.abs(e.clientX - x0) < 8 || !chartData) return;
+      const { r } = chartData;
+      const j0 = Math.max(0, Math.min(r.L - 1, dayAt(Math.min(x0, e.clientX))));
+      const j1 = Math.max(0, Math.min(r.L - 1, dayAt(Math.max(x0, e.clientX))));
+      setView(isoAt(r.i0 + j0), isoAt(r.i0 + j1));
+    });
+    wrap.addEventListener('dblclick', () => setView(null, null));
+    wrap.addEventListener('pointerleave', () => { if (!drag) hideTip(); });
     window.addEventListener('resize', () => drawChart());
     window.addEventListener('hashchange', () => {
       if (location.hash.replace(/^#/, '') === toHash(state)) return;
       state = fromHash(location.hash);
+      view = viewFromHash(location.hash);
       setInputs();
       schedule();
     });
