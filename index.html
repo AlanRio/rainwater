@@ -89,6 +89,7 @@
   .surf-row input[type=text] { width: 11em; }
   .surf-row input[type=number] { width: 4.5em; }
   .surf-row .area { min-width: 5.5em; font-weight: 600; }
+  .surf-row select { font-size: 13px; padding: 4px 5px; }
   .inline { display: inline-flex; align-items: center; gap: 6px; }
   .derived { font-size: 14px; margin-top: 8px; }
   .derived b { color: var(--accent); }
@@ -248,13 +249,12 @@
 
   <div class="panel">
     <h3>Tanks</h3>
-    <div class="inline small" style="flex-wrap:wrap">
-      <input type="number" data-k="tanks" min="1" max="10" step="1" aria-label="Number of tanks"> tanks, each
-      <input type="number" data-k="tl" min="0.5" max="20" step="0.1" aria-label="Inside length in metres"> ×
-      <input type="number" data-k="tw" min="0.5" max="20" step="0.1" aria-label="Inside width in metres"> ×
-      <input type="number" data-k="td" min="0.5" max="10" step="0.1" aria-label="Inside depth in metres"> m deep inside
+    <p class="small muted">Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one.</p>
+    <div id="tanks"></div>
+    <div class="toolbar" style="margin:8px 0 0">
+      <button type="button" id="add_tank">Add another tank</button>
+      <span class="derived" style="margin:0">Total <b id="o_tankvol"></b>, of which <b id="o_usable"></b> usable.</span>
     </div>
-    <p class="derived">Total <b id="o_tankvol"></b>, of which <b id="o_usable"></b> usable.</p>
   </div>
 
   <div class="panel">
@@ -416,7 +416,7 @@
   <details id="calib">
     <summary>Check it against your own tanks</summary>
     <div class="body">
-      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. If there are two linked tanks, measure both and use the average. The page looks up the rain measured at Anglars between your readings.</p>
+      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. This assumes the tanks are linked, so the water stands at the same level in each. The page looks up the rain measured at Anglars between your readings.</p>
 
       <h3>1. How much rain actually reaches the tanks</h3>
       <p class="small muted">Take a reading before and after a rainy spell, when nobody is using water and the tanks aren't full (so nothing overflows). Morning readings line up best with the gauge.</p>

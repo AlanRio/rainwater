@@ -19,6 +19,11 @@
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
   ];
+  // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
+  const DEFAULT_TANKS = [
+    { n: 'Tank 1', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+    { n: 'Tank 2', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+  ];
   const DEFAULTS = {
     // guests and season
     guests: 8, occ: 100, s0: 5, s1: 10, offPeople: 0,
@@ -27,8 +32,8 @@
     shN: 1, shL: 50, toilet: 'std', flush: 5, taps: 15, wmLoads: 8, wmL: 55, dwRuns: 1.5, dwL: 12, otherL: 0,
     // collection
     eff: 75, loss: 0, cap: 0,
-    // tanks
-    tanks: 2, tl: 4, tw: 4, td: 4, usable: 90, fill: 100,
+    // tanks (their sizes are in the tank list)
+    usable: 90, fill: 100,
     // tanker
     tanker: 1, trig: 5, lead: 2, load: 12, price: 2.8, callout: 270,
     // weather
@@ -81,14 +86,16 @@
 
   // ---- Settings ------------------------------------------------------------
 
-  const freshDefaults = () => Object.assign(clone(DEFAULTS), { surfaces: clone(DEFAULT_SURFACES) });
+  const freshDefaults = () => Object.assign(clone(DEFAULTS), { surfaces: clone(DEFAULT_SURFACES), tanklist: clone(DEFAULT_TANKS) });
   let state = freshDefaults();
   let pinned = null; // settings pinned for comparison; null means the default setup
 
   const catchment = (s) => s.surfaces.reduce((a, x) => a + (x.on ? x.l * x.w : 0), 0);
-  const tankVolume = (s) => s.tanks * s.tl * s.tw * s.td;
+  const tankFootprint = (t) => (t.shape === 'round' ? Math.PI * t.l * t.l / 4 : t.l * t.w);
+  const tankVolume = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) * t.d : 0), 0);
   const usableVolume = (s) => tankVolume(s) * s.usable / 100;
-  const planArea = (s) => s.tanks * s.tl * s.tw;
+  // Water surface area of the linked tanks: 1 cm of depth is this many m² × 0.01 m³.
+  const planArea = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) : 0), 0);
   const inSeason = (m, a, b) => (a <= b ? m >= a && m <= b : m >= a || m <= b);
 
   function usage(s) {
@@ -351,6 +358,15 @@
       const x = state.surfaces[k];
       row.area.textContent = x ? fmt(x.l * x.w) + ' m²' : '';
       row.el.style.opacity = x && x.on ? '1' : '0.55';
+    });
+    tankRows.forEach((row, k) => {
+      const t = state.tanklist[k];
+      if (!t) return;
+      const round = t.shape === 'round';
+      row.lbl.textContent = round ? 'Ø ' : '';
+      row.wpart.style.display = round ? 'none' : '';
+      row.area.textContent = m3(tankFootprint(t) * t.d);
+      row.el.style.opacity = t.on ? '1' : '0.55';
     });
   }
 
@@ -713,6 +729,13 @@
         return parts.join('~');
       }).join('|'));
     }
+    if (JSON.stringify(s.tanklist) !== JSON.stringify(DEFAULT_TANKS)) {
+      p.set('tk', s.tanklist.map((t, k) => {
+        const parts = [t.on ? 1 : 0, t.shape === 'round' ? 'r' : 'b', t.l, t.w, t.d];
+        if (!DEFAULT_TANKS[k] || DEFAULT_TANKS[k].n !== t.n) parts.push(t.n.replace(/[~|]/g, ' '));
+        return parts.join('~');
+      }).join('|'));
+    }
     return p.toString();
   }
 
@@ -732,6 +755,24 @@
         return { on: on === '1' ? 1 : 0, l: parseFloat(l) || 0, w: parseFloat(w) || 0, n };
       });
       if (list.length) s.surfaces = list;
+    }
+    if (p.has('tk')) {
+      const list = p.get('tk').split('|').filter(Boolean).map((t, k) => {
+        const [on, shape, l, w, d, ...name] = t.split('~');
+        return {
+          n: name.join(' ') || (DEFAULT_TANKS[k] ? DEFAULT_TANKS[k].n : 'Tank ' + (k + 1)),
+          shape: shape === 'r' ? 'round' : 'box',
+          l: parseFloat(l) || 0, w: parseFloat(w) || 0, d: parseFloat(d) || 0,
+          on: on === '1' ? 1 : 0,
+        };
+      });
+      if (list.length) s.tanklist = list;
+    } else if (['tanks', 'tl', 'tw', 'td'].some((k) => p.has(k))) {
+      // Links made before tanks became a list described n identical box tanks.
+      const num = (k, def) => (isFinite(parseFloat(p.get(k))) ? parseFloat(p.get(k)) : def);
+      const count = Math.max(1, Math.round(num('tanks', 2)));
+      s.tanklist = Array.from({ length: count }, (_, k) => (
+        { n: 'Tank ' + (k + 1), shape: 'box', l: num('tl', 4), w: num('tw', 4), d: num('td', 4), on: 1 }));
     }
     if (!R.sources[s.src]) s.src = DEFAULTS.src;
     if (!(s.toilet in TOILET_LITRES)) s.toilet = DEFAULTS.toilet;
@@ -777,6 +818,47 @@
     });
   }
 
+  let tankRows = [];
+
+  function renderTanks() {
+    const box = $('tanks');
+    box.innerHTML = '';
+    tankRows = state.tanklist.map((t, k) => {
+      const el = document.createElement('div');
+      el.className = 'surf-row';
+      el.innerHTML = '<input type="checkbox" aria-label="In use"> ' +
+        '<input type="text" maxlength="40" aria-label="Name"> ' +
+        '<select aria-label="Shape"><option value="box">Box</option><option value="round">Round</option></select> ' +
+        '<span class="lbl"></span><input type="number" min="0" max="50" step="0.1" aria-label="Length or diameter in metres">' +
+        '<span class="wpart"> × <input type="number" min="0" max="50" step="0.1" aria-label="Width in metres"></span> × ' +
+        '<input type="number" min="0" max="20" step="0.1" aria-label="Depth in metres"> m ' +
+        '<span class="area"></span>' +
+        (k >= DEFAULT_TANKS.length ? ' <button type="button" class="small-btn">Remove</button>' : '');
+      const [on, name, len, wid, dep] = el.querySelectorAll('input');
+      const shape = el.querySelector('select');
+      on.checked = !!t.on;
+      name.value = t.n;
+      shape.value = t.shape;
+      len.value = t.l;
+      wid.value = t.w;
+      dep.value = t.d;
+      const num = (input, key) => input.addEventListener('input', () => {
+        const v = parseFloat(input.value);
+        if (isFinite(v)) { t[key] = v; schedule(); }
+      });
+      on.addEventListener('change', () => { t.on = on.checked ? 1 : 0; schedule(); });
+      name.addEventListener('input', () => { t.n = name.value; schedule(); });
+      shape.addEventListener('change', () => { t.shape = shape.value; schedule(); });
+      num(len, 'l');
+      num(wid, 'w');
+      num(dep, 'd');
+      const del = el.querySelector('button');
+      if (del) del.addEventListener('click', () => { state.tanklist.splice(k, 1); renderTanks(); schedule(); });
+      box.appendChild(el);
+      return { el, area: el.querySelector('.area'), lbl: el.querySelector('.lbl'), wpart: el.querySelector('.wpart') };
+    });
+  }
+
   function setInputs() {
     document.querySelectorAll('[data-k]').forEach((el) => {
       const v = state[el.dataset.k];
@@ -785,6 +867,7 @@
       else el.value = v;
     });
     renderSurfaces();
+    renderTanks();
   }
 
   function readInput(el) {
@@ -845,6 +928,11 @@
     $('add_surface').addEventListener('click', () => {
       state.surfaces.push({ n: 'Other surface', l: 5, w: 4, on: 1 });
       renderSurfaces();
+      schedule();
+    });
+    $('add_tank').addEventListener('click', () => {
+      state.tanklist.push({ n: 'Tank ' + (state.tanklist.length + 1), shape: 'box', l: 3, w: 3, d: 3, on: 1 });
+      renderTanks();
       schedule();
     });
     document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => {

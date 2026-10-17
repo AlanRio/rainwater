@@ -89,7 +89,7 @@ stretch with guests give real litres per guest per day (fall in level plus rain 
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | New 10 × 10 m roof, terraces 10 × 4 m and 5 × 3 m | Off by default |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
-| Tanks | 2 × 4 × 4 × 4 m, 90% usable | Estimated, still to be measured |
+| Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, fully booked, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days; 12 m³ loads | Small rigid tanker suits the access |
