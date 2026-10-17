@@ -43,10 +43,15 @@ jobs:
             git push
           fi
 
+      # GitHub Pages lets browsers cache each file for 10 minutes, independently. Stamping the
+      # script addresses with the commit means a page always loads the scripts it was built with.
       - name: Collect the site files
         run: |
           mkdir _site
           cp index.html app.js rainfall.js .nojekyll _site/
+          v=$(git rev-parse --short HEAD)
+          sed -i "s|src=\"rainfall.js\"|src=\"rainfall.js?v=$v\"|; s|src=\"app.js\"|src=\"app.js?v=$v\"|" _site/index.html
+          grep -o 'src="[^"]*"' _site/index.html
 
       - uses: actions/configure-pages@v5
 
