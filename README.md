@@ -86,34 +86,37 @@ surfaces with their own efficiency delivered); readings across a stretch with gu
 litres per guest per day (fall in level plus rain added).
 
 Settings live in the page address. Surfaces are written as
-`on~length~width[~e<share>][~g][~name]`, separated by `|`, where `g` marks the proposed ground
-sheet. Links made before the ground sheet existed get it added, switched off. The calibration
-tool leaves the ground sheet out, as it isn't built.
+`on~length~width[~e<share>][~g][~name]` and tanks as `on~shape~length~width~depth[~g][~name]`,
+separated by `|`, where `g` marks the proposed ground sheet and the tank under it. Links made
+before these existed get them added, switched off. The calibration tool leaves both out, as
+they aren't built.
 
-## The recommended fix: a rain sheet on the slope
+The tank under the sheet is modelled as a separate store: only the sheet fills it, and each day
+it empties into the main tanks as far as they have room. The level shown is the total of both.
+
+## The recommended fix: a rain sheet on the slope, with a tank under it
 
 The roofs catch too little rain: with the house full all summer they can't even refill the
 tanks over winter. The fix is more collecting surface: one EPDM rubber sheet on the slope of
-grass and low scrub just south of the buildings. The page has the full write-up, the map and
-the sources; in short:
+grass and low scrub just south of the buildings, with a 10 m³ tank buried under its collection
+trench. The page has the full write-up, the map and the sources; in short:
 
 - **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
-  about 231 to 234 m at 10°, facing west-north-west. The underground tanks are at the southern
+  about 231 to 233 m at 10°, facing west-north-west. The underground tanks are at the southern
   corner of the north-east building, ground about 229.5 m.
-- **Layout:** 20 × 15.5 m (310 m²), square on the slope: the 20 m bottom edge follows the
-  contour, with a collection trench falling 1% to an outlet at the north-east end (about 30 cm
-  deep at the far end, 90 cm at the outlet). About 25 m of buried 110 mm pipe runs north and
-  falls about 2 m to the tanks; beside the south-east building the pipe trench is up to about
-  2 m deep. No pump.
+- **Layout:** sheet 20 × 8.75 m (175 m²), square on the slope: the 20 m bottom edge follows the
+  contour, with a collection trench falling 1% to the north-east end. Under the trench, a 10 m³
+  tank 20 m long (20 m of 800 mm plastic pipe, or a concrete-block tank 20 × 1.0 × 0.75 m inside)
+  with its bottom at about 230.1 m. About 25 m of buried 110 mm pipe runs north and falls to the
+  main tanks; beside the south-east building the pipe trench is up to about 2 m deep. No pump.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
-  year) to none since 2010; the lowest the tanks get is 18 m³ (2016). Back to 1994 there are
-  none either, but in 2009, the driest summer in the record, the tanks only just scrape through
-  (6 m³ left, against a tanker trigger of 5.8 m³), so a summer like that could need one tanker.
-  With dual-flush toilets as well, the lowest is 38 m³; dual flush with a 150 m² sheet also
-  gets through 2009 (15 m³).
-- **Cost:** about €5,300–9,000: sheet made to measure, about 21.6 × 17.8 m or 385 m²,
-  €3,400–5,000; underlay €400–700; outlet, filter and pipe €400–800; fence €500–1,000; small
+  year) to none since 2010; the lowest the tanks get is 12 m³ (2011). A summer as dry as 2009
+  would need one or two tankers; the sheet can be extended later. Without the tank the sheet
+  would need about 230 m² for the same result; with 20, 30 or 50 m³ it could be 170, 160 or
+  155–160 m². With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
+- **Cost:** about €6,000–12,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
+  €300–500; tank €2,000–5,000; leaf screen, filter and pipe €400–800; fence €500–1,000; small
   digger with driver for 1–2 days €600–1,500.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
@@ -121,7 +124,7 @@ the sources; in short:
 - **Rules:** PLUi zone Ntvb, which bans digging out or raising the ground except for permitted
   works and earthworks covered by visible sheeting, even where no permit is needed; ask the
   mairie in writing first. ZNIEFF type 1 "Bois sec de Niaudon" (semi-dry limestone grassland):
-  low risk for about 300 m² next to the buildings; work in autumn or winter and fell no trees.
+  low risk for about 200 m² next to the buildings; work in autumn or winter and fell no trees.
 
 ### Why not a borehole
 
@@ -140,7 +143,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
-| Ground sheet | 20 × 15.5 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see above) |
+| Ground sheet | 20 × 8.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ tank under it | Off by default; the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |

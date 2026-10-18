@@ -44,15 +44,19 @@
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
-    { n: 'Ground sheet (EPDM)', l: 20, w: 15.5, on: 0, e: 85, g: 1 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 8.75, on: 0, e: 85, g: 1 },
   ];
   const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
+  // The tank under the sheet (g) only takes the sheet's water, and empties into the other tanks
+  // whenever they have room.
   const DEFAULT_TANKS = [
     { n: 'Tank 1', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
     { n: 'Tank 2', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+    { n: 'Tank under the sheet', shape: 'box', l: 20, w: 1, d: 0.5, on: 0, g: 1 },
   ];
+  const SHEET_TANK_ROW = DEFAULT_TANKS.findIndex((t) => t.g);
   const DEFAULTS = {
     // guests and season
     guests: 8, occ: 100, s0: 5, s1: 10, offPeople: 0,
@@ -133,7 +137,8 @@
   const tankVolume = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) * t.d : 0), 0);
   const usableVolume = (s) => tankVolume(s) * s.usable / 100;
   // Water surface area of the linked tanks: 1 cm of depth is this many m² × 0.01 m³.
-  const planArea = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) : 0), 0);
+  const planArea = (s) => s.tanklist.reduce((a, t) => a + (t.on && !t.g ? tankFootprint(t) : 0), 0);
+  const sheetTankVolume = (s) => s.tanklist.reduce((a, t) => a + (t.on && t.g ? tankFootprint(t) * t.d : 0), 0) * s.usable / 100;
   // A delivery costs the fixed charge and the round trip whatever the load, plus the water.
   const tripCost = (s) => s.fixed + s.perKm * 2 * s.km;
   const deliveryCost = (s) => tripCost(s) + s.load * s.price;
@@ -193,7 +198,13 @@
     const area = catchment(s);
     const cap = usableVolume(s);
     const trigger = cap * s.trig / 100;
-    const perMm = wetArea(s) / 1000; // 1 mm on 1 m² is 1 litre
+    // With a tank under the sheet, the sheet fills that tank, which tops up the main tanks when they
+    // have room; otherwise everything goes straight to the main tanks. 1 mm on 1 m² is 1 litre.
+    const capS = sheetTankVolume(s);
+    const capM = cap - capS;
+    const sheetWet = s.surfaces.reduce((a, x) => a + (x.on && x.g ? x.l * x.w * (ownShare(x) ? x.e : s.eff) / 100 : 0), 0);
+    const perMmS = capS > 0 ? sheetWet / 1000 : 0;
+    const perMm = wetArea(s) / 1000 - perMmS;
     const d = demand(s);
     const useSeason = d.season / 1000;
     const useOff = d.off / 1000;
@@ -201,14 +212,15 @@
     const vol = new Float32Array(L);
     const deliveryDays = [];
     const years = [];
-    let v = cap * s.fill / 100;
+    let v = capM * s.fill / 100; // main tanks
+    let sv = capS * s.fill / 100; // tank under the sheet
     let arrival = -1; // day a tanker that's been ordered will arrive
     let Y = null;
     let minLevel = Infinity;
     let minDay = -1;
 
     const deliver = (j) => {
-      const add = Math.min(s.load, cap - v);
+      const add = Math.min(s.load, capM - v);
       if (add <= 0.001) return false;
       v += add;
       Y.deliveries++;
@@ -232,10 +244,17 @@
       if (occupied) { Y.seasonDays++; Y.rain += mm; }
 
       // Rain in; anything above capacity overflows.
-      const inflow = harvestMm(mm, s) * perMm;
+      const h = harvestMm(mm, s);
+      const inflow = h * perMm;
+      const inflowS = h * perMmS;
       v += inflow;
-      Y.collected += inflow;
-      if (v > cap) { Y.overflow += v - cap; v = cap; }
+      sv += inflowS;
+      Y.collected += inflow + inflowS;
+      if (v > capM) { Y.overflow += v - capM; v = capM; }
+      if (sv > capS) { Y.overflow += sv - capS; sv = capS; }
+      // The tank under the sheet tops up the main tanks.
+      const move = Math.min(sv, capM - v);
+      if (move > 0) { v += move; sv -= move; }
 
       // A tanker ordered earlier arrives.
       if (arrival >= 0 && j >= arrival) { deliver(j); arrival = -1; }
@@ -247,16 +266,17 @@
       if (v < 0) { Y.used += v; if (use > 0) Y.dryDays++; v = 0; }
 
       // Order a tanker when the level falls to the trigger.
-      if (s.tanker && use > 0 && arrival < 0 && v <= trigger) {
+      if (s.tanker && use > 0 && arrival < 0 && v + sv <= trigger) {
         if (s.lead > 0) arrival = j + s.lead;
-        else for (let g = 0; g < 50 && v <= trigger && deliver(j); g++);
+        else for (let g = 0; g < 50 && v + sv <= trigger && deliver(j); g++);
       }
 
+      const total = v + sv;
       if (use > 0) {
-        if (v < Y.min) Y.min = v;
-        if (v < minLevel) { minLevel = v; minDay = j; }
+        if (total < Y.min) Y.min = total;
+        if (total < minLevel) { minLevel = total; minDay = j; }
       }
-      vol[j] = v;
+      vol[j] = total;
     }
 
     const T = { collected: 0, overflow: 0, used: 0, deliveries: 0, delivered: 0, cost: 0, dryDays: 0 };
@@ -557,10 +577,17 @@
     const k = sheetIndex(s);
     if (k < 0 || !$('fix_live')) return;
     const sheet = s.surfaces[k];
-    const withSheet = (on) => { const c = clone(s); c.surfaces[k].on = on; return simulate(c); };
+    const kt = s.tanklist.findIndex((t) => t.g);
+    const withSheet = (on) => {
+      const c = clone(s);
+      c.surfaces[k].on = on;
+      if (kt >= 0) c.tanklist[kt].on = on;
+      return simulate(c);
+    };
+    const tankV = kt >= 0 ? tankFootprint(s.tanklist[kt]) * s.tanklist[kt].d : 0;
     const r0 = withSheet(0);
     const r1 = withSheet(1);
-    const size = `${fmt(sheet.l * sheet.w)} m² sheet`;
+    const size = `${fmt(sheet.l * sheet.w)} m² sheet${tankV > 0 ? ` and the ${fmt(tankV)} m³ tank under it` : ''}`;
     let t;
     if (s.tanker) {
       const del = (r) => `${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer`;
@@ -901,6 +928,7 @@
     if (JSON.stringify(s.tanklist) !== JSON.stringify(DEFAULT_TANKS)) {
       p.set('tk', s.tanklist.map((t, k) => {
         const parts = [t.on ? 1 : 0, t.shape === 'round' ? 'r' : 'b', t.l, t.w, t.d];
+        if (t.g) parts.push('g');
         if (!DEFAULT_TANKS[k] || DEFAULT_TANKS[k].n !== t.n) parts.push(t.n.replace(/[~|]/g, ' '));
         return parts.join('~');
       }).join('|'));
@@ -943,14 +971,18 @@
     }
     if (p.has('tk')) {
       const list = p.get('tk').split('|').filter(Boolean).map((t, k) => {
-        const [on, shape, l, w, d, ...name] = t.split('~');
-        return {
-          n: name.join(' ') || (DEFAULT_TANKS[k] ? DEFAULT_TANKS[k].n : 'Tank ' + (k + 1)),
-          shape: shape === 'r' ? 'round' : 'box',
+        const [on, shape, l, w, d, ...rest] = t.split('~');
+        const tank = {
+          n: '', shape: shape === 'r' ? 'round' : 'box',
           l: parseFloat(l) || 0, w: parseFloat(w) || 0, d: parseFloat(d) || 0,
           on: on === '1' ? 1 : 0,
         };
+        if (rest[0] === 'g') { rest.shift(); tank.g = 1; }
+        tank.n = rest.join(' ') || (DEFAULT_TANKS[k] ? DEFAULT_TANKS[k].n : 'Tank ' + (k + 1));
+        return tank;
       });
+      // Links made before the tank under the sheet existed: put it back in its usual place.
+      if (list.length && !list.some((t) => t.g)) list.splice(Math.min(SHEET_TANK_ROW, list.length), 0, clone(DEFAULT_TANKS[SHEET_TANK_ROW]));
       if (list.length) s.tanklist = list;
     } else if (['tanks', 'tl', 'tw', 'td'].some((k) => p.has(k))) {
       // Links made before tanks became a list described n identical box tanks.
@@ -958,6 +990,7 @@
       const count = Math.max(1, Math.round(num('tanks', 2)));
       s.tanklist = Array.from({ length: count }, (_, k) => (
         { n: 'Tank ' + (k + 1), shape: 'box', l: num('tl', 4), w: num('tw', 4), d: num('td', 4), on: 1 }));
+      s.tanklist.push(clone(DEFAULT_TANKS[SHEET_TANK_ROW]));
     }
     // Links made before supplier and distance existed had one call-out charge per delivery.
     if (p.has('callout') && !p.has('fixed') && !p.has('km')) {
@@ -998,7 +1031,7 @@
         '<input type="number" min="0" max="200" step="0.1" aria-label="Width in metres"> m ' +
         '<span class="area"></span>' +
         '<span class="share"><input type="number" min="1" max="100" step="1" aria-label="Share of rain reaching the tanks, %; blank uses the general setting"> % reaches tanks</span>' +
-        (k >= DEFAULT_SURFACES.length ? ' <button type="button" class="small-btn">Remove</button>' : '');
+        (k >= DEFAULT_SURFACES.length && !x.g ? ' <button type="button" class="small-btn">Remove</button>' : '');
       const [on, name, len, wid, share] = el.querySelectorAll('input');
       on.checked = !!x.on;
       name.value = x.n;
@@ -1038,7 +1071,7 @@
         '<span class="wpart"> × <input type="number" min="0" max="50" step="0.1" aria-label="Width in metres"></span> × ' +
         '<input type="number" min="0" max="20" step="0.1" aria-label="Depth in metres"> m ' +
         '<span class="area"></span>' +
-        (k >= DEFAULT_TANKS.length ? ' <button type="button" class="small-btn">Remove</button>' : '');
+        (k >= DEFAULT_TANKS.length && !t.g ? ' <button type="button" class="small-btn">Remove</button>' : '');
       const [on, name, len, wid, dep] = el.querySelectorAll('input');
       const shape = el.querySelector('select');
       on.checked = !!t.on;
@@ -1199,7 +1232,10 @@
       const sheet = state.surfaces[sheetIndex(state)];
       if (!sheet) return;
       sheet.on = sheet.on ? 0 : 1;
+      const tank = state.tanklist.find((t) => t.g);
+      if (tank) tank.on = sheet.on;
       renderSurfaces();
+      renderTanks();
       update();
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
