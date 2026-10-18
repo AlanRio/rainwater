@@ -66,7 +66,7 @@ def run(roofs_m2, tanks_m3, sheet_m2=0.0, sheet_tank_m3=0.0, from_year=2010, gue
 if __name__ == '__main__':
     HOUSE_GITE = 15 * 5 + 14 * 7
     STEP1 = HOUSE_GITE + 5 * 7 + 12 * 4.5 + 5 * 5   # + yoga building, car port, house terrace
-    TANKS = 50 + 10   # house tank and solar building tank
+    TANKS = 50 + 10   # solar building tank and house tank
     SCENARIOS = [
         ('As now: house and gîte roofs', dict(roofs_m2=HOUSE_GITE, tanks_m3=TANKS)),
         ('1. Step 1 roofs', dict(roofs_m2=STEP1, tanks_m3=TANKS)),
