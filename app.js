@@ -55,7 +55,7 @@
   // whenever they have room.
   const DEFAULT_TANKS = [
     { n: 'House tank', shape: 'box', l: 4.1, w: 4.1, d: 3, on: 1 },
-    { n: 'Solar building tank', shape: 'box', l: 1.85, w: 1.8, d: 3, on: 1 },
+    { n: 'Solar building tank', shape: 'box', l: 1.85, w: 1.81, d: 3, on: 1 },
     { n: 'Extra tank (sheet only)', shape: 'box', l: 4, w: 2.5, d: 1, on: 0, g: 1 },
     { n: 'New buried tank', shape: 'box', l: 4.1, w: 4.1, d: 3, on: 0 },
   ];

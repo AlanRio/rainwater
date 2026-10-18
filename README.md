@@ -172,7 +172,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool), house terrace 5 × 5 m (above the house tank) | Off by default |
 | Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; step 2 of the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
-| Tanks | House tank 50 m³ (4.1 × 4.1 × 3 m) and solar building tank 10 m³ (1.85 × 1.8 × 3 m), 90% usable | As reported, still to be measured; the 10 m³ is doubtful. Each tank has its own size and shape (box or round), and more can be added |
+| Tanks | House tank 50 m³ (4.1 × 4.1 × 3 m) and solar building tank 10 m³ (1.85 × 1.81 × 3 m), 90% usable | As reported, still to be measured; the 10 m³ is doubtful. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
