@@ -161,7 +161,7 @@
 
 <section class="answer" aria-live="polite">
   <div class="answer-label">The answer, with the settings below</div>
-  <p class="small muted" style="margin:-2px 0 8px">Feel free to change anything below: it all recalculates automatically and this answer updates. The tank sizes (house tank 50 m³, solar building tank 10 m³) are as reported and still need measuring.</p>
+  <p class="small muted" style="margin:-2px 0 8px">Feel free to change anything below: it all recalculates automatically and this answer updates. The tank sizes (house tank 50 m³, solar building tank 10 m³) may need measuring to confirm them.</p>
   <p class="headline" id="headline">Calculating…</p>
   <p class="compare" id="compare"></p>
 </section>
@@ -169,7 +169,7 @@
 <section class="fix" id="fix">
   <div class="fix-label">The recommended fix</div>
   <h2>More roofs, more storage, and dual-flush toilets</h2>
-  <p class="caveat"><b>Based on tank sizes still to be confirmed.</b> The house tank is taken as 50 m³ and the solar building tank as 10 m³, as reported, but neither has been measured; the 10 m³ in particular is doubtful (at least 3 m deep, it would be only about 1.8 × 1.8 m inside). Everything below changes with their real size, so measure them first.</p>
+  <p class="caveat"><b>Tank sizes:</b> the house tank is 50 m³ and the solar building tank 10 m³. They may need measuring to confirm them, as everything below depends on the total storage.</p>
   <p>The house runs short for two reasons. Its roofs catch too little rain, and with only about 60 m³ of tanks it can't keep what they do catch: a summer storm fills the tanks in a day and the rest overflows. So it needs <b>more collecting surface and more storage</b>, in that order of cost.</p>
   <ol class="steps">
     <li><b>Connect the roofs you already have:</b> the yoga building (5 × 7 m), the car port (12 × 4.5 m) and the house terrace (5 × 5 m, right above the house tank). 114 m² more for the price of gutters, downpipes and pipes, and nobody sees them. On its own that takes deliveries from about 7 a summer to about 4.5, because the tanks are too small to keep the extra water.</li>
@@ -184,7 +184,7 @@
     <span class="small muted">Each switches that change on in the simulator below.</span></div>
 
   <h3>Options compared</h3>
-  <p class="small muted">With the default settings: house and gîte roofs, house tank 50 m³ and solar building tank 10 m³ (to be measured), 8 guests from May to October, 120 litres each a day, every summer since 2010. Worked out on 18 October 2026; the box above is recalculated live.</p>
+  <p class="small muted">With the default settings: house and gîte roofs, house tank 50 m³ and solar building tank 10 m³, 8 guests from May to October, 120 litres each a day, every summer since 2010. Worked out on 18 October 2026; the box above is recalculated live.</p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Option</th><th>Upfront cost</th><th>Tanker deliveries a summer</th><th>Notes</th></tr></thead>
@@ -217,8 +217,8 @@
   <details>
     <summary>Step 2: the new storage, and measuring the tanks</summary>
     <div class="body">
-      <p class="small"><b>Measure the existing tanks first.</b> In each: the inside length and width, the depth from the floor to the overflow pipe, and the height of the pump intake above the floor (water below it can't be used). Usable volume = length × width × (overflow height − intake height). If you can't get a tape in, note how far the level rises when a known amount goes in: a 12 m³ tanker load raising the level by 1 m means a floor area of 12 m². Enter the real sizes under <i>Tanks</i> in the simulator.</p>
-      <p class="small"><b>How much new storage.</b> With steps 1 and 3, the existing 60 m³ plus about 50 m³ new comes to about 110 m³ in total; with the rain sheet instead of dual flush, about 130 m³. So the new tank should hold about 110 m³ (or 130 m³) minus whatever the existing tanks really hold. If they turn out bigger than reported, the new tank shrinks or isn't needed.</p>
+      <p class="small"><b>Confirming the existing tanks.</b> To measure each one: the inside length and width, the depth from the floor to the overflow pipe, and the height of the pump intake above the floor (water below it can't be used). Usable volume = length × width × (overflow height − intake height). If you can't get a tape in, note how far the level rises when a known amount goes in: a 12 m³ tanker load raising the level by 1 m means a floor area of 12 m². Enter the real sizes under <i>Tanks</i> in the simulator.</p>
+      <p class="small"><b>How much new storage.</b> With steps 1 and 3, the existing 60 m³ plus about 50 m³ new comes to about 110 m³ in total; with the rain sheet instead of dual flush, about 130 m³. So the new tank should hold about 110 m³ (or 130 m³) minus whatever the existing tanks really hold. If the existing tanks hold more, the new tank can be smaller.</p>
       <p class="small"><b>What to build it from:</b></p>
       <ul class="checks small">
         <li><b>Precast concrete rainwater tanks</b>, buried, from a local concrete works: one or two tanks of 25–50 m³. Concrete releases nothing harmful and slightly raises the pH of acidic rainwater. A new tank releases lime at first, so fill and empty it once or twice before use, and ask for one certified for drinking water (ACS). It needs a crane or a large digger to lift in.</li>
@@ -353,7 +353,7 @@
     <summary>Before ordering</summary>
     <div class="body">
       <ol class="steps small">
-        <li><b>Measure the house tank and the solar building tank</b> (see <i>Step 2: the new storage, and measuring the tanks</i>). Everything here depends on it.</li>
+        <li><b>Confirm the sizes of the house tank and the solar building tank</b> if needed (see <i>Step 2: the new storage, and measuring the tanks</i>), as the new storage depends on them.</li>
         <li><b>Connect the yoga building, car port and house terrace</b>: the cheapest step, whatever the tanks turn out to be.</li>
         <li><b>Size the new storage</b> from the measured tanks in the simulator, and get quotes.</li>
         <li><b>Fit dual-flush mechanisms</b> if the toilets allow.</li>
@@ -408,7 +408,7 @@
           <tr><td>Roof areas</td><td>House 15 × 5 m, gîte 14 × 7 m</td><td>Footprint of each roof. It's the area seen from above that catches rain, not the larger sloping tiled surface.</td></tr>
           <tr><td>Ground sheet</td><td>Off; 20 × 4.5 m, 85% reaches the tanks</td><td>The step 2 rubber sheet on the slope south of the buildings (see <a href="#fix">the recommended fix</a>). A plastic-sheeted catchment on a South Australian farm gave close to 100% runoff, though ripples in the plastic reduced it in light rain on hot days (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island case study</a>). 85% allows for that, leaves, dust and the first rinse.</td></tr>
           <tr><td>Collection efficiency</td><td>75%</td><td>Design standards for rainwater systems (BS 8515 in the UK, DIN 1989 in Germany) assume roughly 80–90% runs off a pitched roof and about 90% gets through the filter. Set a little lower here for clay tiles and summer cloudbursts. You can measure the real figure with your own tanks at the bottom of the page.</td></tr>
-          <tr><td>Tanks</td><td>House tank 50 m³ and solar building tank 10 m³ (modelled 3 m deep), 90% usable</td><td><b>Sizes as reported, still to be measured; the 10 m³ is doubtful.</b> The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
+          <tr><td>Tanks</td><td>House tank 50 m³ and solar building tank 10 m³ (modelled 3 m deep), 90% usable</td><td>May need measuring to confirm. The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
           <tr><td>Water use</td><td>120 litres per guest per day</td><td>Built up from showers, toilets, taps, laundry and dishwasher under <i>Water use in detail</i>. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
           <tr><td>Water price</td><td>€2.80 per m³</td><td>Official average price of drinking water in the Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
           <tr><td>Tanker delivery</td><td>12 m³ from Parnac (15.6 km): €150 fixed + €3 per km + water</td><td>Each delivery costs a fixed charge, plus a charge per kilometre on the round trip, plus the water. The fixed charge is about 1 to 1.5 hours of lorry and driver at the €90 to €130 an hour that hauliers charge. The per-km rate is the French road-haulage cost of about €1.80 to €2.30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus a margin, in line with the €2 to €4 per km that delivery firms quote (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Two real figures check it: about €300 for a small private delivery, and the roughly €10 per m³ that Figeac budgeted for tanker loads in its August 2026 drought plan, about €10,000 a day for up to about 1,000 m³ (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). The local hauliers and their distances are under <i>Tanker in detail</i>. Replace with a real quote when you have one.</td></tr>
@@ -481,7 +481,7 @@
 
   <div class="panel">
     <h3>Tanks</h3>
-    <p class="small muted"><b>The house tank (50 m³) and the solar building tank (10 m³) are sizes as reported, not measured, and the 10 m³ is doubtful.</b> Enter their real inside sizes when you have them. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
+    <p class="small muted">The house tank is 50 m³ and the solar building tank 10 m³; if they're measured, enter their inside sizes here. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
     <div id="tanks"></div>
     <div class="toolbar" style="margin:8px 0 0">
       <button type="button" id="add_tank">Add another tank</button>

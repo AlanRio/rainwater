@@ -33,10 +33,8 @@ Where things stand (18 October 2026), for picking this up in a new session:
 - **The recommendation** is on the page under "The recommended fix": 1. gutter the yoga
   building, car port and house terrace into the tanks; 2. add about 50 m³ of buried storage;
   3. dual-flush toilets. Alternative to 3: a 90 m² rain sheet with about 70 m³ of new storage.
-- **Open question: the main tanks' real size.** The defaults are the sizes a business partner
-  reported: house tank 50 m³ and solar building tank 10 m³, modelled 3 m deep. The 10 m³ is
-  doubtful (at least 3 m deep, it would be only about 1.8 × 1.8 m inside). The whole
-  recommendation depends on the real total.
+- **Tank sizes:** house tank 50 m³ and solar building tank 10 m³, modelled 3 m deep. They may
+  need measuring to confirm them; the recommendation depends on the total.
 - **Next steps once measured** (inside length, width, depth to the overflow, height of the pump
   intake for each tank):
   1. Set the sizes of "House tank" and "Solar building tank" in `DEFAULT_TANKS` in `app.js`
@@ -125,8 +123,8 @@ switch in the main tanks). The level shown is the total of both.
 
 ## The recommended fix: more roofs, more storage, dual-flush toilets
 
-Based on tank sizes as reported but not measured: house tank 50 m³, solar building tank 10 m³
-(the 10 m³ is doubtful). With only about 60 m³ of tanks the house can't keep what its roofs
+Based on a house tank of 50 m³ and a solar building tank of 10 m³ (to be confirmed by measuring
+if needed). With only about 60 m³ of tanks the house can't keep what its roofs
 catch, so it needs both more collecting surface and more storage. With the default settings
 (8 guests May–October, 120 L each a day), tankers a summer since 2010:
 
@@ -172,7 +170,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool), house terrace 5 × 5 m (above the house tank) | Off by default |
 | Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; step 2 of the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
-| Tanks | House tank 50 m³ (4.1 × 4.1 × 3 m) and solar building tank 10 m³ (1.85 × 1.81 × 3 m), 90% usable | As reported, still to be measured; the 10 m³ is doubtful. Each tank has its own size and shape (box or round), and more can be added |
+| Tanks | House tank 50 m³ (4.1 × 4.1 × 3 m) and solar building tank 10 m³ (1.85 × 1.81 × 3 m), 90% usable | May need measuring to confirm. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
