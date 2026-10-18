@@ -117,7 +117,11 @@ trench. The page has the full write-up, the map and the sources; in short:
   year) to none since 2010; the lowest the tanks get is 12 m³ (2011). A summer as dry as 2009
   would need one or two tankers; the sheet can be extended later. Without the tank the sheet
   would need about 230 m² for the same result; with 20, 30 or 50 m³ it could be 170, 160 or
-  155–160 m². With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
+  155–160 m², but no less: below about 155–175 m² storage can't make up for the missing
+  collecting area. With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
+- **Measure the main tanks first:** what matters is total storage. With the sheet feeding the
+  main tanks directly, about 120–124 m³ of usable storage (about 133–138 m³ full size at 90%
+  usable) does the job of the extra tank; the estimate is 115 m³ (two 4 × 4 × 4 m tanks).
 - **Cost:** about €9,000–16,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
   €300–500; drinking-water pipe tank €5,000–9,000 (rough; a drainage-pipe or block tank about
   €2,000–4,000); leaf screen, filter and pipe €400–800; fence €500–1,000; small
