@@ -168,7 +168,7 @@
 <section class="fix" id="fix">
   <div class="fix-label">The recommended fix</div>
   <h2>A rain sheet on the slope next to the house</h2>
-  <p>The house runs short because its roofs catch too little rain. With the house full all summer they can't even refill the tanks over winter, so each summer starts with the tanks part-empty, and summer showers add little. So the answer is <b>more collecting surface</b>. The simplest, cheapest and lowest-risk way to get it is one rubber (EPDM) sheet, about <b>20 × 8.75 m (175 m²)</b>, laid on the open slope of grass and low scrub just south of the buildings, with a <b>10 m³ tank buried under its collection trench</b>. <b>The tank is what keeps the sheet this small:</b> it holds the sheet's water from storms that come when the main tanks are already full, and without it the sheet would need to be about 230 m² for the same result. It's made from off-the-shelf polyethylene water pipe of the kind used for drinking-water mains, so the tank itself is made of drinking-water-safe material. Everything drains by gravity into the existing underground tanks.</p>
+  <p>The house runs short because its roofs catch too little rain. With the house full all summer they can't even refill the tanks over winter, so each summer starts with the tanks part-empty, and summer showers add little. So the answer is <b>more collecting surface</b>. The simplest, cheapest and lowest-risk way to get it is one rubber (EPDM) sheet, about <b>20 × 8.75 m (175 m²)</b>, laid on the open slope of grass and low scrub just south of the buildings, with a <b>10 m³ tank buried under its collection trench</b>. <b>The tank is what keeps the sheet this small:</b> it holds the sheet's water from storms that come when the main tanks are already full, and without it the sheet would need to be about 230 m² for the same result. If the main tanks turn out to hold about 10 m³ more than estimated, they do the same job and the extra tank isn't needed, so measure them first. It's made from off-the-shelf polyethylene water pipe of the kind used for drinking-water mains, so the tank itself is made of drinking-water-safe material. Everything drains by gravity into the existing underground tanks.</p>
   <p>It's sized so that no tanker would have been needed in any summer since 2010. A summer as dry as 2009, the driest since 1994, would need one or two tankers; it's not worth a bigger sheet for that, and the sheet can be extended later if very dry summers become more common. A bigger buried tank lets the sheet shrink a little further.</p>
   <p class="fix-live" id="fix_live">Calculating…</p>
   <div class="toolbar"><button type="button" id="fix_btn">Switch the sheet on in the simulator</button>
@@ -236,12 +236,12 @@
   </details>
 
   <details>
-    <summary>The 10 m³ tank under the trench</summary>
+    <summary>The 10 m³ tank under the trench, and checking the main tanks</summary>
     <div class="body">
       <p class="small"><b>Why a tank.</b> A storm that arrives when the main tanks are already full would otherwise run off the sheet and be lost. The tank under the trench holds that water and lets it run into the main tanks as they empty. That's what lets the sheet be 175 m² instead of about 230 m² for the same result. A bigger tank lets the sheet shrink a little more, but the gain tails off quickly:</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Tank under the sheet</th><th class="num">Sheet needed</th><th>Example size</th></tr></thead>
+          <thead><tr><th>Extra tank under the sheet</th><th class="num">Sheet needed</th><th>Example size</th></tr></thead>
           <tbody>
             <tr><td>None</td><td class="num">about 230 m²</td><td>20 × 11.5 m</td></tr>
             <tr class="best"><td><b>10 m³</b></td><td class="num"><b>175 m²</b></td><td><b>20 × 8.75 m</b></td></tr>
@@ -252,6 +252,22 @@
         </table>
       </div>
       <p class="tiny">Same result in each row: no tanker in any summer since 2010, and one or two in a summer as dry as 2009. The simulator models the tank as filled only by the sheet and emptying into the main tanks whenever they have room.</p>
+      <p class="small"><b>The trade-off between tank and sheet.</b> More storage lets the sheet shrink a little, but only a little. Below about 155–175 m², storage can't make up for it: the sheet's area is what brings water in during the summer, and with too little of it the longer record shows tankers in several dry summers however big the tanks are. So plan on about 175 m² of sheet. The tank question is only how to provide enough storage in total.</p>
+      <h3>Check the main tanks first</h3>
+      <p class="small">What matters is the total storage, not where it sits. A cubic metre in the main tanks is worth at least as much as one under the sheet, because the main tanks also take the roof water. The page assumes the two main tanks are 4 × 4 × 4 m with 90% usable, which is 115 m³, but they haven't been measured. With the 175 m² sheet feeding the main tanks directly, about 120–124 m³ of usable storage does the job of the extra tank:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">Usable storage in the main tanks</th><th class="num">Their full size, if 90% is usable</th><th class="num">Tankers since 2010</th><th class="num">Tankers since 1994</th></tr></thead>
+          <tbody>
+            <tr><td class="num">115 m³ (current estimate)</td><td class="num">128 m³</td><td class="num">2</td><td class="num">5</td></tr>
+            <tr><td class="num">120 m³</td><td class="num">133 m³</td><td class="num">0</td><td class="num">2, both in 2009</td></tr>
+            <tr class="best"><td class="num"><b>124 m³</b></td><td class="num"><b>138 m³</b></td><td class="num"><b>0</b> (lowest about 15 m³)</td><td class="num"><b>1, in 2009</b></td></tr>
+            <tr><td class="num">130 m³</td><td class="num">144 m³</td><td class="num">0</td><td class="num">1, in 2009</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small"><b>So measure them before building anything.</b> In each tank: the inside length and width, the depth from the floor to the overflow pipe, and the height of the pump intake above the floor (water below it can't be used). Usable volume = length × width × (overflow height − intake height). If the two together come to about 124 m³ or more, skip the extra tank. If they come up short, the extra tank only has to make up the difference. Small differences add up: an extra 25 cm of depth across both tanks is about 8 m³.</p>
+      <p class="small">To check it in the simulator: enter the measured sizes under <i>Tanks</i>, set <i>Usable share of the tank volume</i> under <i>Tanks in detail</i>, tick the ground sheet, untick "Tank under the sheet", and set <i>Start from the year</i> to 1994.</p>
       <p class="small"><b>Size and height.</b> The tank runs the full 20 m under the collection trench, so 10 m³ needs an inside cross-section of only 0.5 m²: a pipe about 800 mm across inside, or a box 1.0 m wide with 0.5 m of water. Its bottom sits at about 230.1–230.2 m, above the point where the pipe enters the main tanks (about 229.3 m), so it empties by gravity. If the main tanks' inlet turns out to be higher, a small solar pump does the same job.</p>
       <p class="small"><b>It only empties when the main tanks have room.</b> A float valve where the pipe enters the main tanks closes when they're full and opens again as the house draws them down. Without it, the tank under the sheet would drain straight through the full main tanks and out of their overflow, and the stored water would be lost. Use a full-bore float valve made for low-pressure gravity filling. When both are full, the tank under the sheet overflows onto the slope below.</p>
       <p class="small"><b>Two ways to build it:</b></p>
@@ -344,6 +360,7 @@
     <summary>Before ordering</summary>
     <div class="body">
       <ol class="steps small">
+        <li><b>Measure the main tanks</b> (see <i>The 10 m³ tank under the trench, and checking the main tanks</i>). If they hold about 124 m³ of usable water or more, the extra tank isn't needed.</li>
         <li><b>Check the levels on site.</b> The pipe needs a steady fall all the way. Measure how high the pipe would enter the tanks: it should be below the bottom of the tank under the trench (about 230.1 m), with enough fall for 25 m of pipe. The LiDAR puts the ground at the tanks at about 229.5 m and the tanks are underground, so this should work; but it decides whether gravity feed works at all, so check it first.</li>
         <li><b>Check the slope is still open grass and low scrub.</b> The survey is from April 2022.</li>
         <li><b>Email the mairie</b> or the planning office of the Communauté de communes with a sketch, and keep their reply.</li>
