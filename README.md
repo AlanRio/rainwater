@@ -96,15 +96,17 @@ page has the full write-up, the map and the sources; in short:
 
 - **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
-  about 231.5 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at the southern corner of the north-east building, ground about 229.5 m.
-- **Layout:** 20 × 13 m (260 m²), square on the slope: the 20 m bottom edge follows the contour,
+  about 231 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at the southern corner of the north-east building, ground about 229.5 m.
+- **Layout:** 20 × 15.5 m (310 m²), square on the slope: the 20 m bottom edge follows the contour,
   with a collection trench falling 1% to an outlet at the north-east end. About 25 m of buried
   110 mm pipe runs north and falls about 2 m to the tanks, at the southern corner of the
   north-east building. No pump.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
-  year) to none since 2010; the lowest the tanks get is about 15 m³ (2016).
-- **Cost:** about €4,100–6,600 (sheet 21.35 × 15.25 m, about 325 m², €2,900–4,200; underlay
-  €300–600; outlet, filter and pipe €400–800; fence €500–1,000). Pays back in about 2–4 summers.
+  year) to none, in every summer since 1994; the lowest the tanks get is 18 m³ since 2010 (2016)
+  and 6 m³ in 2009, the driest summer in the record. A 260 m² sheet would have needed one tanker in
+  2009; 20 m³ more tank would do the same job as the extra 50 m² of sheet but costs far more.
+- **Cost:** about €4,700–7,500 (sheet made to measure, about 21.6 × 17.8 m or 385 m², €3,400–5,000;
+  underlay €400–700; outlet, filter and pipe €400–800; fence €500–1,000). Pays back in about 3–4 summers.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
   measure); ETOBA, 01 34 84 04 64.
@@ -129,7 +131,7 @@ guests also needs a prefect's authorisation after an approved hydrogeologist's o
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
-| Ground sheet | 20 × 13 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see below) |
+| Ground sheet | 20 × 15.5 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see below) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, fully booked, May to October | |

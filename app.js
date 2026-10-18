@@ -44,11 +44,11 @@
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
-    { n: 'Ground sheet (EPDM)', l: 20, w: 13, on: 0, e: 85 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 15.5, on: 0, e: 85 },
   ];
   const SHEET = 5; // row of the ground sheet in the surface list
   // Rough cost range of the sheet, €: outlet, pipe and fence, plus sheet and underlay by area.
-  // Gives €4,100 to €6,600 for the 20 × 13 m design (see the solution section).
+  // Gives €4,700 to €7,500 for the 20 × 15.5 m design (see the solution section).
   const sheetCost = (area) => [900 + 12.3 * area, 1800 + 18.5 * area].map((x) => Math.round(x / 100) * 100);
   // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
   const DEFAULT_TANKS = [
