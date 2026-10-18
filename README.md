@@ -16,6 +16,7 @@ the page, and the settings are stored in the page address so a scenario can be s
 | `app.js` | Simulation, results, chart, comparison, calibration, shareable links |
 | `rainfall.js` | Daily rainfall data, generated. Do not edit by hand |
 | `scripts/update_rainfall.py` | Rebuilds `rainfall.js` from Météo-France and Open-Meteo |
+| `img/rain-sheet-site.jpg` | LiDAR relief map of the site with the proposed rain sheet |
 | `.github/workflows/publish.yml` | Weekly data refresh and publishing to GitHub Pages |
 
 No build step and no external dependencies. Open `index.html` in a browser and it works,
@@ -40,7 +41,7 @@ python scripts/update_rainfall.py
 
 | Source | What it is | Role |
 |---|---|---|
-| Météo-France rain gauge 46005001, Anglars-Juillac | Measured daily rainfall, 2.1 km from the house at the same height (104 m). Complete from 1994 | Default |
+| Météo-France rain gauge 46005001, Anglars-Juillac | Measured daily rainfall, 2.9 km from the house. The gauge is at 104 m in the valley, the house at about 229 m on the plateau. Complete from 1994 | Default |
 | ERA5 via Open-Meteo, 44.5 N 1.2 E | Weather-model reconstruction on a ~28 km grid | Independent cross-check |
 
 The gauge file comes from data.gouv.fr ("Données climatologiques de base - quotidiennes",
@@ -64,8 +65,9 @@ For each day, in order:
    scaled by the chosen percentages.
 2. Rain reaching the gutters = rain capped at the overflow threshold (if set), minus the
    loss at the start of each wet day (if set).
-3. Harvest (m³) = that rain (mm) × collecting area (m²) × collection efficiency ÷ 1000.
-   1 mm on 1 m² is 1 litre.
+3. Harvest (m³) = that rain (mm) × collecting area (m²) × collection efficiency ÷ 1000,
+   summed over the surfaces. 1 mm on 1 m² is 1 litre. A surface can have its own efficiency
+   (the ground sheet uses 85%); the others use the general setting.
 4. Anything above the usable tank volume overflows.
 5. A tanker ordered earlier arrives: one load, or less if the tank can't take it all.
    Each delivery costs load × water price + call-out.
@@ -79,8 +81,46 @@ For each day, in order:
 The tank level carries over from day to day through the whole period.
 
 Calibration on the page uses the Anglars gauge: tank depth readings before and after a rainy
-spell give the real collection efficiency (water gained ÷ rain × area); readings across a
-stretch with guests give real litres per guest per day (fall in level plus rain added).
+spell give the real collection efficiency (water gained ÷ rain × area, after taking off what
+surfaces with their own efficiency delivered); readings across a stretch with guests give real
+litres per guest per day (fall in level plus rain added).
+
+Settings live in the page address. Surfaces are written as `on~length~width[~e<share>][~name]`,
+separated by `|`; links made before the ground sheet existed get it added, switched off.
+
+## The recommended fix: a rain sheet on the slope
+
+The roofs catch too little rain in summer; the tanks are full every spring. The fix is more
+collecting surface: one EPDM rubber sheet on the scrub slope just south of the buildings. The
+page has the full write-up, the map and the sources; in short:
+
+- **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
+  on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
+  about 231.5 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at about 229 m.
+- **Layout:** 20 × 13 m (260 m²), square on the slope: the 20 m bottom edge follows the contour,
+  with a collection trench falling 1% to an outlet at the north-east end. About 30 m of 110 mm
+  pipe falls about 2.5 m to the tanks. No pump.
+- **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
+  year) to none since 2010; the lowest the tanks get is about 15 m³ (2016).
+- **Cost:** about €4,100–6,600 (sheet 21.35 × 15.25 m, about 325 m², €2,900–4,200; underlay
+  €300–600; outlet, filter and pipe €400–800; fence €500–1,000). Pays back in about 2–4 summers.
+- **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
+  07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
+  measure); ETOBA, 01 34 84 04 64.
+- **Rules:** PLUi zone Ntvb and ZNIEFF type 1 "Bois sec de Niaudon". No permit expected for a
+  sheet on the ground (article L111-16 of the planning code protects rainwater systems for
+  household use), but ask the mairie in writing. Clear scrub between September and February;
+  fell no trees.
+
+### Why not a borehole
+
+The house is at 229 m and the water table nearby is at about 100–120 m (springs and the
+nearest boreholes, all on valley floors), so water is likely 110–130 m down and a borehole
+would be 130–150 m deep. Karst limestone can give a dry hole: roughly a 1 in 5 chance for the
+first hole, as a judgement. The hole alone costs about €20,000 if the first one works, about
+€33,000 if the second does, about €29,000 for two dry holes and no water; about €22,000 on
+average. A pump able to lift 130 m, its solar drive and treatment add €5,000–9,000. Supplying
+guests also needs a prefect's authorisation after an approved hydrogeologist's opinion.
 
 ## Default settings
 
@@ -88,6 +128,7 @@ stretch with guests give real litres per guest per day (fall in level plus rain 
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
+| Ground sheet | 20 × 13 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see below) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, fully booked, May to October | |

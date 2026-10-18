@@ -36,13 +36,20 @@
   // The comparison setup always sees the same weather as the current settings.
   const WEATHER_KEYS = ['src', 'from', 'sumAdj', 'winAdj'];
 
+  // A surface with its own share (e, in %) uses that instead of the general collection setting.
+  // The ground sheet is the proposed EPDM rain sheet on the slope south of the buildings.
   const DEFAULT_SURFACES = [
     { n: 'Roof 1', l: 15, w: 5, on: 1 },
     { n: 'Roof 2', l: 15, w: 5, on: 1 },
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 13, on: 0, e: 85 },
   ];
+  const SHEET = 5; // row of the ground sheet in the surface list
+  // Rough cost range of the sheet, €: outlet, pipe and fence, plus sheet and underlay by area.
+  // Gives €4,100 to €6,600 for the 20 × 13 m design (see the solution section).
+  const sheetCost = (area) => [900 + 12.3 * area, 1800 + 18.5 * area].map((x) => Math.round(x / 100) * 100);
   // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
   const DEFAULT_TANKS = [
     { n: 'Tank 1', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
@@ -119,6 +126,10 @@
   let pinned = null; // settings pinned for comparison; null means the default setup
 
   const catchment = (s) => s.surfaces.reduce((a, x) => a + (x.on ? x.l * x.w : 0), 0);
+  const ownShare = (x) => x.e > 0;
+  // Area that effectively delivers water: each surface times the share of its rain that reaches the tanks.
+  const wetArea = (s) => s.surfaces.reduce((a, x) => a + (x.on ? x.l * x.w * (ownShare(x) ? x.e : s.eff) / 100 : 0), 0);
+  const avgShare = (s) => (catchment(s) > 0 ? wetArea(s) / catchment(s) * 100 : s.eff);
   const tankFootprint = (t) => (t.shape === 'round' ? Math.PI * t.l * t.l / 4 : t.l * t.w);
   const tankVolume = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) * t.d : 0), 0);
   const usableVolume = (s) => tankVolume(s) * s.usable / 100;
@@ -183,7 +194,7 @@
     const area = catchment(s);
     const cap = usableVolume(s);
     const trigger = cap * s.trig / 100;
-    const perMm = area * s.eff / 100 / 1000; // 1 mm on 1 m² is 1 litre
+    const perMm = wetArea(s) / 1000; // 1 mm on 1 m² is 1 litre
     const d = demand(s);
     const useSeason = d.season / 1000;
     const useOff = d.off / 1000;
@@ -328,7 +339,7 @@
     if (same) {
       return pinned
         ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try ticking the yoga building roof, or switching the toilets to dual flush, to see what changes.';
+        : 'These are the default settings for the house as it is now. Try ticking the ground sheet or the yoga building roof, or switching the toilets to dual flush, to see what changes.';
     }
     const intro = `Compared with ${who} (${describe(bs)}): `;
     if (r.s.tanker && bs.tanker) {
@@ -400,6 +411,7 @@
       const x = state.surfaces[k];
       row.area.textContent = x ? fmt(x.l * x.w) + ' m²' : '';
       row.el.style.opacity = x && x.on ? '1' : '0.55';
+      row.share.placeholder = String(s.eff);
     });
     tankRows.forEach((row, k) => {
       const t = state.tanklist[k];
@@ -423,8 +435,10 @@
     setAll('ex_range', `${longDate(R.start)} to ${longDate(R.end)}`);
     setHTML('updated_o', longDate(R.updated));
     setHTML('ex_rain', `<b>${fmt(rainAvg)} mm</b>${climate}`);
+    const share = avgShare(s);
+    const mixed = s.surfaces.some((x) => x.on && ownShare(x) && x.e !== s.eff);
     setHTML('ex_area', `<b>${fmt(r.area)} m²</b>`);
-    setHTML('ex_eff', `<b>${s.eff}%</b>`);
+    setHTML('ex_eff', `<b>${mixed ? 'on average ' : ''}${fmt(share)}%</b>`);
     setHTML('ex_usable', `<b>${m3(r.cap)}</b>`);
     const season = `${MONTHS[s.s0 - 1]} to ${MONTHS[s.s1 - 1]}`;
     setHTML('ex_use', `From ${season} the house uses <b>${fmt(r.d.season)} litres a day</b> on average ` +
@@ -436,7 +450,7 @@
       : `There's no tanker in these settings, so when the tanks are empty the house has no water until it rains.`);
 
     setHTML('fl_rain', `${fmt(rainAvg)} mm a year`);
-    setHTML('fl_area', `${fmt(r.area)} m² collecting, ${s.eff}% reaches the tanks`);
+    setHTML('fl_area', `${fmt(r.area)} m² collecting, ${mixed ? 'about ' : ''}${fmt(share)}% reaches the tanks`);
     setHTML('fl_collect', `${fmt(r.T.collected / r.span)} m³ a year`);
     setHTML('fl_tank', `${m3(r.cap)} usable`);
     setHTML('fl_season', `${season}, ${s.guests} ${plural(s.guests, 'guest', 'guests')}${s.occ < 100 ? `, ${s.occ}% booked` : ''}`);
@@ -537,6 +551,36 @@
         : 'These changes don\'t reduce tanker costs, so they wouldn\'t pay back.';
     } else pay = 'Payback needs the tanker switched on in both setups, so there\'s a cost to compare.';
     setHTML('payback_o', pay);
+  }
+
+  // The solution section: the same settings with the ground sheet off and on.
+  function renderFix(s) {
+    const sheet = s.surfaces[SHEET];
+    if (!sheet || !$('fix_live')) return;
+    const withSheet = (on) => { const c = clone(s); c.surfaces[SHEET].on = on; return simulate(c); };
+    const r0 = withSheet(0);
+    const r1 = withSheet(1);
+    const size = `${fmt(sheet.l * sheet.w)} m² sheet`;
+    let t;
+    if (s.tanker) {
+      const del = (r) => `${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer`;
+      t = `With the settings on this page, the house needs about <b>${del(r0)}</b> (${eur(r0.T.cost / r0.span)} a year) without the sheet` +
+        (r1.T.deliveries
+          ? `, and <b>${del(r1)}</b> (${eur(r1.T.cost / r1.span)} a year) with a ${size}, on average since ${s.from}.`
+          : `, and <b>none at all</b> with a ${size}, in any summer since ${s.from}.`) +
+        ` With the sheet, the lowest the tanks get is ${m3(r1.minLevel)}${r1.minYear ? ' (' + r1.minYear + ')' : ''}.`;
+      const saved = (r0.T.cost - r1.T.cost) / r0.span;
+      const [lo, hi] = sheetCost(sheet.l * sheet.w);
+      t += saved > 1
+        ? ` At roughly ${eur(lo)} to ${eur(hi)}, it pays for itself in about <b>${fmt(lo / saved, 1)} to ${fmt(hi / saved, 1)} summers</b>.`
+        : ' With these settings the roofs already cope without a tanker, so the sheet would be spare margin.';
+    } else {
+      const dry = (r) => `${oneDp(r.T.dryDays / r.span)} days without water a summer`;
+      t = `With the settings on this page and no tanker, the house would have <b>${dry(r0)}</b> without the sheet and ` +
+        `<b>${r1.T.dryDays ? dry(r1) : 'none'}</b> with a ${size}, on average since ${s.from}.`;
+    }
+    setHTML('fix_live', t);
+    $('fix_btn').textContent = sheet.on ? 'Switch the sheet off again' : 'Switch the sheet on in the simulator';
   }
 
   // ---- Chart ---------------------------------------------------------------
@@ -790,14 +834,18 @@
     if (!(i1 > i0)) return { text: 'The second reading needs to be after the first.' };
     if (i0 < 0 || i1 > N) return { text: `Rain data covers ${longDate(R.start)} to ${longDate(R.end)}.` };
     const rain = rainBetween(i0, i1, state);
-    const area = catchment(state);
+    // Surfaces with their own share (the ground sheet) are taken off first; what's left measures the rest.
+    const general = state.surfaces.reduce((a, x) => a + (x.on && !ownShare(x) ? x.l * x.w : 0), 0);
+    const fixedWet = state.surfaces.reduce((a, x) => a + (x.on && ownShare(x) ? x.l * x.w * x.e / 100 : 0), 0);
     const gained = (parseFloat(row.l1) - parseFloat(row.l0)) / 100 * planArea(state);
     if (rain.raw < 3) return { text: `Only ${fmt(rain.raw, 1)} mm fell between those readings. Pick a wetter spell.` };
-    if (!(area > 0) || !(rain.usable > 0)) return { text: 'Tick at least one collecting surface first.' };
-    const eff = gained / (rain.usable * area / 1000) * 100;
+    if (!(rain.usable > 0)) return { text: 'Tick at least one collecting surface first.' };
+    if (!(general > 0)) return { text: 'This measures the surfaces that use the general setting. Tick at least one roof.' };
+    const eff = (gained - rain.usable * fixedWet / 1000) / (rain.usable * general / 1000) * 100;
     return {
       eff,
-      text: `${fmt(rain.raw, 1)} mm of rain, tanks gained ${m3(gained)}: <b>${fmt(eff)}%</b> reached the tanks.`,
+      text: `${fmt(rain.raw, 1)} mm of rain, tanks gained ${m3(gained)}: <b>${fmt(eff)}%</b> reached the tanks` +
+        (fixedWet > 0 ? ' from the roofs, after allowing for the surfaces with their own share.' : '.'),
     };
   }
 
@@ -809,7 +857,7 @@
     if (!(i1 > i0)) return { text: 'The end date needs to be after the start date.' };
     const days = i1 - i0;
     const rain = rainBetween(i0, i1, state);
-    const fromRain = rain.usable * catchment(state) * state.eff / 100 / 1000;
+    const fromRain = rain.usable * wetArea(state) / 1000;
     const drop = (parseFloat(u.l0) - parseFloat(u.l1)) / 100 * planArea(state);
     const lpd = (drop + fromRain) * 1000 / (g * days);
     let text = `Over ${days} ${plural(days, 'day', 'days')} the tanks went down by ${m3(drop)}` +
@@ -842,9 +890,11 @@
     const p = new URLSearchParams();
     for (const k of Object.keys(DEFAULTS)) if (s[k] !== DEFAULTS[k]) p.set(k, s[k]);
     if (JSON.stringify(s.surfaces) !== JSON.stringify(DEFAULT_SURFACES)) {
-      // Names are only written when they differ from the default name for that row.
+      // Names are only written when they differ from the default name for that row; a surface's
+      // own share is written as e<percent>.
       p.set('surf', s.surfaces.map((x, k) => {
         const parts = [x.on ? 1 : 0, x.l, x.w];
+        if (ownShare(x)) parts.push('e' + x.e);
         if (!DEFAULT_SURFACES[k] || DEFAULT_SURFACES[k].n !== x.n) parts.push(x.n.replace(/[~|]/g, ' '));
         return parts.join('~');
       }).join('|'));
@@ -878,10 +928,14 @@
     }
     if (p.has('surf')) {
       const list = p.get('surf').split('|').filter(Boolean).map((t, k) => {
-        const [on, l, w, ...name] = t.split('~');
-        const n = name.join(' ') || (DEFAULT_SURFACES[k] ? DEFAULT_SURFACES[k].n : 'Other surface');
-        return { on: on === '1' ? 1 : 0, l: parseFloat(l) || 0, w: parseFloat(w) || 0, n };
+        const [on, l, w, ...rest] = t.split('~');
+        const x = { n: '', l: parseFloat(l) || 0, w: parseFloat(w) || 0, on: on === '1' ? 1 : 0 };
+        if (rest.length && /^e\d+(\.\d+)?$/.test(rest[0])) x.e = parseFloat(rest.shift().slice(1));
+        x.n = rest.join(' ') || (DEFAULT_SURFACES[k] ? DEFAULT_SURFACES[k].n : 'Other surface');
+        return x;
       });
+      // Links made before the ground sheet existed have fewer rows: add the missing defaults.
+      for (let k = list.length; list.length && k < DEFAULT_SURFACES.length; k++) list.push(clone(DEFAULT_SURFACES[k]));
       if (list.length) s.surfaces = list;
     }
     if (p.has('tk')) {
@@ -938,20 +992,29 @@
         '<input type="number" min="0" max="200" step="0.1" aria-label="Length in metres"> × ' +
         '<input type="number" min="0" max="200" step="0.1" aria-label="Width in metres"> m ' +
         '<span class="area"></span>' +
+        '<span class="share"><input type="number" min="1" max="100" step="1" aria-label="Share of rain reaching the tanks, %; blank uses the general setting"> % reaches tanks</span>' +
         (k >= DEFAULT_SURFACES.length ? ' <button type="button" class="small-btn">Remove</button>' : '');
-      const [on, name, len, wid] = el.querySelectorAll('input');
+      const [on, name, len, wid, share] = el.querySelectorAll('input');
       on.checked = !!x.on;
       name.value = x.n;
       len.value = x.l;
       wid.value = x.w;
+      share.value = ownShare(x) ? x.e : '';
       on.addEventListener('change', () => { x.on = on.checked ? 1 : 0; schedule(); });
       name.addEventListener('input', () => { x.n = name.value; schedule(); });
       len.addEventListener('input', () => { const v = parseFloat(len.value); if (isFinite(v)) { x.l = v; schedule(); } });
       wid.addEventListener('input', () => { const v = parseFloat(wid.value); if (isFinite(v)) { x.w = v; schedule(); } });
+      share.addEventListener('input', () => {
+        const v = parseFloat(share.value);
+        if (share.value.trim() === '') delete x.e;
+        else if (isFinite(v) && v > 0) x.e = Math.min(100, v);
+        else return;
+        schedule();
+      });
       const del = el.querySelector('button');
       if (del) del.addEventListener('click', () => { state.surfaces.splice(k, 1); renderSurfaces(); schedule(); });
       box.appendChild(el);
-      return { el, area: el.querySelector('.area') };
+      return { el, area: el.querySelector('.area'), share };
     });
   }
 
@@ -1047,6 +1110,7 @@
     renderCards(r);
     renderYears(r);
     renderCompare(r, rb, bs, same);
+    renderFix(state);
     chartData = { r, rb };
     syncViewInputs();
     drawChart();
@@ -1125,6 +1189,14 @@
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fallback);
       else fallback();
+    });
+    $('fix_btn').addEventListener('click', () => {
+      const sheet = state.surfaces[SHEET];
+      if (!sheet) return;
+      sheet.on = sheet.on ? 0 : 1;
+      renderSurfaces();
+      update();
+      $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('open_water').addEventListener('click', (e) => {
       e.preventDefault();

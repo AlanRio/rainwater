@@ -49,6 +49,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html app.js rainfall.js .nojekyll _site/
+          cp -r img _site/
           v=$(git rev-parse --short HEAD)
           sed -i "s|src=\"rainfall.js\"|src=\"rainfall.js?v=$v\"|; s|src=\"app.js\"|src=\"app.js?v=$v\"|" _site/index.html
           grep -o 'src="[^"]*"' _site/index.html
