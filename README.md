@@ -96,10 +96,11 @@ page has the full write-up, the map and the sources; in short:
 
 - **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
-  about 231.5 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at about 229 m.
+  about 231.5 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at the southern corner of the north-east building, ground about 229.5 m.
 - **Layout:** 20 × 13 m (260 m²), square on the slope: the 20 m bottom edge follows the contour,
-  with a collection trench falling 1% to an outlet at the north-east end. About 30 m of 110 mm
-  pipe falls about 2.5 m to the tanks. No pump.
+  with a collection trench falling 1% to an outlet at the north-east end. About 25 m of buried
+  110 mm pipe runs north and falls about 2 m to the tanks, at the southern corner of the
+  north-east building. No pump.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
   year) to none since 2010; the lowest the tanks get is about 15 m³ (2016).
 - **Cost:** about €4,100–6,600 (sheet 21.35 × 15.25 m, about 325 m², €2,900–4,200; underlay
