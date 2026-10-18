@@ -87,32 +87,31 @@ litres per guest per day (fall in level plus rain added).
 
 Settings live in the page address. Surfaces are written as
 `on~length~width[~e<share>][~g][~name]` and tanks as `on~shape~length~width~depth[~g][~name]`,
-separated by `|`, where `g` marks the proposed ground sheet and the tank under it. Links made
+separated by `|`, where `g` marks the proposed ground sheet and its extra tank. Links made
 before these existed get them added, switched off. The calibration tool leaves both out, as
 they aren't built.
 
-The tank under the sheet is modelled as a separate store: only the sheet fills it, and each day
-it empties into the main tanks as far as they have room (on site, a float valve at the main
-tanks' inlet does this). The level shown is the total of both.
+The extra tank is modelled as a separate store: only the sheet fills it, and each day it
+empties into the main tanks as far as they have room (on site, a solar pump switched by a float
+switch in the main tanks). The level shown is the total of both.
 
-## The recommended fix: a rain sheet on the slope, with a tank under it
+## The recommended fix: a rain sheet on the slope, with an extra tank
 
 The roofs catch too little rain: with the house full all summer they can't even refill the
 tanks over winter. The fix is more collecting surface: one EPDM rubber sheet on the slope of
-grass and low scrub just south of the buildings, with a 10 m³ tank buried under its collection
-trench. The page has the full write-up, the map and the sources; in short:
+grass and low scrub just south of the buildings, draining into a 10 m³ buried tank at the end
+of its collection trench. The page has the full write-up, the map and the sources; in short:
 
 - **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
   about 231 to 233 m at 10°, facing west-north-west. The underground tanks are at the southern
   corner of the north-east building, ground about 229.5 m.
 - **Layout:** sheet 20 × 8.75 m (175 m²), square on the slope: the 20 m bottom edge follows the
-  contour, with a collection trench falling 1% to the north-east end. Under the trench, a 10 m³
-  tank 20 m long, which is what keeps the sheet this small: 20 m of off-the-shelf PE100
-  drinking-water main pipe, 900 mm outside and about 830 mm inside (about 10.8 m³), with welded
-  end caps (or, not drinking-water grade, 800 mm twin-wall drainage pipe or a block tank)
-  with its bottom at about 230.1 m. About 25 m of buried 110 mm pipe runs north and falls to the
-  main tanks; beside the south-east building the pipe trench is up to about 2 m deep. No pump.
+  contour, with a collection trench falling 1% to the north-east end. There it drains into a 10 m³
+  buried precast concrete rainwater tank (drinking-water certified), which is what keeps the
+  sheet this small. A small solar pump, switched by a float switch in the main tanks, moves its
+  water about 25 m to the main tanks whenever they have room. Size the extra tank as 124 m³ minus
+  the measured usable storage of the main tanks.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
   year) to none since 2010; the lowest the tanks get is 12 m³ (2011). A summer as dry as 2009
   would need one or two tankers; the sheet can be extended later. Without the tank the sheet
@@ -121,11 +120,10 @@ trench. The page has the full write-up, the map and the sources; in short:
   collecting area. With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
 - **Measure the main tanks first:** what matters is total storage. With the sheet feeding the
   main tanks directly, about 120–124 m³ of usable storage (about 133–138 m³ full size at 90%
-  usable) does the job of the extra tank; the estimate is 115 m³ (two 4 × 4 × 4 m tanks).
-- **Cost:** about €9,000–16,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
-  €300–500; drinking-water pipe tank €5,000–9,000 (rough; a drainage-pipe or block tank about
-  €2,000–4,000); leaf screen, filter and pipe €400–800; fence €500–1,000; small
-  digger with driver for 1–2 days €600–1,500.
+  usable) does the job of the extra tank; the estimate is 115 m³ (house tank and solar building tank, 4 × 4 × 4 m each, not yet measured).
+- **Cost:** about €7,000–13,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
+  €300–500; precast tank €2,500–5,000; solar pump and float switch €300–800; leaf screen,
+  filter and pipe €400–800; fence €500–1,000; small digger with driver for 1–2 days €600–1,500.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
   measure); ETOBA, 01 34 84 04 64.
@@ -151,9 +149,9 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
-| Ground sheet | 20 × 8.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ tank under it | Off by default; the recommended fix (see above) |
+| Ground sheet | 20 × 8.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ extra tank | Off by default; the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
-| Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
+| Tanks | House tank and solar building tank, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
