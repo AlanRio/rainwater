@@ -17,11 +17,42 @@ the page, and the settings are stored in the page address so a scenario can be s
 | `rainfall.js` | Daily rainfall data, generated. Do not edit by hand |
 | `scripts/update_rainfall.py` | Rebuilds `rainfall.js` from Météo-France and Open-Meteo |
 | `img/rain-sheet-site.jpg` | LiDAR relief map of the site with the proposed rain sheet |
+| `scripts/site_map.py` | Redraws that map from `data/` (numpy and matplotlib) |
+| `scripts/scenarios.py` | What-if tables from the command line, same model as the page (standard library) |
+| `data/site_lidar.npz`, `data/sheet_layout.json` | LiDAR extract around the site and the sheet's position |
 | `.github/workflows/publish.yml` | Weekly data refresh and publishing to GitHub Pages |
 
 No build step and no external dependencies. Open `index.html` in a browser and it works,
 including offline: the data is loaded with a `<script>` tag rather than fetched, so it also
 works when opened straight from disk.
+
+## Continuing this project
+
+Where things stand (18 October 2026), for picking this up in a new session:
+
+- **The recommendation** is on the page under "The recommended fix": step 1, gutter the yoga
+  building, car port and house terrace into the main tanks; step 2, for no tankers at all,
+  dual-flush toilets or a 90 m² rain sheet (20 × 4.5 m) on the slope south of the buildings.
+- **Open question: the main tanks' real size.** The page assumes the house tank and the solar
+  building tank are 4 × 4 × 4 m each (128 m³, 115 m³ usable). A business partner says they are
+  10 m³ and 50 m³; the 10 m³ is doubtful (it is at least 3 m deep, so 10 m³ would mean only
+  about 1.8 × 1.8 m inside). If the total really is about 60 m³, storage becomes the
+  bottleneck: step 1 alone still needs about 4.5 tankers a summer, and more storage (an extra
+  tank) matters more than more collecting surface.
+- **Next steps once measured** (inside length, width, depth to the overflow, height of the pump
+  intake for each tank):
+  1. Set the sizes of "House tank" and "Solar building tank" in `DEFAULT_TANKS` in `app.js`
+     (and the usable share in `DEFAULTS.usable` if it differs from 90%).
+  2. Rerun the options with `python scripts/scenarios.py` (edit the list at the bottom),
+     including extra storage, and choose step 2 again: the sheet size, an extra tank (the
+     "Extra tank (sheet only)" row in the simulator; a buried precast concrete rainwater tank
+     was the preferred kind), or both.
+  3. Update the hard-coded numbers in `index.html` (the fix section's text, the options table
+     and the storage table, which say "Worked out on 18 October 2026"), this README, and the
+     sheet size in `DEFAULT_SURFACES` and `data/sheet_layout.json`; then
+     `python scripts/site_map.py` to redraw the map.
+  4. Commit and push to `main`; GitHub Actions publishes the page.
+- **Commits:** use the GitHub no-reply e-mail for this public repository, not a personal one.
 
 ## Publishing and updates
 
