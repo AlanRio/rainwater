@@ -49,12 +49,12 @@
   const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
-  // The tank under the sheet (g) only takes the sheet's water, and empties into the other tanks
+  // The extra tank for the sheet (g) only takes the sheet's water, and empties into the other tanks
   // whenever they have room.
   const DEFAULT_TANKS = [
-    { n: 'Tank 1', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
-    { n: 'Tank 2', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
-    { n: 'Tank under the sheet', shape: 'box', l: 20, w: 1, d: 0.5, on: 0, g: 1 },
+    { n: 'House tank', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+    { n: 'Solar building tank', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+    { n: 'Extra tank (sheet only)', shape: 'box', l: 4, w: 2.5, d: 1, on: 0, g: 1 },
   ];
   const SHEET_TANK_ROW = DEFAULT_TANKS.findIndex((t) => t.g);
   const DEFAULTS = {
@@ -198,7 +198,7 @@
     const area = catchment(s);
     const cap = usableVolume(s);
     const trigger = cap * s.trig / 100;
-    // With a tank under the sheet, the sheet fills that tank, which tops up the main tanks when they
+    // With an extra tank for the sheet, the sheet fills that tank, which tops up the main tanks when they
     // have room; otherwise everything goes straight to the main tanks. 1 mm on 1 m² is 1 litre.
     const capS = sheetTankVolume(s);
     const capM = cap - capS;
@@ -213,7 +213,7 @@
     const deliveryDays = [];
     const years = [];
     let v = capM * s.fill / 100; // main tanks
-    let sv = capS * s.fill / 100; // tank under the sheet
+    let sv = capS * s.fill / 100; // extra tank for the sheet
     let arrival = -1; // day a tanker that's been ordered will arrive
     let Y = null;
     let minLevel = Infinity;
@@ -252,7 +252,7 @@
       Y.collected += inflow + inflowS;
       if (v > capM) { Y.overflow += v - capM; v = capM; }
       if (sv > capS) { Y.overflow += sv - capS; sv = capS; }
-      // The tank under the sheet tops up the main tanks.
+      // The extra tank tops up the main tanks.
       const move = Math.min(sv, capM - v);
       if (move > 0) { v += move; sv -= move; }
 
@@ -587,7 +587,7 @@
     const tankV = kt >= 0 ? tankFootprint(s.tanklist[kt]) * s.tanklist[kt].d : 0;
     const r0 = withSheet(0);
     const r1 = withSheet(1);
-    const size = `${fmt(sheet.l * sheet.w)} m² sheet${tankV > 0 ? ` and the ${fmt(tankV)} m³ tank under it` : ''}`;
+    const size = `${fmt(sheet.l * sheet.w)} m² sheet${tankV > 0 ? ` and a ${fmt(tankV)} m³ extra tank` : ''}`;
     let t;
     if (s.tanker) {
       const del = (r) => `${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer`;
@@ -981,7 +981,7 @@
         tank.n = rest.join(' ') || (DEFAULT_TANKS[k] ? DEFAULT_TANKS[k].n : 'Tank ' + (k + 1));
         return tank;
       });
-      // Links made before the tank under the sheet existed: put it back in its usual place.
+      // Links made before the extra tank existed: put it back in its usual place.
       if (list.length && !list.some((t) => t.g)) list.splice(Math.min(SHEET_TANK_ROW, list.length), 0, clone(DEFAULT_TANKS[SHEET_TANK_ROW]));
       if (list.length) s.tanklist = list;
     } else if (['tanks', 'tl', 'tw', 'td'].some((k) => p.has(k))) {
