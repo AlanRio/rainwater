@@ -3,7 +3,7 @@
 
 Two sources, aligned day by day so the page can switch between them:
 
-  anglars  Météo-France rain gauge 46005001, Anglars-Juillac, 2.1 km from the house.
+  anglars  Météo-France rain gauge 46005001, Anglars-Juillac, 2.9 km from the house.
            Open data from data.gouv.fr ("Données climatologiques de base - quotidiennes").
            Each value is the 24 h total from 06:00 UTC that day to 06:00 UTC the next.
   era5     ERA5 reanalysis (a weather model, ~28 km grid) from the Open-Meteo archive,
