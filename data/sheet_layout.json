@@ -1,0 +1,29 @@
+{
+ "c": [
+  1186.012332183998,
+  509.3180098699568
+ ],
+ "ux": -0.9068486938185546,
+ "uy": 0.42145633999215326,
+ "along": 20,
+ "down": 4.5,
+ "corners": {
+  "bottom_end_a": [
+   1188.186486022828,
+   519.3347735731247
+  ],
+  "bottom_end_b": [
+   1179.7573592229846,
+   501.19779969675363
+  ],
+  "top_end_a": [
+   1202.2426407770154,
+   512.8022003032463
+  ],
+  "top_end_b": [
+   1193.813513977172,
+   494.6652264268752
+  ]
+ },
+ "note": "Local coordinates: metres on a site-local grid. c = sheet centre; (ux, uy) = downhill unit vector; along = length on the contour; down = width down the slope. Main tanks at local (1195, 542)."
+}
