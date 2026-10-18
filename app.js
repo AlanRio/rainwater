@@ -37,19 +37,17 @@
   const WEATHER_KEYS = ['src', 'from', 'sumAdj', 'winAdj'];
 
   // A surface with its own share (e, in %) uses that instead of the general collection setting.
-  // The ground sheet is the proposed EPDM rain sheet on the slope south of the buildings.
+  // The ground sheet (g) is the proposed EPDM rain sheet on the slope south of the buildings.
   const DEFAULT_SURFACES = [
     { n: 'Roof 1', l: 15, w: 5, on: 1 },
     { n: 'Roof 2', l: 15, w: 5, on: 1 },
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
-    { n: 'Ground sheet (EPDM)', l: 20, w: 15.5, on: 0, e: 85 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 15.5, on: 0, e: 85, g: 1 },
   ];
-  const SHEET = 5; // row of the ground sheet in the surface list
-  // Rough cost range of the sheet, €: outlet, pipe and fence, plus sheet and underlay by area.
-  // Gives €4,700 to €7,500 for the 20 × 15.5 m design (see the solution section).
-  const sheetCost = (area) => [900 + 12.3 * area, 1800 + 18.5 * area].map((x) => Math.round(x / 100) * 100);
+  const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
+  const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   // Box tanks use length × width × depth; round tanks use l as the diameter and ignore w.
   const DEFAULT_TANKS = [
     { n: 'Tank 1', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
@@ -130,6 +128,7 @@
   // Area that effectively delivers water: each surface times the share of its rain that reaches the tanks.
   const wetArea = (s) => s.surfaces.reduce((a, x) => a + (x.on ? x.l * x.w * (ownShare(x) ? x.e : s.eff) / 100 : 0), 0);
   const avgShare = (s) => (catchment(s) > 0 ? wetArea(s) / catchment(s) * 100 : s.eff);
+  const sheetIndex = (s) => s.surfaces.findIndex((x) => x.g);
   const tankFootprint = (t) => (t.shape === 'round' ? Math.PI * t.l * t.l / 4 : t.l * t.w);
   const tankVolume = (s) => s.tanklist.reduce((a, t) => a + (t.on ? tankFootprint(t) * t.d : 0), 0);
   const usableVolume = (s) => tankVolume(s) * s.usable / 100;
@@ -298,7 +297,7 @@
     const d = demand(s);
     return `${fmt(catchment(s))} m² collecting, ${m3(usableVolume(s))} of usable tank, ` +
       `${s.guests} ${plural(s.guests, 'guest', 'guests')} at ${fmt(d.perGuest)} litres a day, ` +
-      `${s.occ === 100 ? 'fully booked' : s.occ + '% booked'}${s.tanker ? '' : ', no tanker'}`;
+      `${s.occ === 100 ? 'house full all season' : 'house full ' + s.occ + '% of the season'}${s.tanker ? '' : ', no tanker'}`;
   }
 
   // ---- The answer ----------------------------------------------------------
@@ -443,7 +442,7 @@
     const season = `${MONTHS[s.s0 - 1]} to ${MONTHS[s.s1 - 1]}`;
     setHTML('ex_use', `From ${season} the house uses <b>${fmt(r.d.season)} litres a day</b> on average ` +
       `(${s.guests} ${plural(s.guests, 'guest', 'guests')} at about ${fmt(r.d.perGuest)} litres each` +
-      `${s.occ < 100 ? `, ${s.occ}% of the season booked` : ''})` +
+      `${s.occ < 100 ? `, the house full ${s.occ}% of the season` : ''})` +
       `${s.offPeople > 0 ? `, and ${fmt(r.d.off)} litres a day the rest of the year` : ''}.`);
     setHTML('ex_tanker', s.tanker
       ? `When the tanks fall to ${s.trig}%, a tanker is ordered and brings ${fmt(s.load)} m³ ${s.lead} ${plural(s.lead, 'day', 'days')} later.`
@@ -453,7 +452,7 @@
     setHTML('fl_area', `${fmt(r.area)} m² collecting, ${mixed ? 'about ' : ''}${fmt(share)}% reaches the tanks`);
     setHTML('fl_collect', `${fmt(r.T.collected / r.span)} m³ a year`);
     setHTML('fl_tank', `${m3(r.cap)} usable`);
-    setHTML('fl_season', `${season}, ${s.guests} ${plural(s.guests, 'guest', 'guests')}${s.occ < 100 ? `, ${s.occ}% booked` : ''}`);
+    setHTML('fl_season', `${season}, ${s.guests} ${plural(s.guests, 'guest', 'guests')}${s.occ < 100 ? `, ${s.occ}% full` : ''}`);
     setHTML('fl_use', `${fmt(r.d.season)} litres a day`);
     setHTML('fl_tanker', s.tanker
       ? `Backup: a tanker brings ${fmt(s.load)} m³ when the tanks fall to ${s.trig}% (${m3(r.trigger)}).`
@@ -555,9 +554,10 @@
 
   // The solution section: the same settings with the ground sheet off and on.
   function renderFix(s) {
-    const sheet = s.surfaces[SHEET];
-    if (!sheet || !$('fix_live')) return;
-    const withSheet = (on) => { const c = clone(s); c.surfaces[SHEET].on = on; return simulate(c); };
+    const k = sheetIndex(s);
+    if (k < 0 || !$('fix_live')) return;
+    const sheet = s.surfaces[k];
+    const withSheet = (on) => { const c = clone(s); c.surfaces[k].on = on; return simulate(c); };
     const r0 = withSheet(0);
     const r1 = withSheet(1);
     const size = `${fmt(sheet.l * sheet.w)} m² sheet`;
@@ -569,11 +569,7 @@
           ? `, and <b>${del(r1)}</b> (${eur(r1.T.cost / r1.span)} a year) with a ${size}, on average since ${s.from}.`
           : `, and <b>none at all</b> with a ${size}, in any summer since ${s.from}.`) +
         ` With the sheet, the lowest the tanks get is ${m3(r1.minLevel)}${r1.minYear ? ' (' + r1.minYear + ')' : ''}.`;
-      const saved = (r0.T.cost - r1.T.cost) / r0.span;
-      const [lo, hi] = sheetCost(sheet.l * sheet.w);
-      t += saved > 1
-        ? ` At roughly ${eur(lo)} to ${eur(hi)}, it pays for itself in about <b>${fmt(lo / saved, 1)} to ${fmt(hi / saved, 1)} summers</b>.`
-        : ' With these settings the roofs already cope without a tanker, so the sheet would be spare margin.';
+      if (r0.T.deliveries === 0) t = `With these settings the roofs already cope without a tanker since ${s.from}, so the sheet would be spare margin.`;
     } else {
       const dry = (r) => `${oneDp(r.T.dryDays / r.span)} days without water a summer`;
       t = `With the settings on this page and no tanker, the house would have <b>${dry(r0)}</b> without the sheet and ` +
@@ -834,9 +830,10 @@
     if (!(i1 > i0)) return { text: 'The second reading needs to be after the first.' };
     if (i0 < 0 || i1 > N) return { text: `Rain data covers ${longDate(R.start)} to ${longDate(R.end)}.` };
     const rain = rainBetween(i0, i1, state);
-    // Surfaces with their own share (the ground sheet) are taken off first; what's left measures the rest.
-    const general = state.surfaces.reduce((a, x) => a + (x.on && !ownShare(x) ? x.l * x.w : 0), 0);
-    const fixedWet = state.surfaces.reduce((a, x) => a + (x.on && ownShare(x) ? x.l * x.w * x.e / 100 : 0), 0);
+    // The proposed ground sheet isn't built, so it's left out. Other surfaces with their own share are
+    // taken off first; what's left measures the surfaces that use the general setting.
+    const general = state.surfaces.reduce((a, x) => a + (x.on && !x.g && !ownShare(x) ? x.l * x.w : 0), 0);
+    const fixedWet = state.surfaces.reduce((a, x) => a + (x.on && !x.g && ownShare(x) ? x.l * x.w * x.e / 100 : 0), 0);
     const gained = (parseFloat(row.l1) - parseFloat(row.l0)) / 100 * planArea(state);
     if (rain.raw < 3) return { text: `Only ${fmt(rain.raw, 1)} mm fell between those readings. Pick a wetter spell.` };
     if (!(rain.usable > 0)) return { text: 'Tick at least one collecting surface first.' };
@@ -857,7 +854,8 @@
     if (!(i1 > i0)) return { text: 'The end date needs to be after the start date.' };
     const days = i1 - i0;
     const rain = rainBetween(i0, i1, state);
-    const fromRain = rain.usable * wetArea(state) / 1000;
+    const built = Object.assign({}, state, { surfaces: state.surfaces.filter((x) => !x.g) });
+    const fromRain = rain.usable * wetArea(built) / 1000;
     const drop = (parseFloat(u.l0) - parseFloat(u.l1)) / 100 * planArea(state);
     const lpd = (drop + fromRain) * 1000 / (g * days);
     let text = `Over ${days} ${plural(days, 'day', 'days')} the tanks went down by ${m3(drop)}` +
@@ -895,6 +893,7 @@
       p.set('surf', s.surfaces.map((x, k) => {
         const parts = [x.on ? 1 : 0, x.l, x.w];
         if (ownShare(x)) parts.push('e' + x.e);
+        if (x.g) parts.push('g');
         if (!DEFAULT_SURFACES[k] || DEFAULT_SURFACES[k].n !== x.n) parts.push(x.n.replace(/[~|]/g, ' '));
         return parts.join('~');
       }).join('|'));
@@ -931,11 +930,15 @@
         const [on, l, w, ...rest] = t.split('~');
         const x = { n: '', l: parseFloat(l) || 0, w: parseFloat(w) || 0, on: on === '1' ? 1 : 0 };
         if (rest.length && /^e\d+(\.\d+)?$/.test(rest[0])) x.e = parseFloat(rest.shift().slice(1));
+        if (rest[0] === 'g') { rest.shift(); x.g = 1; }
+        // Links from before the marker existed: the unnamed row in the sheet's place is the sheet.
+        if (k === SHEET_ROW && !rest.length) x.g = 1;
         x.n = rest.join(' ') || (DEFAULT_SURFACES[k] ? DEFAULT_SURFACES[k].n : 'Other surface');
         return x;
       });
-      // Links made before the ground sheet existed have fewer rows: add the missing defaults.
-      for (let k = list.length; list.length && k < DEFAULT_SURFACES.length; k++) list.push(clone(DEFAULT_SURFACES[k]));
+      // Links made before the ground sheet existed don't have it: put it back in its usual place,
+      // ahead of any surfaces added by hand.
+      if (list.length && !list.some((x) => x.g)) list.splice(Math.min(SHEET_ROW, list.length), 0, clone(DEFAULT_SURFACES[SHEET_ROW]));
       if (list.length) s.surfaces = list;
     }
     if (p.has('tk')) {
@@ -965,8 +968,10 @@
     if (!sup || (sup.km !== null && sup.km !== s.km)) s.supplier = 'custom';
     const truck = TRUCKS.find((x) => x.id === s.truck);
     if (!truck || (truck.load !== null && truck.load !== s.load)) s.truck = 'custom';
-    if (!R.sources[s.src]) s.src = DEFAULTS.src;
-    if (!(s.toilet in TOILET_LITRES)) s.toilet = DEFAULTS.toilet;
+    if (!has(R.sources, s.src)) s.src = DEFAULTS.src;
+    if (!has(TOILET_LITRES, s.toilet)) s.toilet = DEFAULTS.toilet;
+    s.s0 = Math.min(12, Math.max(1, Math.round(s.s0)));
+    s.s1 = Math.min(12, Math.max(1, Math.round(s.s1)));
     if (s.mode !== 'direct') s.mode = 'build';
     s.from = Math.min(LAST_FULL_YEAR, Math.max(FIRST_YEAR, Math.round(s.from)));
     return s;
@@ -1191,7 +1196,7 @@
       else fallback();
     });
     $('fix_btn').addEventListener('click', () => {
-      const sheet = state.surfaces[SHEET];
+      const sheet = state.surfaces[sheetIndex(state)];
       if (!sheet) return;
       sheet.on = sheet.on ? 0 : 1;
       renderSurfaces();

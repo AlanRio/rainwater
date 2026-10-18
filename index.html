@@ -40,7 +40,7 @@
   .sub { color: var(--text-2); margin: 0; }
   .muted { color: var(--text-2); }
   .small { font-size: 13px; }
-  .tiny { font-size: 12px; color: var(--text-3); }
+  .tiny { font-size: 12px; color: var(--text-2); }
   b, strong { font-weight: 600; }
 
   /* The answer */
@@ -84,7 +84,7 @@
   input[type=range] { width: 100%; margin: 4px 0 0; }
   input[type=number], input[type=text], input[type=date], select { font: inherit; font-size: 14px; padding: 5px 7px; border: 0.5px solid var(--border-2); border-radius: 6px; background: var(--surface); color: var(--text); }
   input[type=number] { width: 5.5em; }
-  label.f input[type=number], label.f select { display: block; margin-top: 3px; }
+  label.f input[type=number], label.f select { display: block; margin-top: 3px; max-width: 100%; }
   .surf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 6px 0; border-bottom: 0.5px dashed var(--border); }
   .surf-row input[type=text] { width: 11em; }
   .surf-row input[type=number] { width: 4.5em; }
@@ -168,42 +168,46 @@
 <section class="fix" id="fix">
   <div class="fix-label">The recommended fix</div>
   <h2>A rain sheet on the slope next to the house</h2>
-  <p>The house runs short because its roofs catch too little rain in summer. The tanks are big enough: they're full every spring. So the answer is <b>more collecting surface</b>. The simplest, cheapest and lowest-risk way to get it is one rubber (EPDM) sheet, about <b>20 × 15.5 m</b>, laid on the open scrub slope just south of the buildings. It drains by gravity into the existing tanks: no pump, no new tank, no building work. It's sized so that even 2009, the driest summer in the record since 1994, would have needed no tanker.</p>
+  <p>The house runs short because its roofs catch too little rain. With the house full all summer they can't even refill the tanks over winter, so each summer starts with the tanks part-empty, and summer showers add little. So the answer is <b>more collecting surface</b>. The simplest, cheapest and lowest-risk way to get it is one rubber (EPDM) sheet, about <b>20 × 15.5 m</b>, laid on the open slope of grass and low scrub just south of the buildings. It drains by gravity into the existing underground tanks: no pump, no new tank, no building work.</p>
+  <p>In 2009, the driest summer in the record since 1994, the tanks would only just have scraped through without a tanker, with a few days' water to spare. If the sheet collects a little less than assumed, or the house uses a little more, a summer like that would need one tanker.</p>
   <p class="fix-live" id="fix_live">Calculating…</p>
   <div class="toolbar"><button type="button" id="fix_btn">Switch the sheet on in the simulator</button>
     <span class="small muted">It's also in the settings under <i>Roofs, terraces and ground sheet</i>.</span></div>
 
   <figure>
-    <a href="img/rain-sheet-site.jpg" target="_blank" rel="noopener"><img src="img/rain-sheet-site.jpg" width="1092" height="988" loading="lazy" alt="Elevation map of the slope south of the buildings from LiDAR, showing the proposed rain sheet, its collection trench and outlet, the diversion ditch above it and the pipe to the tanks."></a>
-    <figcaption>Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey. The sheet, trench, ditch and pipe are the proposed layout. The tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
+    <a href="img/rain-sheet-site.jpg" target="_blank" rel="noopener"><img src="img/rain-sheet-site.jpg" width="1106" height="994" loading="lazy" alt="Elevation map of the slope south of the buildings from LiDAR, showing the proposed rain sheet, its collection trench and outlet, the diversion ditch above it and the pipe to the tanks."></a>
+    <figcaption>Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey, trees over 5 m hatched. The sheet, trench, ditch and pipe are the proposed layout. The tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
   </figure>
 
   <h3>Options compared</h3>
-  <p class="small muted">With the default settings: 8 guests from May to October, 120 litres each a day, every summer since 2010.</p>
+  <p class="small muted">With the default settings: 8 guests from May to October, 120 litres each a day, every summer since 2010. Worked out on 18 October 2026; the box above is recalculated live.</p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Option</th><th>Upfront cost</th><th>Tanker deliveries a summer</th><th>Risk and hassle</th></tr></thead>
       <tbody>
         <tr><td>As now, with tankers</td><td>None</td><td class="num">6.5 (about €1,800 a year)</td><td>Depends on finding a haulier and a legal filling point; in a drought, towns compete for the same lorries.</td></tr>
-        <tr class="best"><td><b>Rain sheet, 20 × 15.5 m</b></td><td><b>About €4,700–7,500</b></td><td class="num"><b>0</b> (lowest the tanks got: about 18 m³, in 2016; 6 m³ in 2009, the driest summer since 1994)</td><td>Proven method, a few days' work, gravity-fed. No permit expected; scrub cleared in winter. Lasts 20–40 years.</td></tr>
+        <tr class="best"><td><b>Rain sheet, 20 × 15.5 m</b></td><td><b>About €5,300–9,000</b></td><td class="num"><b>0</b> (lowest the tanks got: about 18 m³, in 2016; only 6 m³ in 2009, the driest summer since 1994)</td><td>Proven method, about a week's work with a small digger, gravity-fed. Ask the mairie first; do the work in autumn or winter. Lasts 20–40 years.</td></tr>
+        <tr><td>Rain sheet and dual-flush toilets</td><td>As above, plus a few hundred euros</td><td class="num">0 (lowest: about 38 m³, in 2009)</td><td>The same sheet with a large safety margin, even in the driest summer.</td></tr>
+        <tr><td>Smaller sheet (150 m²) and dual-flush toilets</td><td>About €3,500–6,000, plus the toilets</td><td class="num">0 (lowest: about 15 m³, in 2009)</td><td>Half the sheet and half the ground disturbed, if the toilets are changed.</td></tr>
+        <tr><td>Dual-flush toilets alone</td><td>A few hundred euros</td><td class="num">3.7</td><td>Cheap and worth doing, but not enough on its own.</td></tr>
         <tr><td>Yoga building roof as well</td><td>Gutters and a pipe</td><td class="num">4.6</td><td>Easy, but on its own it isn't enough.</td></tr>
         <tr><td>Shower water reused to flush toilets</td><td>Replumbing (not costed)</td><td class="num">1.0 (0 with the yoga roof)</td><td>Works, but needs new pipework and a declaration to the authorities.</td></tr>
-        <tr><td>200 m³ more tank space</td><td>High</td><td class="num">5.5</td><td>Barely helps: the tanks already start the summer full.</td></tr>
-        <tr><td>Borehole</td><td>About €20,000 if the first hole finds water; €29,000–33,000 if it doesn't; plus €5,000–9,000 for the pump</td><td class="num">0, if it works</td><td>Water is likely 110–130 m down. Roughly a 1 in 5 chance the first hole is dry (see below). Supplying guests needs a prefect's authorisation.</td></tr>
+        <tr><td>200 m³ more tank space</td><td>High</td><td class="num">6.3</td><td>Barely helps: the roofs don't collect enough to fill the tanks there are now.</td></tr>
+        <tr><td>Borehole</td><td>About €20,000 if the first hole finds water; €29,000–33,000 if it doesn't; plus €5,000–9,000 for the pump</td><td class="num">0, if it works</td><td>Water could be 110 m down or much deeper. Roughly a 1 in 5 chance the first hole is dry (see below).</td></tr>
         <tr><td>Air-to-water machines</td><td>€1,000s per unit</td><td class="num">No real change</td><td>12–20 litres a day each: enough for drinking water, nowhere near enough for showers.</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="tiny">Ruled out: a mains connection (the nearest main is about 800 m away and 50 m lower), taking water from the Lot (not legal), and an open pond (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
+  <p class="tiny">Ruled out: a mains connection (the nearest main is about 800 m away and 50 m lower), taking water from the Lot (far away and far below the house), and an open pond (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
 
   <details>
     <summary>Where it goes, from the LiDAR survey</summary>
     <div class="body">
       <ul class="checks">
         <li><b>The house sits on a saddle at about 229.5 m</b>, between two hollows. Bowl 1, to the south-west, is a closed limestone hollow (a doline) with its floor at about 224.5 m. Bowl 2, to the north-east, is the head of a dry valley that falls away north.</li>
-        <li><b>The sheet goes on the slope just south of the buildings</b>, at the south-east end of bowl 1. The ground there rises from about 231 to 234 m at a steady 10°, facing west-north-west. It's scrub, with no trees to fell; the trees start at the top of the slope.</li>
+        <li><b>The sheet goes on the slope just south of the buildings</b>, at the south-east end of bowl 1. The ground there rises from about 231 to 234 m at a steady 10°, facing west-north-west. It's open ground of grass and low scrub; the trees start at the top of the slope, and a few bushes and small trees at the corners may need cutting back.</li>
         <li><b>It's square on the slope.</b> The 20 m edges run along the contour lines and the 15.5 m sides run straight down the slope, so every part of the sheet drains by the shortest route into one trench along the bottom edge.</li>
-        <li><b>Gravity does the work.</b> The bottom edge, at about 231.2–231.6 m, is above the ground at the tanks (about 229.5 m, at the southern corner of the north-east building). About 25 m of buried pipe runs north from the outlet to the tanks and falls about 2 m.</li>
+        <li><b>Gravity does the work.</b> The bottom edge, at about 231.2–231.6 m, is above the ground at the tanks (about 229.5 m, at the southern corner of the north-east building). About 25 m of buried pipe runs north from the outlet to the underground tanks and falls about 2 m. The ground rises about half a metre beside the south-east building, so that stretch of pipe trench is up to about 2 m deep, close to the building and past tree roots.</li>
         <li><b>Hard to see.</b> The sheet lies flat on the ground below the trees, so it shows little from a distance. A dark colour helps.</li>
       </ul>
       <p class="tiny">Heights are from the IGN LiDAR HD survey (<a href="https://geoservices.ign.fr/lidarhd" target="_blank" rel="noopener">geoservices.ign.fr/lidarhd</a>), flown 11 April 2022.</p>
@@ -214,13 +218,14 @@
     <summary>How it's built</summary>
     <div class="body">
       <ol class="steps">
-        <li><b>Clear the scrub</b> between September and February, outside the bird nesting season, and dig out the roots and stumps to 10–15 cm so nothing regrows under the sheet. No weedkiller.</li>
+        <li><b>Clear the ground</b> between September and February, outside the bird nesting season and the spring flowering: cut the grass and bushes short and take out any woody roots that could push up under the sheet. No weedkiller.</li>
         <li><b>Smooth the ground.</b> Rake off stones bigger than about 2 cm and fill hollows so no water can pond. Shape the surface as a very shallow trough, with the middle 10–20 cm lower than the ends, so water runs down the middle.</li>
-        <li><b>Dig the collection trench</b> along the bottom edge, following the contour, about 30 cm deep at the south-west end and falling about 1% (20 cm over 20 m) to the outlet at the north-east end, nearest the tanks, where it's about 50 cm deep. Line it with the bottom edge of the sheet.</li>
-        <li><b>Dig anchor trenches</b> about 30 × 30 cm along the top edge and both sides, and a shallow <b>diversion ditch</b> above the top edge that sends water and leaves from the wood round the sheet.</li>
+        <li><b>Dig the collection trench</b> along the bottom edge, following the contour, falling a steady 1% (20 cm over 20 m) to the outlet at the north-east end, nearest the tanks. The ground rises slightly towards that end, so the trench is about 30 cm deep at the south-west end and about 90 cm at the outlet. Line it with the bottom edge of the sheet.</li>
+        <li><b>Dig anchor trenches</b> about 30 × 30 cm along the top edge and both sides, and a shallow <b>diversion ditch</b> above the top edge that sends water and leaves from the wood round the sheet. Its ends run into the edge of the trees, so keep them shallow there and work round the roots.</li>
         <li><b>Lay a protective underlay</b> of non-woven geotextile (300 g/m², or 500 g/m² over rock or a lot of stone).</li>
         <li><b>Lay the sheet</b> from the top on a calm, warm day, when the rubber is supple. Pull it downhill so it lies flat without ripples. Bury its top and side edges in the anchor trenches and lap the bottom edge into the collection trench.</li>
-        <li><b>Fit the outlet</b>: an EPDM pipe collar into 110 mm PVC pipe, laid with a steady fall to the tanks, with a self-cleaning leaf filter rated for at least 310 m² where it enters them.</li>
+        <li><b>Dig the pipe trench</b> to the tanks, about 25 m, with a steady fall all the way. It's up to about 2 m deep where the ground rises beside the south-east building, so use the digger and keep clear of the foundations.</li>
+        <li><b>Fit the outlet</b>: an EPDM pipe collar into 110 mm PVC pipe, laid in the pipe trench, with a self-cleaning leaf filter rated for at least 310 m² where it enters the tanks.</li>
         <li><b>Fence it</b> against wild boar and deer, and keep guests off: wet rubber on a slope is very slippery. Cut back any branches that overhang it.</li>
       </ol>
       <p class="small">Upkeep: sweep or blow off leaves before May and after summer storms, clean the leaf filter, and check the sheet once a year. Small tears are patched like a bicycle tyre.</p>
@@ -239,8 +244,8 @@
             <tr><td>Geotextile underlay, about 390 m²</td><td class="num">€400–700</td></tr>
             <tr><td>Outlet collar, leaf filter and about 25 m of 110 mm pipe</td><td class="num">€400–800</td></tr>
             <tr><td>Fence against wild boar and deer</td><td class="num">€500–1,000</td></tr>
-            <tr><th>Total</th><th class="num">€4,700–7,500</th></tr>
-            <tr><td class="muted">Optional: small digger with driver for a day, for clearing and trenches</td><td class="num muted">€300–600</td></tr>
+            <tr><td>Small digger with driver, 1–2 days: clearing, the trenches and the deep stretch of pipe trench</td><td class="num">€600–1,500</td></tr>
+            <tr><th>Total</th><th class="num">€5,300–9,000</th></tr>
           </tbody>
         </table>
       </div>
@@ -249,7 +254,7 @@
       <ul class="checks small">
         <li><b>Egide Systèmes</b>, Mérignac (Bordeaux), 05 56 02 76 39. Approved Elevate distributor, the nearest to the house.</li>
         <li><b>EPDM Méditerranée</b>, Mudaison (Montpellier), 07 82 52 53 55. Approved Elevate distributor.</li>
-        <li><b>Elevate</b> also has a pond-lining contact for France (<a href="https://www.holcimelevate.com/content/dam/elevateemea/assets/pdf/CONTACTS_FRANCE.pdf" target="_blank" rel="noopener">contact list</a>, <a href="https://www.holcimelevate.com/content/dam/elevateemea/documents/fr/lining/geosmart-epdm/product-literature/gs-lit-bro-fr-02909-secured.pdf" target="_blank" rel="noopener">GeoSmart EPDM brochure</a>).</li>
+        <li><b>Elevate</b> also has a pond-lining contact for France (<a href="https://www.holcimelevate.com/content/dam/elevateemea/assets/pdf/CONTACTS_FRANCE.pdf" target="_blank" rel="noopener">contact list</a>, <a href="https://holcimelevate.com/uk-en/lining/geomembrane-applications/geosmart-epdm" target="_blank" rel="noopener">GeoSmart EPDM product page</a>).</li>
         <li><b>Chausson Matériaux</b> (builders' merchant across the south-west) sells Flexirub's made-to-measure Aquafilma EPDM, one piece up to 2,000 m², 1.2 mm, 20-year warranty (<a href="https://www.batiproduits.com/fiche/produits/geomembrane-epdm-pour-stockage-d-eau-ou-lagunage-p69097578.html" target="_blank" rel="noopener">product sheet</a>).</li>
         <li><b>ETOBA</b>, 01 34 84 04 64, contact@etoba.fr: rolls 3–15 m wide, made to measure up to 1,200 m² without joints (<a href="https://www.batiproduits.com/fiche/produits/bache-epdm-d-epaisseur-1-mm-pour-bassin-de-rete-p325177020.html" target="_blank" rel="noopener">product sheet</a>).</li>
       </ul>
@@ -261,11 +266,11 @@
     <summary>Rules and permissions</summary>
     <div class="body">
       <ul class="checks small">
-        <li><b>Planning.</b> A sheet lying on the ground has no height and no floor area, so it isn't a building, and the shallow trenches are well below the size that needs a declaration. The land is in zone Ntvb (natural area on a wildlife corridor) of the <a href="https://data.geopf.fr/annexes/gpu/documents/DU_244600433/ea9c13afe557d09858ad92d60ccc5b56/244600433_reglement_20260312.pdf" target="_blank" rel="noopener">PLUi Vallée du Lot et du Vignoble</a> (version of 12 March 2026), which aims to avoid sealing natural ground and bans earthworks "covered by sheeting left visible". The same document quotes article L111-16 of the planning code: a permission can't be refused for systems that retain rainwater for the household's own needs, as long as they fit into the landscape. <b>Send the mairie a sketch and keep their written answer</b>, and choose a dark sheet.</li>
-        <li><b>Nature.</b> The site is inside the ZNIEFF type 1 "<a href="https://inpn.mnhn.fr/zone/znieff/730030184" target="_blank" rel="noopener">Bois sec de Niaudon</a>", an inventory of valuable dry woodland. That doesn't ban anything by itself, but destroying the habitat of protected species is an offence: clear only scrub, outside the nesting season, and leave the trees. The local plan maps no protected hedge, wood, dry grassland or wetland on this spot.</li>
-        <li><b>Clearing.</b> Clearing scrub isn't forest clearance, so no authorisation from the DDT is needed. Felling trees to make room would be, which is why the sheet goes on the open slope.</li>
-        <li><b>The fence.</b> Since 2023, fences in natural zones must let wildlife through, but only those more than 150 m from a house (<a href="https://www.ofb.gouv.fr/sites/default/files/Fichiers/Plaquettes%20et%20rapports%20instit/OFB_Plaquette_Engrillagement_WEB.pdf" target="_blank" rel="noopener">OFB</a>). This one is closer, so a boar-proof fence is allowed.</li>
-        <li><b>Collecting the water.</b> Catching rain on your own land for your own use isn't an abstraction under water law; a declaration only applies to rainwater drainage schemes of 1 ha or more. The water counts as rainwater under the 2024 rules on non-drinking water (<a href="https://www.paca.ars.sante.fr/reutilisation-des-eaux-usees-traitees" target="_blank" rel="noopener">ARS summary</a>), so the same rules apply to it as to the water from the roofs.</li>
+        <li><b>Planning.</b> A sheet lying on the ground has no height and no floor area, so it isn't a building, and the trenches are well below the size that needs a declaration. But the land is in zone Ntvb (natural area on a wildlife corridor) of the <a href="https://data.geopf.fr/annexes/gpu/documents/DU_244600433/ea9c13afe557d09858ad92d60ccc5b56/244600433_reglement_20260312.pdf" target="_blank" rel="noopener">PLUi Vallée du Lot et du Vignoble</a> (version of 12 March 2026), which aims to avoid sealing natural ground, bans digging out or raising the ground except for permitted works, and bans earthworks "covered by sheeting left visible". Those rules apply even to work that needs no permit. The same document quotes article L111-16 of the planning code, which says a permission can't be refused for systems that retain rainwater for the household's own needs if they fit into the landscape, but that only helps once a permit or declaration is being decided. <b>So ask the mairie first: send a sketch and keep their written answer.</b> A dark sheet helps.</li>
+        <li><b>Nature.</b> The site is inside the ZNIEFF type 1 "<a href="https://inpn.mnhn.fr/zone/znieff/730030184" target="_blank" rel="noopener">Bois sec de Niaudon</a>", a 113-hectare inventory area noted for its semi-dry limestone grassland, the kind where wild orchids grow. The listing bans nothing by itself and the risk here is low: the sheet covers about 300 m² of ground right next to the buildings. Do the work in autumn or winter, not in spring or early summer, and leave the trees. The local plan maps no protected hedge, wood, dry grassland or wetland on this spot.</li>
+        <li><b>Clearing.</b> Cutting grass and bushes isn't forest clearance, so no authorisation from the DDT is needed. Felling trees to make room would be, which is why the sheet goes on the open slope.</li>
+        <li><b>The fence.</b> Since 2023, fences in natural zones must let wildlife through, but only those more than 150 m from a house (<a href="https://www.ofb.gouv.fr/sites/default/files/Fichiers/Plaquettes%20et%20rapports%20instit/OFB_Plaquette_Engrillagement_WEB.pdf" target="_blank" rel="noopener">OFB</a>). This one is closer, so a boar-proof fence is allowed. The local plan does ask fences in this zone to leave gaps for small wildlife where possible.</li>
+        <li><b>Collecting the water.</b> Catching rain on your own land isn't an abstraction under water law; a declaration only applies to rainwater drainage schemes of 1 ha or more.</li>
       </ul>
     </div>
   </details>
@@ -273,19 +278,19 @@
   <details>
     <summary>Why not a borehole</summary>
     <div class="body">
-      <p class="small">The ground here is karst limestone: water runs through scattered cracks, and the rock above the water table is dry. Nearby, the water table sits roughly where the springs come out, about 100–120 m above sea level. The house is at 229 m, so <b>water is likely 110–130 m down, and a borehole would need to be about 130–150 m deep</b>. Every borehole on record nearby is on a valley floor, far lower than the house:</p>
+      <p class="small">The ground here is karst limestone: water runs through scattered cracks, and the rock above the water table is dry. Every borehole on record nearby is on a valley floor, far lower than the house, and they found water at very different levels: from 118 m above sea level down to below sea level. The springs nearby come out at about 100–110 m. The house is at 229 m, so <b>water is at least about 110 m down and could be much deeper</b>:</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Borehole</th><th class="num">Ground height</th><th class="num">Depth</th><th>Water found at</th></tr></thead>
+          <thead><tr><th>Borehole</th><th class="num">Ground height</th><th class="num">Depth</th><th>Water found at</th><th class="num">Water level above sea level</th></tr></thead>
           <tbody>
-            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS004HSGU" target="_blank" rel="noopener">Les Junies, La Mouline</a> (2023)</td><td class="num">123 m</td><td class="num">51 m</td><td>5 m below ground</td></tr>
-            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJSP" target="_blank" rel="noopener">Puy-l'Évêque, Les Balmes</a> (2011)</td><td class="num">102 m</td><td class="num">80 m</td><td>56 m below ground</td></tr>
-            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJTS" target="_blank" rel="noopener">Prayssac, La Plaine Sud</a> (2014)</td><td class="num">about 100 m</td><td class="num">162 m</td><td>140 m below ground</td></tr>
-            <tr><td><b>The house</b></td><td class="num"><b>229 m</b></td><td class="num">130–150 m?</td><td>probably 110–130 m below ground</td></tr>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS004HSGU" target="_blank" rel="noopener">Les Junies, La Mouline</a> (2023)</td><td class="num">123 m</td><td class="num">51 m</td><td>5 m below ground</td><td class="num">118 m</td></tr>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJSP" target="_blank" rel="noopener">Puy-l'Évêque, Les Balmes</a> (2011)</td><td class="num">102 m</td><td class="num">80 m</td><td>56 m below ground</td><td class="num">46 m</td></tr>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJTS" target="_blank" rel="noopener">Prayssac, La Plaine Sud</a> (2014)</td><td class="num">105 m</td><td class="num">162 m</td><td>140 m below ground</td><td class="num">−35 m</td></tr>
+            <tr><td><b>The house</b></td><td class="num"><b>229 m</b></td><td class="num">?</td><td>at least about 110 m below ground</td><td class="num">?</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="small" style="margin-top:10px">Finding water isn't guaranteed: a hole can pass between water-bearing cracks and come up dry. A rough judgement for this site, with a hydrogeologist choosing the spot, is a 1 in 5 chance that the first hole is dry. The cost of the hole alone:</p>
+      <p class="small" style="margin-top:10px">Finding water isn't guaranteed: a hole can pass between water-bearing cracks and come up dry. A rough judgement for this site, with a hydrogeologist choosing the spot, is a 1 in 5 chance that the first hole is dry. The cost of the hole alone, if water is found at about 140 m:</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Outcome</th><th class="num">Rough chance</th><th class="num">Cost</th></tr></thead>
@@ -297,8 +302,8 @@
           </tbody>
         </table>
       </div>
-      <p class="tiny">Assumes a hydrogeologist and ground survey to choose the spot (€2,000), setting up the rig (€1,000; €300 for a second hole), drilling at €70 a metre, casing and sealing at €40 a metre once water is found, a pumping test (€1,200), and €1,000 to seal a dry hole as the law requires. Then add about €5,000–9,000 for a pump that can lift water 130 m, its solar drive, pipework and treatment.</p>
-      <p class="small">There's paperwork too: a household borehole must be declared on <a href="https://www.ecologie.gouv.fr/actualites/forages-domestiques-louverture-tele-declaration" target="_blank" rel="noopener">DUPLOS</a> at least a month before drilling, and supplying paying guests counts as supplying the public, which needs a prefect's authorisation after an opinion from a hydrogeologist approved by the regional health agency (<a href="https://www.occitanie.ars.sante.fr/les-hydrogeologues-agrees-0" target="_blank" rel="noopener">ARS Occitanie</a>).</p>
+      <p class="tiny">Assumes a hydrogeologist and ground survey to choose the spot (€2,000), setting up the rig (€1,000; €300 for a second hole), drilling at €70 a metre, casing and sealing at €40 a metre once water is found, a pumping test (€1,200), and €1,000 to seal a dry hole as the law requires. Every extra 10 m of depth adds about €1,100. Then add about €5,000–9,000 for a pump that can lift water 130 m or more, its solar drive, pipework and treatment.</p>
+      <p class="small">There's paperwork too: a household borehole must be declared on <a href="https://www.ecologie.gouv.fr/actualites/forages-domestiques-louverture-tele-declaration" target="_blank" rel="noopener">DUPLOS</a> at least a month before drilling.</p>
       <p class="small"><b>Compared with that, the rain sheet costs about a quarter as much, can't come up dry, and uses rain the record shows falls every summer.</b></p>
     </div>
   </details>
@@ -307,11 +312,11 @@
     <summary>Before ordering</summary>
     <div class="body">
       <ol class="steps small">
-        <li><b>Check the levels on site.</b> The pipe needs a steady fall all the way. Measure how high the pipe would enter the tanks: it should be at least 0.5 m below the outlet of the trench (about 231 m). The LiDAR puts the ground at the tanks at about 229.5 m, so this should be easy. The ground rises slightly beside the south-east building, so bury the pipe deeper there rather than letting it follow the surface.</li>
-        <li><b>Check the slope is still only scrub.</b> The survey is from April 2022.</li>
+        <li><b>Check the levels on site.</b> The pipe needs a steady fall all the way. Measure how high the pipe would enter the tanks: it should be at least 0.5 m below the bottom of the trench at the outlet (about 230.7 m). The LiDAR puts the ground at the tanks at about 229.5 m and the tanks are underground, so this should work; but it decides whether gravity feed works at all, so check it first.</li>
+        <li><b>Check the slope is still open grass and low scrub.</b> The survey is from April 2022.</li>
         <li><b>Email the mairie</b> or the planning office of the Communauté de communes with a sketch, and keep their reply.</li>
         <li><b>Get two or three quotes</b> for the sheet and underlay.</li>
-        <li><b>Plan the work for autumn or winter</b>, so it's ready to collect before the guest season.</li>
+        <li><b>Plan the work for autumn or winter</b>, so it's ready to collect before summer.</li>
       </ol>
     </div>
   </details>
@@ -320,11 +325,11 @@
     <summary>Where else this is done</summary>
     <div class="body">
       <ul class="checks small">
-        <li><a href="https://www.edenshalefarm.com/blog/eden-shale-farm-update-february-2021" target="_blank" rel="noopener">Eden Shale Farm</a>, Kentucky: a 40 × 80 ft liner (about 230 m²) on a gentle slope, a trench along the bottom edge into a collection box, and a gravity pipe to a tank. Almost exactly this design.</li>
-        <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island</a>, South Australia: three 7 × 100 m plastic runs gave close to 100% runoff. Lessons: clear the vegetation, lay the sheet flat, choose a slope above the storage so it flows by gravity, bury the edges.</li>
+        <li><a href="https://www.edenshalefarm.com/blog/eden-shale-farm-update-february-2021" target="_blank" rel="noopener">Eden Shale Farm</a>, Kentucky: a 40 × 80 ft PVC pond liner (about 230 m² once laid) on a gentle slope, a trench along the bottom edge into a collection box, and a gravity pipe to a tank. Almost exactly this design.</li>
+        <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island</a>, South Australia: three 7 × 100 m plastic runs gave close to 100% runoff; ripples in the plastic cost the most in light rain on hot days. Lessons: clear the vegetation, lay the sheet flat, choose a slope above the storage so it flows by gravity, bury the edges.</li>
         <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ep/sheeted_catchments_meet_future_water_need.pdf" target="_blank" rel="noopener">Wharminda</a>, South Australia: a one-hectare sheet. Lessons: anchor it against wind, and store the water in closed tanks, not an open dam, because of evaporation and algae.</li>
         <li><a href="https://en.wikipedia.org/wiki/Great_Gibraltar_Sand_Dune" target="_blank" rel="noopener">Gibraltar</a> collected its water on sheeted slopes for most of the 20th century, and the Canary Islands have done it with plastered slopes (<i>alcogidas</i>) for centuries (<a href="https://www.lavozdelanzarote.com/en/news/more-news/the-eras-and-alcogidas-the-lifesavers-of-the-people-of-lanzarote-when-scarcity-reigned-on-the-island_230146_102.html" target="_blank" rel="noopener">La Voz de Lanzarote</a>).</li>
-        <li>Design guidance: University of Kentucky <a href="https://bae.ca.uky.edu/sites/bae.ca.uky.edu/files/AEN175.pdf" target="_blank" rel="noopener">AEN-175</a> (slopes of 2–10% to one corner, gravel-filled edge ditches) and the US Department of Agriculture's <a href="https://www.nrcs.usda.gov/sites/default/files/2025-07/521-nhcp-cps-pond-sealing-lining-geomembrane-geosyn.pdf" target="_blank" rel="noopener">lining standard 521</a> (EPDM at least 1.14 mm, sheets running down the slope, upper sheets overlapping lower ones).</li>
+        <li>Design guidance: University of Kentucky <a href="https://bae.mgcafe.uky.edu/articles/aen-175-rain-traps-watering-livestock-remote-locations" target="_blank" rel="noopener">AEN-175</a> (slopes of 2–10% to one corner, gravel-filled edge ditches) and the US Department of Agriculture's <a href="https://www.nrcs.usda.gov/sites/default/files/2025-07/521-nhcp-cps-pond-sealing-lining-geomembrane-geosyn.pdf" target="_blank" rel="noopener">lining standard 521</a> (EPDM at least 1.14 mm, sheets running down the slope, upper sheets overlapping lower ones).</li>
       </ul>
     </div>
   </details>
@@ -359,12 +364,12 @@
         <tbody>
           <tr><td>Daily rainfall</td><td><span class="ex_range"></span></td><td>Météo-France rain gauge 46005001, Anglars-Juillac, 2.9 km from the house. The gauge is in the valley at 104 m and the house is on the plateau at about 229 m; if anything, slightly higher ground gets slightly more rain, so the gauge is on the cautious side. Published as <a href="https://www.data.gouv.fr/fr/datasets/donnees-climatologiques-de-base-quotidiennes/" target="_blank" rel="noopener">open data on data.gouv.fr</a>. Refreshed on this page every week.</td></tr>
           <tr><td>Roof areas</td><td>2 roofs, 15 × 5 m each</td><td>Footprint of each roof. It's the area seen from above that catches rain, not the larger sloping tiled surface.</td></tr>
-          <tr><td>Ground sheet</td><td>Off; 20 × 15.5 m, 85% reaches the tanks</td><td>The proposed rubber sheet on the slope south of the buildings (see <a href="#fix">the recommended fix</a>). A plastic-sheeted catchment on a South Australian farm gave close to 100% runoff when the sheet lay flat, even in small showers (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island case study</a>). 85% allows for ripples, leaves, dust and the first rinse.</td></tr>
+          <tr><td>Ground sheet</td><td>Off; 20 × 15.5 m, 85% reaches the tanks</td><td>The proposed rubber sheet on the slope south of the buildings (see <a href="#fix">the recommended fix</a>). A plastic-sheeted catchment on a South Australian farm gave close to 100% runoff, though ripples in the plastic reduced it in light rain on hot days (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island case study</a>). 85% allows for that, leaves, dust and the first rinse.</td></tr>
           <tr><td>Collection efficiency</td><td>75%</td><td>Design standards for rainwater systems (BS 8515 in the UK, DIN 1989 in Germany) assume roughly 80–90% runs off a pitched roof and about 90% gets through the filter. Set a little lower here for clay tiles and summer cloudbursts. You can measure the real figure with your own tanks at the bottom of the page.</td></tr>
           <tr><td>Tanks</td><td>2 tanks, 4 × 4 × 4 m, 90% usable</td><td>Estimated size, still to be measured. The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
           <tr><td>Water use</td><td>120 litres per guest per day</td><td>Built up from showers, toilets, taps, laundry and dishwasher under <i>Water use in detail</i>. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
           <tr><td>Water price</td><td>€2.80 per m³</td><td>Official average price of drinking water in the Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
-          <tr><td>Tanker delivery</td><td>12 m³ from Parnac (15.6 km): €150 fixed + €3 per km + water</td><td>Each delivery costs a fixed charge, plus a charge per kilometre on the round trip, plus the water. The fixed charge is about 1 to 1.5 hours of lorry and driver at the €90 to €130 an hour that hauliers charge. The per-km rate is the French road-haulage cost of about €1.80 to €2.30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus a margin, in line with the €2 to €4 per km that delivery firms quote (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Two real prices check it: about €300 for a small private delivery, and the roughly €10 per m³ Figeac paid for 30 m³ tanker loads in the August 2026 drought (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). The local hauliers and their distances are under <i>Tanker in detail</i>. Replace with a real quote when you have one.</td></tr>
+          <tr><td>Tanker delivery</td><td>12 m³ from Parnac (15.6 km): €150 fixed + €3 per km + water</td><td>Each delivery costs a fixed charge, plus a charge per kilometre on the round trip, plus the water. The fixed charge is about 1 to 1.5 hours of lorry and driver at the €90 to €130 an hour that hauliers charge. The per-km rate is the French road-haulage cost of about €1.80 to €2.30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus a margin, in line with the €2 to €4 per km that delivery firms quote (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Two real figures check it: about €300 for a small private delivery, and the roughly €10 per m³ that Figeac budgeted for tanker loads in its August 2026 drought plan, about €10,000 a day for up to about 1,000 m³ (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). The local hauliers and their distances are under <i>Tanker in detail</i>. Replace with a real quote when you have one.</td></tr>
           <tr><td>Climate outlook</td><td>Off (recent weather)</td><td>Météo-France projections for Occitanie around 2050: summer rain −15%, winter rain +12% (<a href="https://meteofrance.com/changement-climatique/quel-climat-futur-en-occitanie" target="_blank" rel="noopener">Météo-France</a>).</td></tr>
         </tbody>
       </table>
@@ -377,7 +382,7 @@
       <ul class="checks">
         <li><b>The rain gauge agrees with its neighbours.</b> From 2010 to 2025, rain between May and October averaged 384 mm at Anglars, 381 mm at Montcuq, 374 mm at Le Montat and 382 mm at Gourdon, all Météo-France gauges within 31 km.</li>
         <li><b>An independent source tells the same story.</b> ERA5, a completely separate reconstruction of the weather from satellites and weather models, averages <span id="chk_era"></span> a year here, against the gauge's <span id="chk_gauge"></span> (<span id="chk_years"></span>). With the settings on this page it gives <span id="chk_alt"></span>. It reads wetter than the gauge in several recent summers, so the gauge is the cautious choice. You can switch to it under <i>Rainfall data and climate</i>.</li>
-        <li><b>It matches what's been seen at the house.</b> With light use (a few guests for part of the season), the model has the tanks full again by January 2026, which is what happened. With full bookings, the same winter would have left them only about a fifth full.</li>
+        <li><b>It matches what's been seen at the house.</b> With light use (a few guests for part of the season), the model has the tanks full again by January 2026, which is what happened. With the house full all summer, the same winter would have left them only about a fifth full.</li>
         <li><b>You can check it against your own tanks.</b> The tool at the bottom of the page turns a few dipstick readings into this house's real collection and water use, and plugs them in.</li>
       </ul>
     </div>
@@ -388,7 +393,7 @@
     <div class="body">
       <ul class="checks">
         <li>Rain is measured 3 km away. A single summer storm can soak one village and miss the next, but over months and years the totals agree closely.</li>
-        <li>Occupancy below 100% is spread evenly through the season rather than modelled as empty weeks. The seasonal total is the same; a fully booked fortnight in a dry spell is slightly harder than shown.</li>
+        <li>Occupancy below 100% is spread evenly through the season rather than modelled as empty weeks. The seasonal total is the same; a full fortnight in a dry spell is slightly harder than shown.</li>
         <li>The weather won't repeat itself exactly. The record covers more than 30 wet and dry years, and the climate setting shifts all of them towards the expected future, but nobody can say which coming years will be dry.</li>
         <li>Tank size, roof areas and collection efficiency are estimates until they're measured.</li>
         <li>Only the amount of water is modelled, not its quality.</li>
@@ -412,7 +417,7 @@
     <div class="grid">
       <label class="f">Guests in the house: <span class="val" id="o_guests"></span>
         <input type="range" data-k="guests" min="0" max="16" step="1"></label>
-      <label class="f">Share of the season booked: <span class="val" id="o_occ"></span>
+      <label class="f">Share of the season the house is full: <span class="val" id="o_occ"></span>
         <input type="range" data-k="occ" min="0" max="100" step="5"></label>
       <label class="f">Season starts
         <select data-k="s0" class="months"></select></label>
@@ -648,7 +653,7 @@
   <details id="calib">
     <summary>Check it against your own tanks</summary>
     <div class="body">
-      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. This assumes the tanks are linked, so the water stands at the same level in each. The page looks up the rain measured at Anglars between your readings.</p>
+      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. The proposed ground sheet is left out of these checks, as it isn't built yet. This assumes the tanks are linked, so the water stands at the same level in each. The page looks up the rain measured at Anglars between your readings.</p>
 
       <h3>1. How much rain actually reaches the tanks</h3>
       <p class="small muted">Take a reading before and after a rainy spell, when nobody is using water and the tanks aren't full (so nothing overflows). Morning readings line up best with the gauge.</p>

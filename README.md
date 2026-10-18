@@ -70,9 +70,9 @@ For each day, in order:
    (the ground sheet uses 85%); the others use the general setting.
 4. Anything above the usable tank volume overflows.
 5. A tanker ordered earlier arrives: one load, or less if the tank can't take it all.
-   Each delivery costs load × water price + call-out.
+   Each delivery costs the fixed charge + the distance charge + load × water price.
 6. The house uses water: during the season, guests × litres per guest plus the house's
-   laundry, dishwasher and other use, scaled by the share of the season booked; outside the
+   laundry, dishwasher and other use, scaled by the share of the season the house is full; outside the
    season, people present × litres per person. If the tanks are empty, the shortfall is a
    day without water.
 7. If the level is at or below the trigger and water is being used, a tanker is ordered,
@@ -85,45 +85,54 @@ spell give the real collection efficiency (water gained ÷ rain × area, after t
 surfaces with their own efficiency delivered); readings across a stretch with guests give real
 litres per guest per day (fall in level plus rain added).
 
-Settings live in the page address. Surfaces are written as `on~length~width[~e<share>][~name]`,
-separated by `|`; links made before the ground sheet existed get it added, switched off.
+Settings live in the page address. Surfaces are written as
+`on~length~width[~e<share>][~g][~name]`, separated by `|`, where `g` marks the proposed ground
+sheet. Links made before the ground sheet existed get it added, switched off. The calibration
+tool leaves the ground sheet out, as it isn't built.
 
 ## The recommended fix: a rain sheet on the slope
 
-The roofs catch too little rain in summer; the tanks are full every spring. The fix is more
-collecting surface: one EPDM rubber sheet on the scrub slope just south of the buildings. The
-page has the full write-up, the map and the sources; in short:
+The roofs catch too little rain: with the house full all summer they can't even refill the
+tanks over winter. The fix is more collecting surface: one EPDM rubber sheet on the slope of
+grass and low scrub just south of the buildings. The page has the full write-up, the map and
+the sources; in short:
 
 - **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
-  about 231 to 234 m at 10°, facing west-north-west, scrub only. The tanks are at the southern corner of the north-east building, ground about 229.5 m.
-- **Layout:** 20 × 15.5 m (310 m²), square on the slope: the 20 m bottom edge follows the contour,
-  with a collection trench falling 1% to an outlet at the north-east end. About 25 m of buried
-  110 mm pipe runs north and falls about 2 m to the tanks, at the southern corner of the
-  north-east building. No pump.
+  about 231 to 234 m at 10°, facing west-north-west. The underground tanks are at the southern
+  corner of the north-east building, ground about 229.5 m.
+- **Layout:** 20 × 15.5 m (310 m²), square on the slope: the 20 m bottom edge follows the
+  contour, with a collection trench falling 1% to an outlet at the north-east end (about 30 cm
+  deep at the far end, 90 cm at the outlet). About 25 m of buried 110 mm pipe runs north and
+  falls about 2 m to the tanks; beside the south-east building the pipe trench is up to about
+  2 m deep. No pump.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
-  year) to none, in every summer since 1994; the lowest the tanks get is 18 m³ since 2010 (2016)
-  and 6 m³ in 2009, the driest summer in the record. A 260 m² sheet would have needed one tanker in
-  2009; 20 m³ more tank would do the same job as the extra 50 m² of sheet but costs far more.
-- **Cost:** about €4,700–7,500 (sheet made to measure, about 21.6 × 17.8 m or 385 m², €3,400–5,000;
-  underlay €400–700; outlet, filter and pipe €400–800; fence €500–1,000). Pays back in about 3–4 summers.
+  year) to none since 2010; the lowest the tanks get is 18 m³ (2016). Back to 1994 there are
+  none either, but in 2009, the driest summer in the record, the tanks only just scrape through
+  (6 m³ left, against a tanker trigger of 5.8 m³), so a summer like that could need one tanker.
+  With dual-flush toilets as well, the lowest is 38 m³; dual flush with a 150 m² sheet also
+  gets through 2009 (15 m³).
+- **Cost:** about €5,300–9,000: sheet made to measure, about 21.6 × 17.8 m or 385 m²,
+  €3,400–5,000; underlay €400–700; outlet, filter and pipe €400–800; fence €500–1,000; small
+  digger with driver for 1–2 days €600–1,500.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
   measure); ETOBA, 01 34 84 04 64.
-- **Rules:** PLUi zone Ntvb and ZNIEFF type 1 "Bois sec de Niaudon". No permit expected for a
-  sheet on the ground (article L111-16 of the planning code protects rainwater systems for
-  household use), but ask the mairie in writing. Clear scrub between September and February;
-  fell no trees.
+- **Rules:** PLUi zone Ntvb, which bans digging out or raising the ground except for permitted
+  works and earthworks covered by visible sheeting, even where no permit is needed; ask the
+  mairie in writing first. ZNIEFF type 1 "Bois sec de Niaudon" (semi-dry limestone grassland):
+  low risk for about 300 m² next to the buildings; work in autumn or winter and fell no trees.
 
 ### Why not a borehole
 
-The house is at 229 m and the water table nearby is at about 100–120 m (springs and the
-nearest boreholes, all on valley floors), so water is likely 110–130 m down and a borehole
-would be 130–150 m deep. Karst limestone can give a dry hole: roughly a 1 in 5 chance for the
-first hole, as a judgement. The hole alone costs about €20,000 if the first one works, about
-€33,000 if the second does, about €29,000 for two dry holes and no water; about €22,000 on
-average. A pump able to lift 130 m, its solar drive and treatment add €5,000–9,000. Supplying
-guests also needs a prefect's authorisation after an approved hydrogeologist's opinion.
+The house is at 229 m. The nearest boreholes, all on valley floors, found water at levels from
+118 m above sea level down to below sea level, and the springs come out at about 100–110 m, so
+water is at least about 110 m down and could be much deeper. Karst limestone can give a dry
+hole: roughly a 1 in 5 chance for the first hole, as a judgement. With water at about 140 m,
+the hole alone costs about €20,000 if the first one works, about €33,000 if the second does,
+about €29,000 for two dry holes and no water; about €22,000 on average. Each extra 10 m adds
+about €1,100. A pump able to lift 130 m or more, its solar drive and treatment add
+€5,000–9,000.
 
 ## Default settings
 
@@ -131,10 +140,10 @@ guests also needs a prefect's authorisation after an approved hydrogeologist's o
 |---|---|---|
 | Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
-| Ground sheet | 20 × 15.5 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see below) |
+| Ground sheet | 20 × 15.5 m EPDM sheet, 85% reaching the tanks | Off by default; the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Tank 1 and Tank 2, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
-| Guests | 8, fully booked, May to October | |
+| Guests | 8, house full, May to October | |
 | Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
 | Supplier | Transports Delrieu, Parnac, 15.6 km by road | Nearest haulier with food-grade tanks |
@@ -154,8 +163,9 @@ Cost per delivery = fixed charge + €/km × 2 × road distance + water price ×
 - **Water, €2.80 per m³:** SISPEA average drinking-water price for the Lot, 2025.
 
 Checked against two real prices: about €300 for a small private delivery (French price
-guides), and about €10 per m³ for 30 m³ loads, which is what Figeac paid when trucking in
-drinking water in August 2026 (€10,000 a day for about 1,000 m³; France 3, 14 August 2026).
+guides), and about €10 per m³, which is what Figeac budgeted in its August 2026 drought plan
+for trucking in drinking water (about €10,000 a day for up to about 1,000 m³; France 3,
+14 August 2026; the plan had not been triggered).
 The model gives €277 for 12 m³ and €322 for 28 m³ from Parnac.
 
 Water weighs a tonne per m³, so the legal weight limit sets the load: about 12 m³ on a
