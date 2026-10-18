@@ -92,7 +92,8 @@ before these existed get them added, switched off. The calibration tool leaves b
 they aren't built.
 
 The tank under the sheet is modelled as a separate store: only the sheet fills it, and each day
-it empties into the main tanks as far as they have room. The level shown is the total of both.
+it empties into the main tanks as far as they have room (on site, a float valve at the main
+tanks' inlet does this). The level shown is the total of both.
 
 ## The recommended fix: a rain sheet on the slope, with a tank under it
 
@@ -107,7 +108,9 @@ trench. The page has the full write-up, the map and the sources; in short:
   corner of the north-east building, ground about 229.5 m.
 - **Layout:** sheet 20 × 8.75 m (175 m²), square on the slope: the 20 m bottom edge follows the
   contour, with a collection trench falling 1% to the north-east end. Under the trench, a 10 m³
-  tank 20 m long (20 m of 800 mm plastic pipe, or a concrete-block tank 20 × 1.0 × 0.75 m inside)
+  tank 20 m long, which is what keeps the sheet this small: 20 m of off-the-shelf PE100
+  drinking-water main pipe, 900 mm outside and about 830 mm inside (about 10.8 m³), with welded
+  end caps (or, not drinking-water grade, 800 mm twin-wall drainage pipe or a block tank)
   with its bottom at about 230.1 m. About 25 m of buried 110 mm pipe runs north and falls to the
   main tanks; beside the south-east building the pipe trench is up to about 2 m deep. No pump.
 - **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
@@ -115,8 +118,9 @@ trench. The page has the full write-up, the map and the sources; in short:
   would need one or two tankers; the sheet can be extended later. Without the tank the sheet
   would need about 230 m² for the same result; with 20, 30 or 50 m³ it could be 170, 160 or
   155–160 m². With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
-- **Cost:** about €6,000–12,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
-  €300–500; tank €2,000–5,000; leaf screen, filter and pipe €400–800; fence €500–1,000; small
+- **Cost:** about €9,000–16,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
+  €300–500; drinking-water pipe tank €5,000–9,000 (rough; a drainage-pipe or block tank about
+  €2,000–4,000); leaf screen, filter and pipe €400–800; fence €500–1,000; small
   digger with driver for 1–2 days €600–1,500.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
