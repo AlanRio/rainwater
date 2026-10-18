@@ -95,42 +95,41 @@ The extra tank is modelled as a separate store: only the sheet fills it, and eac
 empties into the main tanks as far as they have room (on site, a solar pump switched by a float
 switch in the main tanks). The level shown is the total of both.
 
-## The recommended fix: a rain sheet on the slope, with an extra tank
+## The recommended fix: connect the other roofs first, then close the gap
 
-The roofs catch too little rain: with the house full all summer they can't even refill the
-tanks over winter. The fix is more collecting surface: one EPDM rubber sheet on the slope of
-grass and low scrub just south of the buildings, draining into a 10 m³ buried tank at the end
-of its collection trench. The page has the full write-up, the map and the sources; in short:
+The roofs catch too little rain: with the house full all summer, the house and gîte roofs can't
+even refill the tanks over winter. The fix is more collecting surface, starting with what's
+already there. The page has the full write-up, the map and the sources; in short (default
+settings: 8 guests May–October, main tanks estimated at 115 m³ usable):
 
-- **Site** (IGN LiDAR HD, flown 11 April 2022): the house sits
-  on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
-  about 231 to 233 m at 10°, facing west-north-west. The underground tanks are at the southern
-  corner of the north-east building, ground about 229.5 m.
-- **Layout:** sheet 20 × 7.75 m (155 m²), square on the slope: the 20 m bottom edge follows the
-  contour, with a collection trench falling 1% to the north-east end. There it drains into a 10 m³
-  buried precast concrete rainwater tank (drinking-water certified), which is what keeps the
-  sheet this small. A small solar pump, switched by a float switch in the main tanks, moves its
-  water about 25 m to the main tanks whenever they have room. Size the extra tank as 124 m³ minus
-  the measured usable storage of the main tanks.
-- **Result with the default settings:** tanker deliveries go from 5.3 a summer (about €1,500 a
-  year) to none since 2010; the lowest the tanks get is 11 m³ (2011). A summer as dry as 2009
-  would need one or two tankers; the sheet can be extended later. Without the tank the sheet
-  would need about 190 m² for the same result; with 20, 30 or 50 m³ it could be 155, 145 or
-  140 m², but no less: below about 140–155 m² storage can't make up for the missing
-  collecting area. With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
-- **Measure the main tanks first:** what matters is total storage. With the sheet feeding the
-  main tanks directly, about 120–124 m³ of usable storage (about 133–138 m³ full size at 90%
-  usable) does the job of the extra tank; the estimate is 115 m³ (house tank and solar building tank, 4 × 4 × 4 m each, not yet measured).
-- **Cost:** about €7,000–13,000: standard 12.2 × 21.35 m EPDM panel €2,300–3,400; underlay
-  €300–500; precast tank €2,500–5,000; solar pump and float switch €300–800; leaf screen,
-  filter and pipe €400–800; fence €500–1,000; small digger with driver for 1–2 days €600–1,500.
+- **Step 1: connect the yoga building (5 × 7 m), car port (12 × 4.5 m) and house terrace
+  (5 × 5 m, above the house tank).** 114 m² more for gutters, downpipes, first-flush diverters
+  and pipes, about €1,500–5,000. Tankers go from 5.3 a summer (about €1,500 a year) to about
+  0.7: none in 10 of the 17 summers since 2010, most others one, 2011 four or five. The car port
+  was meant for a swimming pool; it can feed the house tanks first and overflow to the pool.
+- **Step 2, for no tankers at all:** dual-flush toilets (no tanker in any summer since 1994,
+  lowest about 10 m³ in 2009); or a rain sheet of about 90 m² (20 × 4.5 m) on the slope south
+  of the buildings, about €2,500–4,500 (no tanker since 2010; one or two in a 2009-like summer);
+  or about 105 m² more roof such as the garage.
+- **Measure the main tanks first:** with step 1 done, the sheet needed is 90 m² at 115 m³ usable,
+  55 m² at 120, 50 m² at 124 and 45 m² at 130. A 10 m³ extra tank fed only by the sheet would
+  bring 90 m² down to about 70 m², but costs more than the sheet it saves.
+- **Site of the sheet** (IGN LiDAR HD, flown 11 April 2022): the
+  house sits on a saddle at about 229.5 m between two hollows. The slope south of the buildings
+  rises from about 231 to 232 m at 10°, facing west-north-west. The sheet is square on the
+  slope, its 20 m bottom edge on the contour with a collection trench falling 1% to the
+  north-east end; about 25 m of buried 110 mm pipe falls about 2 m to the main tanks at the
+  southern corner of the north-east building (up to about 2 m deep beside the south-east
+  building). No pump.
+- **The earlier plan,** a 155 m² sheet with a 10 m³ precast tank and no other roofs, cost about
+  €7,000–13,000 and is kept on the page for comparison.
 - **Suppliers:** Egide Systèmes, Mérignac, 05 56 02 76 39 and EPDM Méditerranée, Mudaison,
   07 82 52 53 55 (Elevate distributors); Chausson Matériaux (Flexirub Aquafilma, made to
   measure); ETOBA, 01 34 84 04 64.
 - **Rules:** PLUi zone Ntvb, which bans digging out or raising the ground except for permitted
   works and earthworks covered by visible sheeting, even where no permit is needed; ask the
   mairie in writing first. ZNIEFF type 1 "Bois sec de Niaudon" (semi-dry limestone grassland):
-  low risk for about 200 m² next to the buildings; work in autumn or winter and fell no trees.
+  low risk for about 120 m² next to the buildings; work in autumn or winter and fell no trees.
 
 ### Why not a borehole
 
@@ -149,7 +148,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 |---|---|---|
 | Collecting surfaces | House roof 15 × 5 m and gîte roof 14 × 7 m | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool), house terrace 5 × 5 m (above the house tank) | Off by default |
-| Ground sheet | 20 × 7.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ extra tank | Off by default; the recommended fix (see above) |
+| Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; step 2 of the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | House tank and solar building tank, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
