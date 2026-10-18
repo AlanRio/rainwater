@@ -39,12 +39,12 @@
   // A surface with its own share (e, in %) uses that instead of the general collection setting.
   // The ground sheet (g) is the proposed EPDM rain sheet on the slope south of the buildings.
   const DEFAULT_SURFACES = [
-    { n: 'Roof 1', l: 15, w: 5, on: 1 },
-    { n: 'Roof 2', l: 15, w: 5, on: 1 },
+    { n: 'House', l: 15, w: 5, on: 1 },
+    { n: 'Gîte', l: 14, w: 7, on: 1 },
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
-    { n: 'Ground sheet (EPDM)', l: 20, w: 8.75, on: 0, e: 85, g: 1 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 7.75, on: 0, e: 85, g: 1 },
   ];
   const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
