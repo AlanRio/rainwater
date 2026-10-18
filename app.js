@@ -45,6 +45,7 @@
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
     { n: 'Ground sheet (EPDM)', l: 20, w: 7.75, on: 0, e: 85, g: 1 },
+    { n: 'Car port roof', l: 12, w: 4.5, on: 0 },
   ];
   const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
@@ -954,7 +955,9 @@
       else if (isFinite(parseFloat(v))) s[k] = parseFloat(v);
     }
     if (p.has('surf')) {
-      const list = p.get('surf').split('|').filter(Boolean).map((t, k) => {
+      const parts = p.get('surf').split('|').filter(Boolean);
+      const n0 = parts.length;
+      const list = parts.map((t, k) => {
         const [on, l, w, ...rest] = t.split('~');
         const x = { n: '', l: parseFloat(l) || 0, w: parseFloat(w) || 0, on: on === '1' ? 1 : 0 };
         if (rest.length && /^e\d+(\.\d+)?$/.test(rest[0])) x.e = parseFloat(rest.shift().slice(1));
@@ -967,6 +970,10 @@
       // Links made before the ground sheet existed don't have it: put it back in its usual place,
       // ahead of any surfaces added by hand.
       if (list.length && !list.some((x) => x.g)) list.splice(Math.min(SHEET_ROW, list.length), 0, clone(DEFAULT_SURFACES[SHEET_ROW]));
+      // Default surfaces added since the link was made (such as the car port roof) go in their usual place.
+      DEFAULT_SURFACES.forEach((d, k) => {
+        if (list.length && k >= n0 && !d.g && !list.some((x) => !x.g && x.n === d.n)) list.splice(Math.min(k, list.length), 0, clone(d));
+      });
       if (list.length) s.surfaces = list;
     }
     if (p.has('tk')) {
