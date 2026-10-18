@@ -46,6 +46,7 @@
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
     { n: 'Ground sheet (EPDM)', l: 20, w: 7.75, on: 0, e: 85, g: 1 },
     { n: 'Car port roof', l: 12, w: 4.5, on: 0 },
+    { n: 'House terrace', l: 5, w: 5, on: 0 },
   ];
   const SHEET_ROW = DEFAULT_SURFACES.findIndex((x) => x.g); // where the sheet sits in the default list
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);

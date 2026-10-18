@@ -148,7 +148,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 | Setting | Default | Basis |
 |---|---|---|
 | Collecting surfaces | House roof 15 × 5 m and gîte roof 14 × 7 m | Footprint (plan area), which is what catches rain |
-| Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool) | Off by default |
+| Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool), house terrace 5 × 5 m (above the house tank) | Off by default |
 | Ground sheet | 20 × 7.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ extra tank | Off by default; the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | House tank and solar building tank, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
