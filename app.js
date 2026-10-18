@@ -54,10 +54,12 @@
   // The extra tank for the sheet (g) only takes the sheet's water, and empties into the other tanks
   // whenever they have room.
   const DEFAULT_TANKS = [
-    { n: 'House tank', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
-    { n: 'Solar building tank', shape: 'box', l: 4, w: 4, d: 4, on: 1 },
+    { n: 'House tank', shape: 'box', l: 4.1, w: 4.1, d: 3, on: 1 },
+    { n: 'Solar building tank', shape: 'box', l: 1.85, w: 1.8, d: 3, on: 1 },
     { n: 'Extra tank (sheet only)', shape: 'box', l: 4, w: 2.5, d: 1, on: 0, g: 1 },
+    { n: 'New buried tank', shape: 'box', l: 4.1, w: 4.1, d: 3, on: 0 },
   ];
+  const NEW_TANK = 'New buried tank';
   const SHEET_TANK_ROW = DEFAULT_TANKS.findIndex((t) => t.g);
   const DEFAULTS = {
     // guests and season
@@ -360,7 +362,7 @@
     if (same) {
       return pinned
         ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try ticking the yoga building, car port roof and house terrace, then the ground sheet, or switching the toilets to dual flush, to see what changes.';
+        : 'These are the default settings for the house as it is now. Try ticking the yoga building, car port roof and house terrace, then the new buried tank, or switching the toilets to dual flush, to see what changes.';
     }
     const intro = `Compared with ${who} (${describe(bs)}): `;
     if (r.s.tanker && bs.tanker) {
@@ -579,41 +581,41 @@
   const STEP1 = ['Yoga building', 'Car port roof', 'House terrace'];
   const step1Rows = (s) => s.surfaces.map((x, k) => (!x.g && STEP1.includes(x.n) ? k : -1)).filter((k) => k >= 0);
 
-  // The recommended fix: as now, with the other roofs connected, and with the rain sheet as well.
+  const newTankRow = (s) => s.tanklist.findIndex((t) => !t.g && t.n === NEW_TANK);
+
+  // The recommended fix, step by step: as now, other roofs connected, a new buried tank, dual flush.
   function renderFix(s) {
     if (!$('fix_live')) return;
     const roofs = step1Rows(s);
-    const k = sheetIndex(s);
-    const variant = (roofsOn, sheetOn) => {
+    const kt = newTankRow(s);
+    const variant = (step) => {
       const c = clone(s);
-      roofs.forEach((i) => { c.surfaces[i].on = roofsOn; });
-      if (k >= 0) c.surfaces[k].on = sheetOn;
+      roofs.forEach((i) => { c.surfaces[i].on = step >= 1 ? 1 : 0; });
+      if (kt >= 0) c.tanklist[kt].on = step >= 2 ? 1 : 0;
+      if (step >= 3) { c.mode = 'build'; c.toilet = 'dual'; }
       return simulate(c);
     };
-    const r0 = variant(0, 0);
-    const r1 = variant(1, 0);
-    const r2 = variant(1, 1);
-    const sheetSize = k >= 0 ? `${fmt(s.surfaces[k].l * s.surfaces[k].w)} m² rain sheet` : 'rain sheet';
+    const r = [0, 1, 2, 3].map(variant);
+    const tankV = kt >= 0 ? tankFootprint(s.tanklist[kt]) * s.tanklist[kt].d : 0;
     let t;
     if (s.tanker) {
-      const del = (r) => r.T.deliveries
-        ? `about <b>${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer</b> (${eur(r.T.cost / r.span)} a year)`
-        : '<b>no tanker at all</b>';
-      const none = (r) => r.summers - r.yearsTanker;
-      t = `With the settings on this page and only the house and gîte roofs, the house needs ${del(r0)}. ` +
-        `With the yoga building, car port and house terrace connected as well, ${del(r1)}` +
-        (r1.T.deliveries ? `, with no tanker in ${none(r1)} of ${r1.summers} summers since ${s.from}` : ` since ${s.from}`) + '. ' +
-        `With a ${sheetSize} too, ${del(r2)}` + (r2.T.deliveries ? ' on average' : ` in any summer since ${s.from}`) +
-        `, and the tanks never get below ${m3(r2.minLevel)}.`;
+      const del = (x) => (x.T.deliveries
+        ? `about <b>${oneDp(x.T.deliveries / x.span)} tanker ${plural(Math.round(x.T.deliveries / x.span * 10) / 10, 'delivery', 'deliveries')} a summer</b> (${eur(x.T.cost / x.span)} a year, in ${x.yearsTanker} of ${x.summers} summers)`
+        : `<b>no tanker at all</b> in any summer since ${s.from}`);
+      t = `With the settings on this page: as now, ${del(r[0])}. ` +
+        `With the yoga building, car port and house terrace connected, ${del(r[1])}. ` +
+        `With a new ${fmt(tankV)} m³ buried tank as well, ${del(r[2])}. ` +
+        `And with dual-flush toilets too, ${del(r[3])}, the tanks never getting below ${m3(r[3].minLevel)}.`;
     } else {
-      const dry = (r) => (r.T.dryDays ? `${oneDp(r.T.dryDays / r.span)} days without water a summer` : 'no days without water');
-      t = `With the settings on this page and no tanker: ${dry(r0)} with only the house and gîte roofs, ` +
-        `${dry(r1)} with the other roofs connected, and ${dry(r2)} with a ${sheetSize} too, on average since ${s.from}.`;
+      const dry = (x) => (x.T.dryDays ? `${oneDp(x.T.dryDays / x.span)} days without water a summer` : 'no days without water');
+      t = `With the settings on this page and no tanker: ${dry(r[0])} as now, ${dry(r[1])} with the other roofs connected, ` +
+        `${dry(r[2])} with a new ${fmt(tankV)} m³ tank as well, and ${dry(r[3])} with dual-flush toilets too, on average since ${s.from}.`;
     }
     setHTML('fix_live', t);
     const roofsOn = roofs.length && roofs.every((i) => s.surfaces[i].on);
-    $('fix_btn').textContent = roofsOn ? 'Disconnect the other roofs again' : 'Connect the other roofs in the simulator';
-    $('fix_btn2').textContent = k >= 0 && s.surfaces[k].on ? 'Remove the rain sheet again' : 'Add the rain sheet too';
+    $('fix_btn').textContent = roofsOn ? 'Disconnect the other roofs again' : '1. Connect the other roofs';
+    $('fix_btn2').textContent = kt >= 0 && s.tanklist[kt].on ? 'Remove the new tank again' : '2. Add the new tank';
+    $('fix_btn3').textContent = s.mode !== 'direct' && s.toilet === 'dual' ? 'Back to standard toilets' : '3. Dual-flush toilets';
   }
 
   // ---- Chart ---------------------------------------------------------------
@@ -986,7 +988,9 @@
       if (list.length) s.surfaces = list;
     }
     if (p.has('tk')) {
-      const list = p.get('tk').split('|').filter(Boolean).map((t, k) => {
+      const tparts = p.get('tk').split('|').filter(Boolean);
+      const t0 = tparts.length;
+      const list = tparts.map((t, k) => {
         const [on, shape, l, w, d, ...rest] = t.split('~');
         const tank = {
           n: '', shape: shape === 'r' ? 'round' : 'box',
@@ -999,6 +1003,10 @@
       });
       // Links made before the extra tank existed: put it back in its usual place.
       if (list.length && !list.some((t) => t.g)) list.splice(Math.min(SHEET_TANK_ROW, list.length), 0, clone(DEFAULT_TANKS[SHEET_TANK_ROW]));
+      // Default tanks added since the link was made (such as the new buried tank) go in their usual place.
+      DEFAULT_TANKS.forEach((d, k) => {
+        if (list.length && k >= t0 && !d.g && !list.some((t) => !t.g && t.n === d.n)) list.splice(Math.min(k, list.length), 0, clone(d));
+      });
       if (list.length) s.tanklist = list;
     } else if (['tanks', 'tl', 'tw', 'td'].some((k) => p.has(k))) {
       // Links made before tanks became a list described n identical box tanks.
@@ -1007,6 +1015,7 @@
       s.tanklist = Array.from({ length: count }, (_, k) => (
         { n: 'Tank ' + (k + 1), shape: 'box', l: num('tl', 4), w: num('tw', 4), d: num('td', 4), on: 1 }));
       s.tanklist.push(clone(DEFAULT_TANKS[SHEET_TANK_ROW]));
+      s.tanklist.push(clone(DEFAULT_TANKS.find((t) => t.n === NEW_TANK)));
     }
     // Links made before supplier and distance existed had one call-out charge per delivery.
     if (p.has('callout') && !p.has('fixed') && !p.has('km')) {
@@ -1253,11 +1262,17 @@
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('fix_btn2').addEventListener('click', () => {
-      const sheet = state.surfaces[sheetIndex(state)];
-      if (!sheet) return;
-      sheet.on = sheet.on ? 0 : 1;
-      if (sheet.on) step1Rows(state).forEach((i) => { state.surfaces[i].on = 1; });
-      renderSurfaces();
+      const kt = newTankRow(state);
+      if (kt < 0) return;
+      state.tanklist[kt].on = state.tanklist[kt].on ? 0 : 1;
+      renderTanks();
+      update();
+      $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    $('fix_btn3').addEventListener('click', () => {
+      if (state.mode !== 'direct' && state.toilet === 'dual') state.toilet = DEFAULTS.toilet;
+      else { state.mode = 'build'; state.toilet = 'dual'; }
+      setInputs();
       update();
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
