@@ -44,7 +44,7 @@
     { n: 'Yoga building', l: 5, w: 7, on: 0 },
     { n: 'Terrace', l: 10, w: 4, on: 0 },
     { n: 'Small terrace', l: 5, w: 3, on: 0 },
-    { n: 'Ground sheet (EPDM)', l: 20, w: 7.75, on: 0, e: 85, g: 1 },
+    { n: 'Ground sheet (EPDM)', l: 20, w: 4.5, on: 0, e: 85, g: 1 },
     { n: 'Car port roof', l: 12, w: 4.5, on: 0 },
     { n: 'House terrace', l: 5, w: 5, on: 0 },
   ];
@@ -360,7 +360,7 @@
     if (same) {
       return pinned
         ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try ticking the ground sheet or the yoga building roof, or switching the toilets to dual flush, to see what changes.';
+        : 'These are the default settings for the house as it is now. Try ticking the yoga building, car port roof and house terrace, then the ground sheet, or switching the toilets to dual flush, to see what changes.';
     }
     const intro = `Compared with ${who} (${describe(bs)}): `;
     if (r.s.tanker && bs.tanker) {
@@ -575,37 +575,45 @@
   }
 
   // The solution section: the same settings with the ground sheet off and on.
+  // The roofs to connect in step 1 of the recommended fix.
+  const STEP1 = ['Yoga building', 'Car port roof', 'House terrace'];
+  const step1Rows = (s) => s.surfaces.map((x, k) => (!x.g && STEP1.includes(x.n) ? k : -1)).filter((k) => k >= 0);
+
+  // The recommended fix: as now, with the other roofs connected, and with the rain sheet as well.
   function renderFix(s) {
+    if (!$('fix_live')) return;
+    const roofs = step1Rows(s);
     const k = sheetIndex(s);
-    if (k < 0 || !$('fix_live')) return;
-    const sheet = s.surfaces[k];
-    const kt = s.tanklist.findIndex((t) => t.g);
-    const withSheet = (on) => {
+    const variant = (roofsOn, sheetOn) => {
       const c = clone(s);
-      c.surfaces[k].on = on;
-      if (kt >= 0) c.tanklist[kt].on = on;
+      roofs.forEach((i) => { c.surfaces[i].on = roofsOn; });
+      if (k >= 0) c.surfaces[k].on = sheetOn;
       return simulate(c);
     };
-    const tankV = kt >= 0 ? tankFootprint(s.tanklist[kt]) * s.tanklist[kt].d : 0;
-    const r0 = withSheet(0);
-    const r1 = withSheet(1);
-    const size = `${fmt(sheet.l * sheet.w)} m² sheet${tankV > 0 ? ` and a ${fmt(tankV)} m³ extra tank` : ''}`;
+    const r0 = variant(0, 0);
+    const r1 = variant(1, 0);
+    const r2 = variant(1, 1);
+    const sheetSize = k >= 0 ? `${fmt(s.surfaces[k].l * s.surfaces[k].w)} m² rain sheet` : 'rain sheet';
     let t;
     if (s.tanker) {
-      const del = (r) => `${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer`;
-      t = `With the settings on this page, the house needs about <b>${del(r0)}</b> (${eur(r0.T.cost / r0.span)} a year) without the sheet` +
-        (r1.T.deliveries
-          ? `, and <b>${del(r1)}</b> (${eur(r1.T.cost / r1.span)} a year) with a ${size}, on average since ${s.from}.`
-          : `, and <b>none at all</b> with a ${size}, in any summer since ${s.from}.`) +
-        ` With the sheet, the lowest the tanks get is ${m3(r1.minLevel)}${r1.minYear ? ' (' + r1.minYear + ')' : ''}.`;
-      if (r0.T.deliveries === 0) t = `With these settings the roofs already cope without a tanker since ${s.from}, so the sheet would be spare margin.`;
+      const del = (r) => r.T.deliveries
+        ? `about <b>${oneDp(r.T.deliveries / r.span)} tanker ${plural(Math.round(r.T.deliveries / r.span * 10) / 10, 'delivery', 'deliveries')} a summer</b> (${eur(r.T.cost / r.span)} a year)`
+        : '<b>no tanker at all</b>';
+      const none = (r) => r.summers - r.yearsTanker;
+      t = `With the settings on this page and only the house and gîte roofs, the house needs ${del(r0)}. ` +
+        `With the yoga building, car port and house terrace connected as well, ${del(r1)}` +
+        (r1.T.deliveries ? `, with no tanker in ${none(r1)} of ${r1.summers} summers since ${s.from}` : ` since ${s.from}`) + '. ' +
+        `With a ${sheetSize} too, ${del(r2)}` + (r2.T.deliveries ? ' on average' : ` in any summer since ${s.from}`) +
+        `, and the tanks never get below ${m3(r2.minLevel)}.`;
     } else {
-      const dry = (r) => `${oneDp(r.T.dryDays / r.span)} days without water a summer`;
-      t = `With the settings on this page and no tanker, the house would have <b>${dry(r0)}</b> without the sheet and ` +
-        `<b>${r1.T.dryDays ? dry(r1) : 'none'}</b> with a ${size}, on average since ${s.from}.`;
+      const dry = (r) => (r.T.dryDays ? `${oneDp(r.T.dryDays / r.span)} days without water a summer` : 'no days without water');
+      t = `With the settings on this page and no tanker: ${dry(r0)} with only the house and gîte roofs, ` +
+        `${dry(r1)} with the other roofs connected, and ${dry(r2)} with a ${sheetSize} too, on average since ${s.from}.`;
     }
     setHTML('fix_live', t);
-    $('fix_btn').textContent = sheet.on ? 'Switch the sheet off again' : 'Switch the sheet on in the simulator';
+    const roofsOn = roofs.length && roofs.every((i) => s.surfaces[i].on);
+    $('fix_btn').textContent = roofsOn ? 'Disconnect the other roofs again' : 'Connect the other roofs in the simulator';
+    $('fix_btn2').textContent = k >= 0 && s.surfaces[k].on ? 'Remove the rain sheet again' : 'Add the rain sheet too';
   }
 
   // ---- Chart ---------------------------------------------------------------
@@ -1237,13 +1245,19 @@
       else fallback();
     });
     $('fix_btn').addEventListener('click', () => {
+      const roofs = step1Rows(state);
+      const on = roofs.every((i) => state.surfaces[i].on) ? 0 : 1;
+      roofs.forEach((i) => { state.surfaces[i].on = on; });
+      renderSurfaces();
+      update();
+      $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    $('fix_btn2').addEventListener('click', () => {
       const sheet = state.surfaces[sheetIndex(state)];
       if (!sheet) return;
       sheet.on = sheet.on ? 0 : 1;
-      const tank = state.tanklist.find((t) => t.g);
-      if (tank) tank.on = sheet.on;
+      if (sheet.on) step1Rows(state).forEach((i) => { state.surfaces[i].on = 1; });
       renderSurfaces();
-      renderTanks();
       update();
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
