@@ -106,17 +106,17 @@ of its collection trench. The page has the full write-up, the map and the source
   on a saddle at about 229.5 m between two hollows. The slope south of the buildings rises from
   about 231 to 233 m at 10°, facing west-north-west. The underground tanks are at the southern
   corner of the north-east building, ground about 229.5 m.
-- **Layout:** sheet 20 × 8.75 m (175 m²), square on the slope: the 20 m bottom edge follows the
+- **Layout:** sheet 20 × 7.75 m (155 m²), square on the slope: the 20 m bottom edge follows the
   contour, with a collection trench falling 1% to the north-east end. There it drains into a 10 m³
   buried precast concrete rainwater tank (drinking-water certified), which is what keeps the
   sheet this small. A small solar pump, switched by a float switch in the main tanks, moves its
   water about 25 m to the main tanks whenever they have room. Size the extra tank as 124 m³ minus
   the measured usable storage of the main tanks.
-- **Result with the default settings:** tanker deliveries go from 6.5 a summer (about €1,800 a
-  year) to none since 2010; the lowest the tanks get is 12 m³ (2011). A summer as dry as 2009
+- **Result with the default settings:** tanker deliveries go from 5.3 a summer (about €1,500 a
+  year) to none since 2010; the lowest the tanks get is 11 m³ (2011). A summer as dry as 2009
   would need one or two tankers; the sheet can be extended later. Without the tank the sheet
-  would need about 230 m² for the same result; with 20, 30 or 50 m³ it could be 170, 160 or
-  155–160 m², but no less: below about 155–175 m² storage can't make up for the missing
+  would need about 190 m² for the same result; with 20, 30 or 50 m³ it could be 155, 145 or
+  140 m², but no less: below about 140–155 m² storage can't make up for the missing
   collecting area. With dual-flush toilets as well, the lowest is 26 m³ even in 2009.
 - **Measure the main tanks first:** what matters is total storage. With the sheet feeding the
   main tanks directly, about 120–124 m³ of usable storage (about 133–138 m³ full size at 90%
@@ -147,9 +147,9 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 
 | Setting | Default | Basis |
 |---|---|---|
-| Collecting surfaces | Roofs 1 and 2, 15 × 5 m each | Footprint (plan area), which is what catches rain |
+| Collecting surfaces | House roof 15 × 5 m and gîte roof 14 × 7 m | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m | Off by default |
-| Ground sheet | 20 × 8.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ extra tank | Off by default; the recommended fix (see above) |
+| Ground sheet | 20 × 7.75 m EPDM sheet, 85% reaching the tanks, with a 10 m³ extra tank | Off by default; the recommended fix (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | House tank and solar building tank, each a 4 × 4 × 4 m box, 90% usable | Estimated, still to be measured. Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
