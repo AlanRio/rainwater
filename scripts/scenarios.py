@@ -4,8 +4,8 @@ Standard library only. Edit the SCENARIOS list at the bottom and run:
 
     python scripts/scenarios.py
 
-Defaults match the website: 8 guests May-October; showers 50 L, toilets 5 x 9 L, taps 15 L per
-guest a day; laundry 8 x 55 L a week and dishwasher 1.5 x 12 L a day; roofs 75% and the ground
+Defaults match the website: 8 guests May-October; showers 50 L, toilets 5 x 3.3 L (dual flush
+6/2 L, one full flush for every two short ones), taps 15 L per guest a day; laundry 8 x 55 L a week and dishwasher 1.5 x 12 L a day; roofs 75% and the ground
 sheet 85% reaching the tanks; 90% of tank volume usable; a 12 m3 tanker ordered at 5% and
 arriving 2 days later at EUR 150 + EUR 3/km x 2 x 15.6 km + EUR 2.80/m3. A "sheet tank" is filled
 only by the sheet and empties into the main tanks whenever they have room.
@@ -28,8 +28,8 @@ def load_rain(source='anglars'):
 DAYS, RAIN = load_rain()
 
 
-def run(roofs_m2, tanks_m3, sheet_m2=0.0, sheet_tank_m3=0.0, from_year=2010, guests=8,
-        per_guest=50 + 45 + 15, house_l=8 * 55 / 7 + 1.5 * 12, roof_eff=0.75, sheet_eff=0.85,
+def run(roofs_m2, tanks_m3, sheet_m2=0.0, sheet_tank_m3=0.0, from_year=1994, guests=8,
+        per_guest=50 + 5 * (6 + 2 * 2) / 3 + 15, house_l=8 * 55 / 7 + 1.5 * 12, roof_eff=0.75, sheet_eff=0.85,
         usable=0.9, season=(5, 10), load=12, trigger=0.05, lead=2):
     """Returns tankers a summer, cost a year, summers needing a tanker, total, lowest level (m3), its year."""
     i0 = DAYS.index(dt.date(from_year, 1, 1))
@@ -69,10 +69,10 @@ if __name__ == '__main__':
     TANKS = 50 + 10   # solar building tank and house tank
     SCENARIOS = [
         ('As now: house and gîte roofs', dict(roofs_m2=HOUSE_GITE, tanks_m3=TANKS)),
-        ('1. Step 1 roofs', dict(roofs_m2=STEP1, tanks_m3=TANKS)),
-        ('1 + 2. Plus 50 m3 new storage', dict(roofs_m2=STEP1, tanks_m3=TANKS + 50)),
-        ('1 + 2 + 3. Plus dual flush', dict(roofs_m2=STEP1, tanks_m3=TANKS + 50, per_guest=50 + 22.5 + 15)),
-        ('1, 70 m3 new storage, 90 m2 sheet', dict(roofs_m2=STEP1, tanks_m3=TANKS + 70, sheet_m2=90)),
+        ('Step 1: gutter the three roofs', dict(roofs_m2=STEP1, tanks_m3=TANKS)),
+        ('Steps 1 + 2: plus a 25 m3 tank', dict(roofs_m2=STEP1, tanks_m3=TANKS + 25)),
+        ('Steps 1 + 2 + plan B: 90 m2 sheet', dict(roofs_m2=STEP1, tanks_m3=TANKS + 25, sheet_m2=90)),
+        ('Step 1 + 90 m2 sheet, no new tank', dict(roofs_m2=STEP1, tanks_m3=TANKS, sheet_m2=90)),
     ]
     print('scenario | tankers/summer | EUR/year | summers with a tanker | total | lowest m3 | year')
     for name, kw in SCENARIOS:

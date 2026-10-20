@@ -23,6 +23,9 @@
     --border-2: rgba(0, 0, 0, 0.24);
     --water: #1D9E75;
     --tanker: #D85A30;
+    --wet: #3d7fc4;
+    --dry: #b8322a;
+    --planb: #b45f12;
     --radius: 8px;
     --radius-lg: 12px;
     --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -140,6 +143,60 @@
 
   footer { font-size: 12px; color: var(--text-3); padding: 4px 4px 24px; }
 
+  /* The top: the whole message in one screen */
+  .top { border: 2px solid var(--dry); }
+  .kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); font-weight: 600; margin-bottom: 4px; }
+  .top h1 { font-size: 27px; color: var(--dry); margin-bottom: 8px; }
+  .lead { font-size: 17px; line-height: 1.5; margin: 0 0 14px; }
+  .blk { border-left: 4px solid var(--success); background: #eef8f3; border-radius: 0 var(--radius) var(--radius) 0; padding: 10px 14px; margin: 14px 0 0; }
+  .blk p { margin: 0 0 8px; }
+  .blk p:last-child { margin-bottom: 0; }
+  .blk-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; color: var(--success); margin-bottom: 6px; }
+  .planblk { border-left-color: var(--planb); background: #fdf3e8; }
+  .planblk .blk-label { color: var(--planb); }
+  .notenough { color: var(--dry); font-weight: 600; }
+  .more { margin: 14px 0 0; color: var(--text-3); }
+
+  /* Calendar strips: each day of the season, with or without water */
+  .strip-row { display: grid; grid-template-columns: 9.5em 1fr; column-gap: 10px; align-items: center; margin-bottom: 8px; }
+  .strip-name { font-size: 13px; font-weight: 600; }
+  .strip { position: relative; display: flex; height: 22px; border-radius: 4px; overflow: hidden; background: var(--wet); }
+  .strip i { display: block; height: 100%; }
+  .strip i.wet { background: var(--wet); }
+  .strip i.dry { background: var(--dry); }
+  .strip-out { grid-column: 2; font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .strip-out b.good { color: var(--wet); }
+  .strip-out b.bad { color: var(--dry); }
+  .strip-axis { display: grid; grid-template-columns: 9.5em 1fr; column-gap: 10px; }
+  .strip-axis > div { grid-column: 2; position: relative; height: 16px; font-size: 11px; color: var(--text-3); }
+  .strip-axis span { position: absolute; top: 0; border-left: 1px solid var(--border-2); padding-left: 3px; line-height: 14px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+  .seg button { padding: 5px 10px; font-size: 12px; }
+  .seg button[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* Why it runs out */
+  .chart-title { font-weight: 600; font-size: 14px; margin: 14px 0 0; }
+  #why_chart { width: 100%; height: 280px; display: block; margin-top: 6px; }
+
+  /* Plan B */
+  .planb { border: 2px solid var(--planb); }
+  .planb-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--planb); font-weight: 600; margin-bottom: 6px; }
+  .live-box { background: #fdf3e8; border-radius: var(--radius); padding: 10px 12px; margin: 10px 0; }
+  .live-box p { margin: 0 0 6px; }
+  .live-box p:last-child { margin-bottom: 0; }
+  #pb_slider { max-width: 420px; }
+
+  /* How much roof and tank it takes */
+  table.sizing td.cell { text-align: center; }
+  table.sizing td.cell b { font-size: 16px; display: block; }
+  table.sizing .tag { display: block; font-size: 11px; color: var(--text-2); }
+  table.sizing .here-tag { font-weight: 600; color: var(--text); }
+  table.sizing td.over { background: #fbe9e6; }
+  table.sizing td.near { background: #eef8f3; }
+  table.sizing td.zero { background: #d9f0e5; }
+  table.sizing td.here { outline: 2px solid var(--text); outline-offset: -2px; }
+  table.sizing th { white-space: nowrap; }
+
   @media (max-width: 640px) {
     body { padding: 10px; font-size: 15px; }
     section, header { padding: 14px 14px; }
@@ -148,93 +205,79 @@
     .flow { flex-direction: column; }
     .flow .arrow { transform: rotate(90deg); }
     #chart { height: 260px; }
+    .top h1 { font-size: 23px; }
+    .lead { font-size: 16px; }
+    .strip-row, .strip-axis { grid-template-columns: 1fr; }
+    .strip-name { margin-bottom: 2px; }
+    .strip-out, .strip-axis > div { grid-column: 1; }
+    #why_chart { height: 240px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
-  <h1>Will the rainwater last the summer?</h1>
-  <p class="sub">An off-grid house near Prayssac (Lot, France) runs entirely on rain collected from its roofs. This page checks, day by day, whether its tanks can supply guests through the summer, using the rain that actually fell. <a href="#fix">The recommended fix</a> is a rain sheet on the slope next to the house.</p>
+<header class="top" id="top">
+  <div class="kicker">Rainwater at the house near Prayssac, Lot</div>
+  <h1 id="st_h1">Will the rainwater last the summer?</h1>
+  <p class="lead" id="st_today">Working it out…</p>
+
+  <div class="strips" id="strips" role="img"></div>
+  <div class="seg ex-switch"></div>
+  <p class="tiny" id="strip_note"></p>
+
+  <div class="blk fixblk">
+    <div class="blk-label">Two fixes, both needed</div>
+    <p><b>1. Gutter the yoga building, car port and house terrace.</b> More of each rainstorm then reaches the tanks, using buildings that are already there. <span class="notenough" id="st_s1"></span></p>
+    <p><b id="st_s2">2. Add a buried tank.</b> It carries the house through the dry weeks between storms.</p>
+    <p id="st_both"></p>
+  </div>
+
+  <div class="blk planblk">
+    <div class="blk-label">Plan B, which always works</div>
+    <p><b>Still short? Lay a rain sheet on the slope.</b> It can always be made bigger: more sheet catches more rain. <a href="#planb">How big?</a></p>
+  </div>
+  <p class="small more"><a href="#why">Why it runs out</a> · <a href="#planb">Plan B</a> · <a href="#numbers">The numbers</a> · <a href="#try">Try it yourself</a></p>
 </header>
 
-<section class="answer" aria-live="polite">
-  <div class="answer-label">The answer, with the settings below</div>
-  <p class="small muted" style="margin:-2px 0 8px">Feel free to change anything below: it all recalculates automatically and this answer updates. The tank sizes (solar building tank 50 m³, house tank 10 m³) may need measuring to confirm them.</p>
-  <p class="headline" id="headline">Calculating…</p>
-  <p class="compare" id="compare"></p>
+<section id="why">
+  <h2>Why it runs out</h2>
+  <p><b>The house uses water every day, but rain doesn't fall every day.</b> A full house uses <span id="why_use"></span> (<span id="why_parts"></span>). Full tanks hold enough for about <b><span class="why_tankw"></span> weeks</b>. The season is <b><span class="why_seasonw"></span> weeks</b> long, so the other <span id="why_need"></span> weeks' worth has to come from rain that falls during the summer itself.</p>
+  <p><b>Summer rain comes in bursts, with long gaps.</b> From <span class="why_season"></span>, an average year brings <span id="why_rain"></span> of rain, but <span id="why_heavy"></span> of it falls on a few stormy days of 10 mm or more. A dry spell of <span id="why_gap"></span> is normal, and the longest since <span class="why_from"></span> lasted <span id="why_gapmax"></span>.</p>
+
+  <div class="chart-title" id="why_chart_title"></div>
+  <div class="seg ex-switch"></div>
+  <canvas id="why_chart" role="img"></canvas>
+  <p class="tiny">Lines: water left in the tanks, in weeks of use for a full house. Blue bars from the top: each day's rain. Nothing trucked in.</p>
+
+  <h3>So the house needs two things</h3>
+  <ol class="steps">
+    <li><b>More roof, so each storm brings in more.</b> A 20 mm downpour gives today's roofs <span id="why_storm_now"></span> of water. With step 1, the same downpour gives <span id="why_storm_s1"></span>.</li>
+    <li><b>More tank, to get through the gaps.</b> A bigger tank starts the summer with more weeks of water (<span class="why_tankw12"></span> instead of <span class="why_tankw"></span>), and keeps more of the big storms instead of letting them overflow.</li>
+  </ol>
+  <p><b>Neither is enough alone.</b> Since <span class="why_from"></span>, step 1 alone would still run dry in <span id="why_s1only"></span> summers, and the new tank alone in <span id="why_s2only"></span>. Both together: <span id="why_both"></span>.</p>
 </section>
 
-<section class="fix" id="fix">
-  <div class="fix-label">The recommended fix</div>
-  <h2>More roofs, more storage, and dual-flush toilets</h2>
-  <p class="caveat"><b>Tank sizes:</b> the solar building tank is 50 m³ and the house tank 10 m³. They may need measuring to confirm them, as everything below depends on the total storage.</p>
-  <p>The house runs short for two reasons. Its roofs catch too little rain, and with only about 60 m³ of tanks it can't keep what they do catch: a summer storm fills the tanks in a day and the rest overflows. So it needs <b>more collecting surface and more storage</b>, in that order of cost.</p>
-  <ol class="steps">
-    <li><b>Connect the roofs you already have:</b> the yoga building (5 × 7 m), the car port (12 × 4.5 m) and the house terrace (5 × 5 m, right above the house tank). 114 m² more for the price of gutters, downpipes and pipes, and nobody sees them. On its own that takes deliveries from about 7 a summer to about 4.5, because the tanks are too small to keep the extra water.</li>
-    <li><b>Add about 50 m³ of buried storage</b>, such as a precast concrete rainwater tank, filled by all the roofs. With step 1, that brings deliveries down to about 1.3 a summer, with none in 7 of the last 17 summers.</li>
-    <li><b>Fit dual-flush toilets.</b> With steps 1 and 2, no tanker in any summer since 2010; a summer as dry as 2009 would need one.</li>
-  </ol>
-  <p>Instead of dual-flush toilets, a <b>rain sheet of about 90 m²</b> on the slope south of the buildings does the same job if the new storage is about 70 m³ rather than 50 m³.</p>
-  <p class="fix-live" id="fix_live">Calculating…</p>
-  <div class="toolbar"><button type="button" id="fix_btn">1. Connect the other roofs</button>
-    <button type="button" id="fix_btn2">2. Add the new tank</button>
-    <button type="button" id="fix_btn3">3. Dual-flush toilets</button>
-    <span class="small muted">Each switches that change on in the simulator below.</span></div>
-
-  <h3>Options compared</h3>
-  <p class="small muted">With the default settings: house and gîte roofs, solar building tank 50 m³ and house tank 10 m³, 8 guests from May to October, 120 litres each a day, every summer since 2010. Worked out on 18 October 2026; the box above is recalculated live.</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Option</th><th>Upfront cost</th><th>Tanker deliveries a summer</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>As now (house and gîte roofs, 60 m³ of tanks)</td><td>None</td><td class="num">7.0 (about €1,900 a year)</td><td>Depends on finding a haulier and a legal filling point; in a drought, towns compete for the same lorries.</td></tr>
-        <tr><td>Step 1: connect the yoga building, car port and house terrace (114 m²)</td><td>About €1,500–5,000</td><td class="num">4.5</td><td>Cheap and invisible, but on its own the tanks are too small to keep the extra water. The car port was meant to top up a swimming pool: its water could go to the house tanks first and overflow to the pool.</td></tr>
-        <tr><td>Steps 1 and 2: plus about 50 m³ of new buried storage</td><td>Plus roughly €8,000–15,000</td><td class="num">1.3 (none in 7 of 17 summers)</td><td>Storage is what's missing. Price is rough: get quotes.</td></tr>
-        <tr class="best"><td><b>Steps 1, 2 and 3: plus dual-flush toilets</b></td><td><b>Plus roughly €50–150 a toilet</b></td><td class="num"><b>0</b> (lowest about 11 m³, in 2016; a summer like 2009 would need 1)</td><td>The full recommendation.</td></tr>
-        <tr><td>Step 1, about 70 m³ of new storage and a 90 m² rain sheet</td><td>Roughly €12,000–22,000 in all</td><td class="num">0 (a summer like 2009 would need 1–2)</td><td>Instead of dual-flush toilets.</td></tr>
-        <tr><td>Steps 1 and 3 without new storage</td><td>About €1,500–5,000 plus the toilets</td><td class="num">2.2</td><td>Not enough on its own with tanks this small.</td></tr>
-        <tr><td>Borehole</td><td>About €20,000 if the first hole finds water; €29,000–33,000 if it doesn't; plus €5,000–9,000 for the pump</td><td class="num">0, if it works</td><td>Water could be 110 m down or much deeper. Roughly a 1 in 5 chance the first hole is dry (see below).</td></tr>
-        <tr><td>Air-to-water machines</td><td>€1,000s per unit</td><td class="num">No real change</td><td>12–20 litres a day each: enough for drinking water, nowhere near enough for showers.</td></tr>
-      </tbody>
-    </table>
+<section class="planb" id="planb">
+  <div class="planb-label">Plan B</div>
+  <h2>The fallback that always works: more sheet</h2>
+  <p>If the house still runs short after steps 1 and 2 (more guests, less rain reaching the tanks than assumed, drier summers to come), there is always one more lever: <b>a rubber rain sheet laid on the open slope south of the buildings</b>, draining by gravity into the main tanks. It isn't a building, needs no crane, and can always be made bigger. More sheet catches more rain.</p>
+  <label class="f">Sheet size: <span class="val" id="pb_area"></span> (<span id="pb_dims"></span>)
+    <input type="range" id="pb_slider" min="0" max="200" step="10" value="90"></label>
+  <div class="live-box">
+    <p id="pb_both"></p>
+    <p id="pb_instead"></p>
+    <p class="tiny" id="pb_tankers"></p>
+    <p class="tiny" id="pb_site"></p>
   </div>
-  <p class="tiny">Ruled out: a mains connection (the nearest main is about 800 m away and 50 m lower), taking water from the Lot (far away and far below the house), and an open pond (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
-
+  <p class="small"><b>Its limit:</b> a sheet catches more rain but doesn't store any. With only today's tanks, a storm on a big sheet fills them and the rest overflows, so getting through every summer that way takes a very large sheet. It works best on top of the new tank.</p>
+  <div class="toolbar"><button type="button" id="pb_try">Try this in the simulator</button></div>
   <details>
-    <summary>Step 1: connecting the roofs and terrace</summary>
-    <div class="body">
-      <ul class="checks small">
-        <li><b>Each roof</b> needs gutters, downpipes, a leaf guard and a first-flush diverter that throws away the dirtiest first rain, then a buried pipe to the main tanks. Lay the pipe with a steady fall; if a building turns out to be lower than the tank inlet, a small solar pump does the job.</li>
-        <li><b>The house terrace</b> sits right above the house tank, so it's the simplest: a surface drain and a filter straight into the tank. Paving sheds a little less rain than a roof, which barely changes the numbers.</li>
-        <li><b>The car port</b> was meant to top up a swimming pool. Its pipe can feed the house tanks first and overflow to the pool when they're full, so the pool still gets the surplus.</li>
-        <li><b>Rough cost:</b> a few hundred euros to about €2,000 per building, depending on how far it is from the tanks: about €1,500–5,000 for all three.</li>
-      </ul>
-    </div>
-  </details>
-
-  <details>
-    <summary>Step 2: the new storage, and measuring the tanks</summary>
-    <div class="body">
-      <p class="small"><b>Confirming the existing tanks.</b> To measure each one: the inside length and width, the depth from the floor to the overflow pipe, and the height of the pump intake above the floor (water below it can't be used). Usable volume = length × width × (overflow height − intake height). If you can't get a tape in, note how far the level rises when a known amount goes in: a 12 m³ tanker load raising the level by 1 m means a floor area of 12 m². Enter the real sizes under <i>Tanks</i> in the simulator.</p>
-      <p class="small"><b>How much new storage.</b> With steps 1 and 3, the existing 60 m³ plus about 50 m³ new comes to about 110 m³ in total; with the rain sheet instead of dual flush, about 130 m³. So the new tank should hold about 110 m³ (or 130 m³) minus whatever the existing tanks really hold. If the existing tanks hold more, the new tank can be smaller.</p>
-      <p class="small"><b>What to build it from:</b></p>
-      <ul class="checks small">
-        <li><b>Precast concrete rainwater tanks</b>, buried, from a local concrete works: one or two tanks of 25–50 m³. Concrete releases nothing harmful and slightly raises the pH of acidic rainwater. A new tank releases lime at first, so fill and empty it once or twice before use, and ask for one certified for drinking water (ACS). It needs a crane or a large digger to lift in.</li>
-        <li><b>Several linked buried plastic rainwater tanks</b>, if a crane can't reach the site.</li>
-        <li><b>A flexible pillow tank</b> on the ground is the cheapest per m³, but at this size it's about 10 × 6 m and 1 m high, and visible.</li>
-      </ul>
-      <p class="small">Place it where the roofs' pipes can reach it with a steady fall, and link it to the main tanks. If it sits lower than the main tanks, a small solar pump with a float switch moves the water across when they have room. Whatever it's made of, it must be closed and dark, with fine insect mesh on the vents and overflow.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary>Instead of dual flush: the rain sheet, where it goes</summary>
+    <summary>Where the sheet goes</summary>
     <div class="body">
       <figure>
         <a href="img/rain-sheet-site.jpg" target="_blank" rel="noopener"><img src="img/rain-sheet-site.jpg" width="1106" height="994" loading="lazy" alt="Elevation map of the slope south of the buildings from LiDAR, showing where the rain sheet would go, its collection trench and outlet, the diversion ditch above it and the pipe to the main tanks."></a>
-        <figcaption>Where the rain sheet would go, if used instead of dual-flush toilets. Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey, trees over 5 m hatched. The main tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
+        <figcaption>Where the rain sheet would go, drawn at 20 × 4.5 m (90 m²). Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey, trees over 5 m hatched. The main tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
       </figure>
       <ul class="checks">
         <li><b>The house sits on a saddle at about 229.5 m</b>, between two hollows. Bowl 1, to the south-west, is a closed limestone hollow (a doline) with its floor at about 224.5 m. Bowl 2, to the north-east, is the head of a dry valley that falls away north.</li>
@@ -248,7 +291,7 @@
   </details>
 
   <details>
-    <summary>Instead of dual flush: how the rain sheet is built</summary>
+    <summary>How the sheet is built</summary>
     <div class="body">
       <ol class="steps">
         <li><b>Clear the ground</b> between September and February, outside the bird nesting season and the spring flowering: cut the grass and bushes short and take out any woody roots that could push up under the sheet. No weedkiller.</li>
@@ -265,22 +308,58 @@
       <p class="small"><b>Why EPDM.</b> It's heavy enough that the wind doesn't lift it, lies flat on uneven ground, comes in one piece so there's nothing to weld, and lasts 20–40 years in the sun. HDPE plastic is cheaper but stiff and wrinkles in the heat; PVC liners go brittle in sunlight within about 10 years. Rigid roofing sheets on a frame would last as long but cost about €6,000–10,000, catch the wind, show from further away, and count as a building, which this zone of the local plan doesn't allow at that size.</p>
     </div>
   </details>
+</section>
 
+<section id="numbers">
+  <h2>The numbers behind it</h2>
+  <p class="small muted">Worked out by this page from the default settings, over every complete summer since <span class="why_from"></span>. "Without water" assumes nothing is trucked in. The tanker columns assume a 12 m³ tanker is called whenever the tanks run low; the aim is no summer with more than 3 deliveries.</p>
+  <div class="table-wrap"><table id="options"></table></div>
+  <p class="tiny">Other ideas, and why not: a <b>borehole</b> (water at least about 110 m down, a 1 in 5 chance the first hole is dry, about €20,000–33,000; see below); <b>air-to-water machines</b> (12–20 litres a day each, enough for drinking but nowhere near showers); a <b>mains connection</b> (the nearest main is about 800 m away and 50 m lower); taking water from <b>the Lot</b> (far away and far below the house); an <b>open pond</b> (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
+
+  <h3>How much roof and tank it takes</h3>
+  <p class="small">Tanker deliveries in the worst summer since <span class="why_from"></span>, for different roof areas and tank sizes, with how many summers needed any. Green is within 3. There's no fixed ratio between roof and tank. Below a certain roof area, the roofs can't catch a season's water even over a whole year, so no tank helps (the top rows). Above it, more roof lets the tank be smaller, but only slowly.</p>
+  <div class="table-wrap"><table id="sizing" class="sizing"></table></div>
+  <p class="tiny">Small ups and downs along a row come from when deliveries happen to fall: a lorry always brings a full load, and is called when the tanks fall to 5%.</p>
 
   <details>
-    <summary>Costs, and where to buy</summary>
+    <summary>Step 1: guttering the yoga building, car port and house terrace</summary>
+    <div class="body">
+      <ul class="checks small">
+        <li><b>Each roof</b> needs gutters, downpipes, a leaf guard and a first-flush diverter that throws away the dirtiest first rain, then a buried pipe to the main tanks. Lay the pipe with a steady fall; if a building turns out to be lower than the tank inlet, a small solar pump does the job.</li>
+        <li><b>The house terrace</b> sits right above the house tank, so it's the simplest: a surface drain and a filter straight into the tank. Paving sheds a little less rain than a roof, which barely changes the numbers.</li>
+        <li><b>The car port</b> was meant to top up a swimming pool. Its pipe can feed the house tanks first and overflow to the pool when they're full, so the pool still gets the surplus.</li>
+        <li><b>Rough cost:</b> a few hundred euros to about €2,000 per building, depending on how far it is from the tanks: about €1,500–5,000 for all three. A guess, not a quote.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 2: the new buried tank</summary>
+    <div class="body">
+      <p class="small"><b>Size.</b> The page assumes about 25 m³ (4 × 2.5 m and 2.5 m deep), on top of the 60 m³ of the solar building tank and the house tank. Change it under <i>Tanks</i> in the simulator to see what a bigger or smaller one does. Only part of any tank can be used: water below the pump intake and above the overflow pipe can't, so the page counts 90%. Measuring the height of the pump intake in the existing tanks would firm that up.</p>
+      <p class="small"><b>What to build it from:</b></p>
+      <ul class="checks small">
+        <li><b>A precast concrete rainwater tank</b>, buried, from a local concrete works. Concrete releases nothing harmful and slightly raises the pH of acidic rainwater. A new tank releases lime at first, so fill and empty it once or twice before use, and ask for one certified for drinking water (ACS). It needs a crane or a large digger to lift in.</li>
+        <li><b>Several linked buried plastic rainwater tanks</b>, if a crane can't reach the site.</li>
+        <li><b>A flexible pillow tank</b> on the ground is the cheapest per m³, but it's visible and needs a flat, protected spot.</li>
+      </ul>
+      <p class="small">Place it where the roofs' pipes can reach it with a steady fall, and link it to the main tanks. If it sits lower than the main tanks, a small solar pump with a float switch moves the water across when they have room. Whatever it's made of, it must be closed and dark, with fine insect mesh on the vents and overflow.</p>
+      <p class="small"><b>Cost:</b> to be quoted.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Costs, and where to buy: rough guesses until there are quotes</summary>
     <div class="body">
       <div class="table-wrap">
         <table>
           <thead><tr><th>Item</th><th class="num">Rough cost</th></tr></thead>
           <tbody>
-            <tr><th colspan="2">Step 1: connecting the roofs and terrace</th></tr>
+            <tr><th colspan="2">Step 1: guttering the yoga building, car port and house terrace</th></tr>
             <tr><td>Gutters, downpipes, leaf guards, first-flush diverters and buried pipes for the yoga building, car port and house terrace</td><td class="num">€1,500–5,000</td></tr>
-            <tr><th colspan="2">Step 2: about 50 m³ of new buried storage</th></tr>
-            <tr><td>Precast concrete or linked plastic tanks, delivered and set in, with pipework (rough; get quotes)</td><td class="num">€8,000–15,000</td></tr>
-            <tr><th colspan="2">Step 3: dual-flush toilets</th></tr>
-            <tr><td>New dual-flush mechanisms, per toilet</td><td class="num">€50–150</td></tr>
-            <tr><th colspan="2">Instead of step 3: rain sheet of 90 m² (and about 20 m³ more storage)</th></tr>
+            <tr><th colspan="2">Step 2: a new buried tank of about 25 m³</th></tr>
+            <tr><td>Precast concrete or linked plastic tanks, delivered and set in, with pipework</td><td class="num">To be quoted</td></tr>
+            <tr><th colspan="2">Plan B: rain sheet of 90 m²</th></tr>
             <tr><td>EPDM sheet in one piece, about 6.4 × 21.6 m made to measure (1.14–1.2 mm), allowing for the trenches</td><td class="num">€1,250–1,800</td></tr>
             <tr><td>Geotextile underlay, about 140 m²</td><td class="num">€150–300</td></tr>
             <tr><td>Outlet collar, leaf filter and about 25 m of 110 mm pipe</td><td class="num">€400–800</td></tr>
@@ -345,7 +424,7 @@
       </div>
       <p class="tiny">Assumes a hydrogeologist and ground survey to choose the spot (€2,000), setting up the rig (€1,000; €300 for a second hole), drilling at €70 a metre, casing and sealing at €40 a metre once water is found, a pumping test (€1,200), and €1,000 to seal a dry hole as the law requires. Every extra 10 m of depth adds about €1,100. Then add about €5,000–9,000 for a pump that can lift water 130 m or more, its solar drive, pipework and treatment.</p>
       <p class="small">There's paperwork too: a household borehole must be declared on <a href="https://www.ecologie.gouv.fr/actualites/forages-domestiques-louverture-tele-declaration" target="_blank" rel="noopener">DUPLOS</a> at least a month before drilling.</p>
-      <p class="small"><b>Compared with that, connecting the roofs, adding storage and changing the toilets cost a fraction as much, can't come up dry, and uses rain the record shows falls every summer.</b></p>
+      <p class="small"><b>Compared with that, guttering the roofs and adding a tank cost a fraction as much, can't come up dry, and use rain the record shows falls every summer.</b></p>
     </div>
   </details>
 
@@ -353,11 +432,11 @@
     <summary>Before ordering</summary>
     <div class="body">
       <ol class="steps small">
-        <li><b>Confirm the sizes of the house tank and the solar building tank</b> if needed (see <i>Step 2: the new storage, and measuring the tanks</i>), as the new storage depends on them.</li>
-        <li><b>Connect the yoga building, car port and house terrace</b>: the cheapest step, whatever the tanks turn out to be.</li>
-        <li><b>Size the new storage</b> from the measured tanks in the simulator, and get quotes.</li>
-        <li><b>Fit dual-flush mechanisms</b> if the toilets allow.</li>
-        <li><b>If you go for the sheet instead:</b> check the levels on site, check the slope is still open grass and low scrub (the survey is from April 2022), and email the mairie a sketch first.</li>
+        <li><b>Gutter the yoga building, car port and house terrace</b>: needed whatever else is done.</li>
+        <li><b>Get quotes for the new tank</b>, and check where a crane or digger can reach.</li>
+        <li><b>Measure the height of the pump intake</b> in the existing tanks, to firm up how much of them can be used.</li>
+        <li><b>Check how much rain really reaches the tanks</b> with the dipstick tool at the bottom of the page, after the guttering is done.</li>
+        <li><b>If plan B is needed:</b> check the levels on site, check the slope is still open grass and low scrub (the survey is from April 2022), and email the mairie a sketch first.</li>
         <li><b>Plan the work for autumn or winter</b>, so it's ready before summer.</li>
       </ol>
     </div>
@@ -406,10 +485,10 @@
         <tbody>
           <tr><td>Daily rainfall</td><td><span class="ex_range"></span></td><td>Météo-France rain gauge 46005001, Anglars-Juillac, 2.9 km from the house. The gauge is in the valley at 104 m and the house is on the plateau at about 229 m; if anything, slightly higher ground gets slightly more rain, so the gauge is on the cautious side. Published as <a href="https://www.data.gouv.fr/fr/datasets/donnees-climatologiques-de-base-quotidiennes/" target="_blank" rel="noopener">open data on data.gouv.fr</a>. Refreshed on this page every week.</td></tr>
           <tr><td>Roof areas</td><td>House 15 × 5 m, gîte 14 × 7 m</td><td>Footprint of each roof. It's the area seen from above that catches rain, not the larger sloping tiled surface.</td></tr>
-          <tr><td>Ground sheet</td><td>Off; 20 × 4.5 m, 85% reaches the tanks</td><td>The step 2 rubber sheet on the slope south of the buildings (see <a href="#fix">the recommended fix</a>). A plastic-sheeted catchment on a South Australian farm gave close to 100% runoff, though ripples in the plastic reduced it in light rain on hot days (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island case study</a>). 85% allows for that, leaves, dust and the first rinse.</td></tr>
+          <tr><td>Ground sheet</td><td>Off; 20 × 4.5 m, 85% reaches the tanks</td><td>The plan B rubber sheet on the slope south of the buildings (see <a href="#planb">plan B</a>). A plastic-sheeted catchment on a South Australian farm gave close to 100% runoff, though ripples in the plastic reduced it in light rain on hot days (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island case study</a>). 85% allows for that, leaves, dust and the first rinse.</td></tr>
           <tr><td>Collection efficiency</td><td>75%</td><td>Design standards for rainwater systems (BS 8515 in the UK, DIN 1989 in Germany) assume roughly 80–90% runs off a pitched roof and about 90% gets through the filter. Set a little lower here for clay tiles and summer cloudbursts. You can measure the real figure with your own tanks at the bottom of the page.</td></tr>
-          <tr><td>Tanks</td><td>Solar building tank 50 m³ and house tank 10 m³ (both modelled 2.5 m deep), 90% usable</td><td>May need measuring to confirm. The very bottom (below the pump intake) and top (above the overflow pipe) can't be used.</td></tr>
-          <tr><td>Water use</td><td>120 litres per guest per day</td><td>Built up from showers, toilets, taps, laundry and dishwasher under <i>Water use in detail</i>. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
+          <tr><td>Tanks</td><td>Solar building tank 50 m³ and house tank 10 m³ (both modelled 2.5 m deep), 90% usable; the new tank (step 2) about 25 m³</td><td>The very bottom (below the pump intake) and top (above the overflow pipe) can't be used. 90% is an estimate until the pump intake height is measured.</td></tr>
+          <tr><td>Water use</td><td>About 82 litres per guest per day, plus about 81 litres a day for the house's laundry and dishwasher</td><td>Built up from showers (50 litres), toilets, taps (15 litres), laundry and dishwasher under <i>Water use in detail</i>. The toilets are dual flush, 6 and 2 litres. The UK's water efficiency calculation for new homes counts 1.46 full and 2.96 short flushes per person a day, about one full flush for every two short ones (<a href="https://www.gov.uk/government/publications/the-water-efficiency-calculator-for-new-dwellings" target="_blank" rel="noopener">Water Efficiency Calculator for New Dwellings</a>, now part of Approved Document G). So a flush here averages (6 + 2 × 2) ÷ 3 = 3.3 litres, at 5 flushes per guest a day. For comparison, the French average is about 145 litres per person per day including drinking, cooking and gardens (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
           <tr><td>Water price</td><td>€2.80 per m³</td><td>Official average price of drinking water in the Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
           <tr><td>Tanker delivery</td><td>12 m³ from Parnac (15.6 km): €150 fixed + €3 per km + water</td><td>Each delivery costs a fixed charge, plus a charge per kilometre on the round trip, plus the water. The fixed charge is about 1 to 1.5 hours of lorry and driver at the €90 to €130 an hour that hauliers charge. The per-km rate is the French road-haulage cost of about €1.80 to €2.30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus a margin, in line with the €2 to €4 per km that delivery firms quote (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">example</a>). Two real figures check it: about €300 for a small private delivery, and the roughly €10 per m³ that Figeac budgeted for tanker loads in its August 2026 drought plan, about €10,000 a day for up to about 1,000 m³ (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). The local hauliers and their distances are under <i>Tanker in detail</i>. Replace with a real quote when you have one.</td></tr>
           <tr><td>Climate outlook</td><td>Off (recent weather)</td><td>Météo-France projections for Occitanie around 2050: summer rain −15%, winter rain +12% (<a href="https://meteofrance.com/changement-climatique/quel-climat-futur-en-occitanie" target="_blank" rel="noopener">Météo-France</a>).</td></tr>
@@ -437,11 +516,21 @@
         <li>Rain is measured 3 km away. A single summer storm can soak one village and miss the next, but over months and years the totals agree closely.</li>
         <li>Occupancy below 100% is spread evenly through the season rather than modelled as empty weeks. The seasonal total is the same; a full fortnight in a dry spell is slightly harder than shown.</li>
         <li>The weather won't repeat itself exactly. The record covers more than 30 wet and dry years, and the climate setting shifts all of them towards the expected future, but nobody can say which coming years will be dry.</li>
-        <li>Tank size, roof areas and collection efficiency are estimates until they're measured.</li>
+        <li>Roof areas, the usable share of the tanks and collection efficiency are estimates until they're measured.</li>
         <li>Only the amount of water is modelled, not its quality.</li>
       </ul>
     </div>
   </details>
+</section>
+
+<section class="answer" id="try" aria-live="polite">
+  <div class="answer-label">Try it yourself</div>
+  <p class="small muted" style="margin:-2px 0 8px">The answer with the settings below. Change anything and it recalculates; the story at the top always uses the default settings.</p>
+  <p class="headline" id="headline">Calculating…</p>
+  <p class="compare" id="compare"></p>
+  <div class="toolbar" style="margin:12px 0 0"><button type="button" id="fix_btn">Step 1: gutter the three roofs</button>
+    <button type="button" id="fix_btn2">Step 2: add the new tank</button>
+    <button type="button" id="fix_btn3">Plan B: add the rain sheet</button></div>
 </section>
 
 <section id="settings">
@@ -481,7 +570,7 @@
 
   <div class="panel">
     <h3>Tanks</h3>
-    <p class="small muted">The solar building tank is 50 m³ and the house tank 10 m³; if they're measured, enter their inside sizes here. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
+    <p class="small muted">The solar building tank is 50 m³ and the house tank 10 m³. The new buried tank is step 2 of the fix. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
     <div id="tanks"></div>
     <div class="toolbar" style="margin:8px 0 0">
       <button type="button" id="add_tank">Add another tank</button>
@@ -515,7 +604,7 @@
             <tr><td>Toilets</td><td><span class="inline"><select data-k="toilet">
                 <option value="std">Standard flush (9 L)</option>
                 <option value="low">Low flush (6 L)</option>
-                <option value="dual">Dual flush (average 4.5 L)</option>
+                <option value="dual">Dual flush 6/2 L (average 3.3 L)</option>
                 <option value="dry">Dry / composting (no water)</option>
                 <option value="grey">Flushed with used shower water</option>
               </select> ×
