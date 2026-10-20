@@ -12,7 +12,7 @@ the page, and the settings are stored in the page address so a scenario can be s
 
 | File | What it is |
 |---|---|
-| `index.html` | Page layout, styles and the written explanation |
+| `index.html` | Page layout, styles and the written explanation, in English and Dutch |
 | `app.js` | Simulation, results, chart, comparison, calibration, shareable links |
 | `rainfall.js` | Daily rainfall data, generated. Do not edit by hand |
 | `scripts/update_rainfall.py` | Rebuilds `rainfall.js` from Météo-France and Open-Meteo |
@@ -36,6 +36,13 @@ Where things stand (20 October 2026), for picking this up in a new session:
   It avoids m², m³, lorries and prices on purpose. Below it, in order: why it runs out, plan B
   (a live sheet-size slider), the numbers (options table and a roof × tank grid), the details,
   how the model works, and the simulator ("Try it yourself").
+- **The page is in English and Dutch**, with a switch at the very top. Static text in
+  `index.html` is written twice, marked `lang="en"` and `lang="nl"`, and CSS hides the language
+  not in use; text written by `app.js` goes through `tr(english, dutch)`, and numbers and dates
+  follow the language (3,7 and € 1.015 in Dutch). Change both when editing text. The choice is
+  stored in the link as `#lang=nl` and remembered on the device; otherwise the browser's first
+  language decides. Default surface and tank names stay English in the settings and links and are
+  shown in Dutch through `NAMES_NL`.
 - **Every number in the top half is worked out by the page** from the default settings
   (`renderStory` and the functions after it in `app.js`), over complete summers since 1994. So
   changing `DEFAULT_SURFACES`, `DEFAULT_TANKS` or `DEFAULTS` updates the story, the tables and the

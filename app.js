@@ -5,9 +5,33 @@
   'use strict';
 
   const R = window.RAINFALL;
-  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-    'August', 'September', 'October', 'November', 'December'];
-  const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
+
+  // ---- Language --------------------------------------------------------------
+  // English or Dutch. Static text in index.html carries both, marked lang="en" and lang="nl", and CSS
+  // hides the one not in use; everything this script writes picks its language with tr(english, dutch).
+  let LANG = 'en';
+  const tr = (en, nl) => (LANG === 'nl' ? nl : en);
+  const pick = (o) => (o && typeof o === 'object' ? o[LANG] || o.en : o);
+  const MONTH_NAMES = {
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'],
+    nl: ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli',
+      'augustus', 'september', 'oktober', 'november', 'december'],
+  };
+  const MONTH_SHORT = {
+    en: MONTH_NAMES.en.map((m) => m.slice(0, 3)),
+    nl: ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+  };
+  let MONTHS = MONTH_NAMES.en;
+  let MONTHS_SHORT = MONTH_SHORT.en;
+  // The default surfaces and tanks keep their English names in the settings; these are shown in Dutch.
+  const NAMES_NL = {
+    'House': 'Huis', 'Gîte': 'Gîte', 'Yoga building': 'Yogagebouw', 'Terrace': 'Terras', 'Small terrace': 'Klein terras',
+    'Ground sheet (EPDM)': 'Opvangfolie (EPDM)', 'Car port roof': 'Dak van de carport', 'House terrace': 'Terras bij het huis',
+    'House tank': 'Huistank', 'Solar building tank': 'Tank bij het zonnegebouw', 'Extra tank (sheet only)': 'Extra tank (alleen folie)',
+    'New buried tank': 'Nieuwe ondergrondse tank', 'Other surface': 'Ander oppervlak',
+  };
+  const showName = (n) => (LANG === 'nl' && NAMES_NL[n]) || n;
   // Dual flush is the house's 6/2 L: one full flush for every two short ones, as in the UK water efficiency
   // calculator (Approved Document G), averages (6 + 2 × 2) / 3 = 3.3 L.
   const TOILET_LITRES = { std: 9, low: 6, dual: 10 / 3, dry: 0, grey: 9 };
@@ -17,25 +41,39 @@
   // distance from their base to Prayssac. Picking one sets the distance; 'custom' keeps yours.
   const SUPPLIERS = [
     { id: 'delrieu', name: 'Transports Delrieu, Parnac', km: 15.6,
-      note: 'Runs food-grade tanker semi-trailers (bulk wine) and two 28 m³ water tankers. The nearest firm with food-grade tanks; ask whether they can send a smaller lorry.' },
+      note: { en: 'Runs food-grade tanker semi-trailers (bulk wine) and two 28 m³ water tankers. The nearest firm with food-grade tanks; ask whether they can send a smaller lorry.',
+        nl: 'Heeft voedselveilige tankopleggers (wijn in bulk) en twee tankwagens van 28 m³ voor water. Het dichtstbijzijnde bedrijf met voedselveilige tanks; vraag of ze een kleinere wagen kunnen sturen.' } },
     { id: 'cassan', name: 'SARL Cassan, Prayssac', km: 1.6,
-      note: 'Runs fuel and liquids tankers. Only suitable if they have a separate food-grade tank.' },
+      note: { en: 'Runs fuel and liquids tankers. Only suitable if they have a separate food-grade tank.',
+        nl: 'Heeft tankwagens voor brandstof en vloeistoffen. Alleen geschikt als ze een aparte voedselveilige tank hebben.' } },
     { id: 'imbert', name: 'Établissements Imbert, Fontanes', km: 42.7,
-      note: 'Haulier listed for bulk tanker work; tank type not confirmed.' },
+      note: { en: 'Haulier listed for bulk tanker work; tank type not confirmed.',
+        nl: 'Vervoerder die vermeld staat voor bulktransport per tankwagen; type tank niet bevestigd.' } },
     { id: 'amichauf', name: 'Amichauf, Souillac', km: 86.7,
-      note: 'Listed for water transport and distribution; no tanker details found.' },
+      note: { en: 'Listed for water transport and distribution; no tanker details found.',
+        nl: 'Vermeld voor watertransport en -distributie; geen gegevens over tankwagens gevonden.' } },
     { id: 'veynat', name: 'Transports Veynat, Tresses (Gironde)', km: 196.5,
-      note: 'Drinking-water tanker specialist, but nearly 200 km away.' },
-    { id: 'custom', name: 'Other (enter the distance)', km: null, note: '' },
+      note: { en: 'Drinking-water tanker specialist, but nearly 200 km away.',
+        nl: 'Gespecialiseerd in drinkwatertransport, maar bijna 200 km verderop.' } },
+    { id: 'custom', name: { en: 'Other (enter the distance)', nl: 'Anders (vul de afstand in)' }, km: null, note: '' },
   ];
   // Tanker sizes: water weighs a tonne per m³, so the legal weight limit sets the load.
   const TRUCKS = [
-    { id: 'rigid2', name: 'Small rigid lorry, 2 axles (19 t)', load: 12 },
-    { id: 'rigid3', name: 'Rigid lorry, 3 axles (26 t)', load: 16 },
-    { id: 'rigid4', name: 'Large rigid lorry, 4 axles (32 t)', load: 20 },
-    { id: 'semi', name: 'Articulated tanker (44 t)', load: 28 },
-    { id: 'custom', name: 'Other (enter the load)', load: null },
+    { id: 'rigid2', name: { en: 'Small rigid lorry, 2 axles (19 t)', nl: 'Kleine vrachtwagen, 2 assen (19 t)' }, load: 12 },
+    { id: 'rigid3', name: { en: 'Rigid lorry, 3 axles (26 t)', nl: 'Vrachtwagen, 3 assen (26 t)' }, load: 16 },
+    { id: 'rigid4', name: { en: 'Large rigid lorry, 4 axles (32 t)', nl: 'Grote vrachtwagen, 4 assen (32 t)' }, load: 20 },
+    { id: 'semi', name: { en: 'Articulated tanker (44 t)', nl: 'Tankoplegger (44 t)' }, load: 28 },
+    { id: 'custom', name: { en: 'Other (enter the load)', nl: 'Anders (vul de lading in)' }, load: null },
   ];
+  // Names of the rainfall sources, by their key in rainfall.js.
+  const SOURCE_NAMES = {
+    anglars: { en: 'Météo-France rain gauge, Anglars-Juillac (station 46005001)', nl: 'Regenmeter Météo-France, Anglars-Juillac (station 46005001)',
+      short: { en: 'Anglars rain gauge', nl: 'de regenmeter in Anglars' } },
+    era5: { en: 'ERA5 weather model via Open-Meteo, 44.5N 1.2E', nl: 'Weermodel ERA5 via Open-Meteo, 44,5N 1,2E',
+      short: { en: 'ERA5 weather model', nl: 'het weermodel ERA5' } },
+  };
+  const sourceName = (k) => (SOURCE_NAMES[k] ? pick(SOURCE_NAMES[k]) : R.sources[k].name);
+  const sourceShort = (k) => (SOURCE_NAMES[k] ? pick(SOURCE_NAMES[k].short) : R.sources[k].short);
   // The comparison setup always sees the same weather as the current settings.
   const WEATHER_KEYS = ['src', 'from', 'sumAdj', 'winAdj'];
 
@@ -115,17 +153,19 @@
 
   // ---- Formatting ----------------------------------------------------------
 
-  const fmt = (x, d = 0) => Number(x).toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const eur = (x) => '€' + fmt(x);
+  const locale = () => (LANG === 'nl' ? 'nl-NL' : 'en-GB');
+  const fmt = (x, d = 0) => Number(x).toLocaleString(locale(), { minimumFractionDigits: d, maximumFractionDigits: d });
+  const eur = (x, d = 0) => tr('€', '€ ') + fmt(x, d);
   const m3 = (x) => fmt(x, Math.abs(x) < 10 && x !== 0 ? 1 : 0) + ' m³';
   const longDate = (iso) => new Date(iso + 'T00:00:00Z')
-    .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    .toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   const plural = (n, one, many) => (n === 1 ? one : many);
   const signed = (x) => (x > 0 ? '+' : '') + x;
   const oneDp = (x) => fmt(x, x > 0 && x < 10 ? 1 : 0);
   const $ = (id) => document.getElementById(id);
   const setHTML = (id, html) => { const el = $(id); if (el) el.innerHTML = html; };
   const setAll = (cls, text) => document.querySelectorAll('.' + cls).forEach((el) => { el.textContent = text; });
+  const setAllHTML = (cls, html) => document.querySelectorAll('.' + cls).forEach((el) => { el.innerHTML = html; });
   const clone = (o) => JSON.parse(JSON.stringify(o));
 
   // ---- Settings ------------------------------------------------------------
@@ -151,7 +191,7 @@
   const deliveryCost = (s) => tripCost(s) + s.load * s.price;
   const supplierName = (s) => {
     const p = SUPPLIERS.find((x) => x.id === s.supplier);
-    return p && p.id !== 'custom' ? p.name.split(',')[0] : `a supplier ${fmt(s.km, 1)} km away`;
+    return p && p.id !== 'custom' ? pick(p.name).split(',')[0] : tr(`a supplier ${fmt(s.km, 1)} km away`, `een leverancier op ${fmt(s.km, 1)} km`);
   };
   const inSeason = (m, a, b) => (a <= b ? m >= a && m <= b : m >= a || m <= b);
 
@@ -327,9 +367,14 @@
   }
   function describe(s) {
     const d = demand(s);
-    return `${fmt(catchment(s))} m² collecting, ${m3(usableVolume(s))} of usable tank, ` +
-      `${s.guests} ${plural(s.guests, 'guest', 'guests')} at ${fmt(d.perGuest)} litres a day, ` +
-      `${s.occ === 100 ? 'house full all season' : 'house full ' + s.occ + '% of the season'}${s.tanker ? '' : ', no tanker'}`;
+    const g = s.guests;
+    return tr(
+      `${fmt(catchment(s))} m² collecting, ${m3(usableVolume(s))} of usable tank, ` +
+        `${g} ${plural(g, 'guest', 'guests')} at ${fmt(d.perGuest)} litres a day, ` +
+        `${s.occ === 100 ? 'house full all season' : 'house full ' + s.occ + '% of the season'}${s.tanker ? '' : ', no tanker'}`,
+      `${fmt(catchment(s))} m² opvang, ${m3(usableVolume(s))} bruikbare tankinhoud, ` +
+        `${g} ${plural(g, 'gast', 'gasten')} met ${fmt(d.perGuest)} liter per dag, ` +
+        `${s.occ === 100 ? 'huis het hele seizoen vol' : 'huis ' + s.occ + '% van het seizoen vol'}${s.tanker ? '' : ', geen tankwagen'}`);
   }
 
   // ---- The answer ----------------------------------------------------------
@@ -338,57 +383,80 @@
     const s = r.s;
     const { T } = r;
     if (r.d.season <= 0 && r.d.off <= 0) {
-      return 'Nobody is using water in these settings, so the tanks simply stay full. Add guests under <i>Settings</i>.';
+      return tr('Nobody is using water in these settings, so the tanks simply stay full. Add guests under <i>Settings</i>.',
+        'In deze instellingen gebruikt niemand water, dus de tanks blijven gewoon vol. Voeg gasten toe onder <i>Instellingen</i>.');
     }
     const w = worstYear(r);
-    const lowest = `The lowest the tanks got was ${m3(r.minLevel)}${r.minYear ? ' in ' + r.minYear : ''}.`;
+    const inYear = r.minYear ? ' in ' + r.minYear : '';
+    const lowest = tr(`The lowest the tanks got was ${m3(r.minLevel)}${inYear}.`, `Het laagste peil was ${m3(r.minLevel)}${inYear}.`);
     if (T.dryDays === 0 && T.deliveries === 0) {
-      return `<b>The rain alone would have been enough every year since ${s.from}</b>, with no tanker needed. ${lowest}`;
+      return tr(`<b>The rain alone would have been enough every year since ${s.from}</b>, with no tanker needed. ${lowest}`,
+        `<b>Alleen de regen zou sinds ${s.from} elk jaar genoeg zijn geweest</b>, zonder tankwagen. ${lowest}`);
     }
     if (s.tanker) {
       const per = T.deliveries / r.span;
-      let t = `You'd need about <b>${oneDp(per)} tanker ${plural(Math.round(per * 10) / 10, 'delivery', 'deliveries')} a summer</b>, ` +
-        `costing about <b>${eur(T.cost / r.span)} a year</b> on average since ${s.from}.`;
+      const one = Math.round(per * 10) / 10;
+      let t = tr(`You'd need about <b>${oneDp(per)} tanker ${plural(one, 'delivery', 'deliveries')} a summer</b>, ` +
+        `costing about <b>${eur(T.cost / r.span)} a year</b> on average since ${s.from}.`,
+      `Je hebt gemiddeld ongeveer <b>${oneDp(per)} ${plural(one, 'tankwagen', 'tankwagens')} per zomer</b> nodig, ` +
+        `zo'n <b>${eur(T.cost / r.span)} per jaar</b> sinds ${s.from}.`);
       if (w && !w.calm && w.deliveries) {
-        t += ` The worst year was ${w.year}: ${w.deliveries} ${plural(w.deliveries, 'delivery', 'deliveries')}, ${eur(w.cost)}.`;
+        t += tr(` The worst year was ${w.year}: ${w.deliveries} ${plural(w.deliveries, 'delivery', 'deliveries')}, ${eur(w.cost)}.`,
+          ` Het slechtste jaar was ${w.year}: ${w.deliveries} ${plural(w.deliveries, 'tankwagen', 'tankwagens')}, ${eur(w.cost)}.`);
       }
       if (T.dryDays > 0) {
-        t += ` <span class="bad">Even with the tanker, the house would have been without water on ${fmt(T.dryDays)} ` +
-          `${plural(T.dryDays, 'day', 'days')}. Order earlier or allow for a slower delivery under <i>Tanker in detail</i>.</span>`;
+        t += tr(` <span class="bad">Even with the tanker, the house would have been without water on ${fmt(T.dryDays)} ` +
+          `${plural(T.dryDays, 'day', 'days')}. Order earlier or allow for a slower delivery under <i>Tanker in detail</i>.</span>`,
+        ` <span class="bad">Zelfs met de tankwagen zou het huis op ${fmt(T.dryDays)} ${plural(T.dryDays, 'dag', 'dagen')} ` +
+          'zonder water hebben gezeten. Bestel eerder of reken op een langzamere levering onder <i>Tankwagen in detail</i>.</span>');
       }
       return t;
     }
     const per = T.dryDays / r.span;
-    let t = `Without a tanker, the house would run out of water on about <b>${oneDp(per)} days a summer</b> on average since ${s.from}, ` +
-      `in ${r.yearsDry} of ${r.summers} ${plural(r.summers, 'summer', 'summers')}.`;
-    if (w && !w.calm) t += ` The worst year was ${w.year}, with ${w.dryDays} ${plural(w.dryDays, 'day', 'days')} without water.`;
+    let t = tr(`Without a tanker, the house would run out of water on about <b>${oneDp(per)} days a summer</b> on average since ${s.from}, ` +
+      `in ${r.yearsDry} of ${r.summers} ${plural(r.summers, 'summer', 'summers')}.`,
+    `Zonder tankwagen zou het huis sinds ${s.from} gemiddeld op ongeveer <b>${oneDp(per)} dagen per zomer</b> zonder water zitten, ` +
+      `in ${r.yearsDry} van de ${r.summers} ${plural(r.summers, 'zomer', 'zomers')}.`);
+    if (w && !w.calm) {
+      t += tr(` The worst year was ${w.year}, with ${w.dryDays} ${plural(w.dryDays, 'day', 'days')} without water.`,
+        ` Het slechtste jaar was ${w.year}, met ${w.dryDays} ${plural(w.dryDays, 'dag', 'dagen')} zonder water.`);
+    }
     return t;
   }
 
   function comparison(r, rb, bs, same) {
-    const who = pinned ? 'the settings you pinned' : 'the default setup';
+    const who = pinned ? tr('the settings you pinned', 'de instellingen die je hebt vastgezet') : tr('the default setup', 'de standaardopzet');
     if (same) {
       return pinned
-        ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try the buttons below: step 1, step 2 and plan B.';
+        ? tr('These are the settings you pinned for comparison. Change something to see the difference it makes.',
+          'Dit zijn de instellingen die je hebt vastgezet om mee te vergelijken. Verander iets om het verschil te zien.')
+        : tr('These are the default settings for the house as it is now. Try the buttons below: step 1, step 2 and plan B.',
+          'Dit zijn de standaardinstellingen voor het huis zoals het nu is. Probeer de knoppen hieronder: stap 1, stap 2 en plan B.');
     }
-    const intro = `Compared with ${who} (${describe(bs)}): `;
+    const intro = tr(`Compared with ${who} (${describe(bs)}): `, `Vergeleken met ${who} (${describe(bs)}): `);
     if (r.s.tanker && bs.tanker) {
       const dDel = (rb.T.deliveries - r.T.deliveries) / r.span;
       const dCost = (rb.T.cost - r.T.cost) / r.span;
-      if (Math.abs(dCost) < 1 && Math.abs(dDel) < 0.05) return intro + 'no real difference in tanker use.';
+      if (Math.abs(dCost) < 1 && Math.abs(dDel) < 0.05) return intro + tr('no real difference in tanker use.', 'geen echt verschil in gebruik van tankwagens.');
       if (dCost > 0) {
-        let t = intro + `<b>${oneDp(dDel)} fewer ${plural(Math.round(dDel * 10) / 10, 'delivery', 'deliveries')} a summer, saving ${eur(dCost)} a year.</b>`;
-        if (r.s.upCost > 0) t += ` Changes costing ${eur(r.s.upCost)} would pay for themselves in about ${fmt(r.s.upCost / dCost, 1)} years.`;
+        const n = Math.round(dDel * 10) / 10;
+        let t = intro + tr(`<b>${oneDp(dDel)} fewer ${plural(n, 'delivery', 'deliveries')} a summer, saving ${eur(dCost)} a year.</b>`,
+          `<b>${oneDp(dDel)} ${plural(n, 'tankwagen', 'tankwagens')} minder per zomer, een besparing van ${eur(dCost)} per jaar.</b>`);
+        if (r.s.upCost > 0) {
+          t += tr(` Changes costing ${eur(r.s.upCost)} would pay for themselves in about ${fmt(r.s.upCost / dCost, 1)} years.`,
+            ` Veranderingen van ${eur(r.s.upCost)} verdienen zichzelf terug in ongeveer ${fmt(r.s.upCost / dCost, 1)} jaar.`);
+        }
         return t;
       }
-      return intro + `<b>${oneDp(-dDel)} more ${plural(Math.round(-dDel * 10) / 10, 'delivery', 'deliveries')} a summer, costing ${eur(-dCost)} a year more.</b>`;
+      const n = Math.round(-dDel * 10) / 10;
+      return intro + tr(`<b>${oneDp(-dDel)} more ${plural(n, 'delivery', 'deliveries')} a summer, costing ${eur(-dCost)} a year more.</b>`,
+        `<b>${oneDp(-dDel)} ${plural(n, 'tankwagen', 'tankwagens')} meer per zomer, ${eur(-dCost)} per jaar duurder.</b>`);
     }
     const dDry = (rb.T.dryDays - r.T.dryDays) / r.span;
-    if (Math.abs(dDry) < 0.05) return intro + 'no real difference in days without water.';
+    if (Math.abs(dDry) < 0.05) return intro + tr('no real difference in days without water.', 'geen echt verschil in dagen zonder water.');
     return intro + (dDry > 0
-      ? `<b>${oneDp(dDry)} fewer days without water a summer.</b>`
-      : `<b>${oneDp(-dDry)} more days without water a summer.</b>`);
+      ? tr(`<b>${oneDp(dDry)} fewer days without water a summer.</b>`, `<b>${oneDp(dDry)} dagen minder zonder water per zomer.</b>`)
+      : tr(`<b>${oneDp(-dDry)} more days without water a summer.</b>`, `<b>${oneDp(-dDry)} dagen meer zonder water per zomer.</b>`));
   }
 
   // ---- Rendering -----------------------------------------------------------
@@ -397,30 +465,36 @@
     const d = r.d;
     setHTML('o_guests', String(s.guests));
     setHTML('o_occ', s.occ + '%');
-    setHTML('o_lpd', fmt(d.perGuest));
-    setHTML('o_day', fmt(d.fullHouse));
+    setHTML('o_water', tr(`Water use: <b>${fmt(d.perGuest)}</b> litres per guest per day, <b>${fmt(d.fullHouse)}</b> litres a day for the house.`,
+      `Waterverbruik: <b>${fmt(d.perGuest)}</b> liter per gast per dag, <b>${fmt(d.fullHouse)}</b> liter per dag voor het huis.`));
     setHTML('o_area', fmt(r.area) + ' m²');
-    setHTML('o_tankvol', m3(tankVolume(s)));
-    setHTML('o_usable', m3(r.cap));
+    setHTML('o_tanktot', tr(`Total <b>${m3(tankVolume(s))}</b>, of which <b>${m3(r.cap)}</b> usable.`,
+      `Totaal <b>${m3(tankVolume(s))}</b>, waarvan <b>${m3(r.cap)}</b> bruikbaar.`));
     setHTML('o_tanker', s.tanker
-      ? `Each delivery brings ${fmt(s.load)} m³ from ${supplierName(s)} and costs about <b>${eur(deliveryCost(s))}</b> ` +
-        `(€${fmt(deliveryCost(s) / s.load, 1)} per m³). ` +
-        `It's ordered when the tanks fall to ${s.trig}% and arrives ${s.lead} ${plural(s.lead, 'day', 'days')} later.`
-      : 'With no tanker, the results show how often the house would run dry.');
+      ? tr(`Each delivery brings ${fmt(s.load)} m³ from ${supplierName(s)} and costs about <b>${eur(deliveryCost(s))}</b> ` +
+        `(${eur(deliveryCost(s) / s.load, 1)} per m³). ` +
+        `It's ordered when the tanks fall to ${s.trig}% and arrives ${s.lead} ${plural(s.lead, 'day', 'days')} later.`,
+      `Elke levering brengt ${fmt(s.load)} m³ van ${supplierName(s)} en kost ongeveer <b>${eur(deliveryCost(s))}</b> ` +
+        `(${eur(deliveryCost(s) / s.load, 1)} per m³). ` +
+        `Hij wordt besteld als de tanks dalen tot ${s.trig}% en komt ${s.lead} ${plural(s.lead, 'dag', 'dagen')} later.`)
+      : tr('With no tanker, the results show how often the house would run dry.',
+        'Zonder tankwagen laten de resultaten zien hoe vaak het huis zonder water zou zitten.'));
     const sup = SUPPLIERS.find((x) => x.id === s.supplier);
-    setHTML('o_supplier', sup && sup.note ? sup.note : '');
-    const perM3 = (x) => '€' + fmt(x, 1);
-    setHTML('o_cost_breakdown', `Each delivery: ${eur(s.fixed)} fixed + ${eur(s.perKm * 2 * s.km)} for ` +
+    setHTML('o_supplier', sup && sup.note ? pick(sup.note) : '');
+    setHTML('o_cost_breakdown', tr(`Each delivery: ${eur(s.fixed)} fixed + ${eur(s.perKm * 2 * s.km)} for ` +
       `${fmt(2 * s.km, 1)} km there and back + ${eur(s.load * s.price)} for ${fmt(s.load)} m³ of water ` +
-      `= <b>${eur(deliveryCost(s))}</b>, or ${perM3(deliveryCost(s) / s.load)} per m³.`);
-    setHTML('o_off', String(s.offPeople));
+      `= <b>${eur(deliveryCost(s))}</b>, or ${eur(deliveryCost(s) / s.load, 1)} per m³.`,
+    `Elke levering: ${eur(s.fixed)} vast + ${eur(s.perKm * 2 * s.km)} voor ` +
+      `${fmt(2 * s.km, 1)} km heen en terug + ${eur(s.load * s.price)} voor ${fmt(s.load)} m³ water ` +
+      `= <b>${eur(deliveryCost(s))}</b>, of ${eur(deliveryCost(s) / s.load, 1)} per m³.`));
+    setHTML('o_off', fmt(s.offPeople, s.offPeople % 1 ? 1 : 0));
     setHTML('o_eff', s.eff + '%');
-    setHTML('o_loss', s.loss > 0 ? fmt(s.loss, 1) + ' mm' : 'none');
-    setHTML('o_cap', s.cap > 0 ? s.cap + ' mm a day' : 'no limit');
+    setHTML('o_loss', s.loss > 0 ? fmt(s.loss, 1) + ' mm' : tr('none', 'geen'));
+    setHTML('o_cap', s.cap > 0 ? s.cap + tr(' mm a day', ' mm per dag') : tr('no limit', 'geen grens'));
     setHTML('o_usable_pct', s.usable + '%');
     setHTML('o_fill', s.fill + '%');
     setHTML('o_trig', `${s.trig}% (${m3(r.trigger)})`);
-    setHTML('o_lead', `${s.lead} ${plural(s.lead, 'day', 'days')}`);
+    setHTML('o_lead', `${s.lead} ${tr(plural(s.lead, 'day', 'days'), plural(s.lead, 'dag', 'dagen'))}`);
     setHTML('o_sum', signed(s.sumAdj) + '%');
     setHTML('o_win', signed(s.winAdj) + '%');
 
@@ -435,7 +509,7 @@
       setHTML('b_wm', fmt(p.laundry));
       setHTML('b_dw', fmt(p.dish));
       setHTML('b_other', fmt(p.other));
-      setHTML('b_pp', `${fmt(d.perGuest)} litres per guest per day`);
+      setHTML('b_pp', tr(`${fmt(d.perGuest)} litres per guest per day`, `${fmt(d.perGuest)} liter per gast per dag`));
       setHTML('b_total', fmt(d.fullHouse));
     }
     surfRows.forEach((row, k) => {
@@ -460,53 +534,70 @@
     for (let y = s.from; y <= LAST_FULL_YEAR; y++) fullYears.push(y);
     const avg = (src) => fullYears.reduce((a, y) => a + (YEAR_TOTALS[src][y] || 0), 0) / Math.max(1, fullYears.length);
     const rainAvg = avg(s.src);
-    const climate = s.sumAdj || s.winAdj ? ' (before the climate adjustment)' : '';
+    const climate = s.sumAdj || s.winAdj ? tr(' (before the climate adjustment)', ' (vóór de klimaataanpassing)') : '';
 
     setAll('ex_from', String(s.from));
-    setAll('ex_range', `${longDate(R.start)} to ${longDate(R.end)}`);
-    setHTML('updated_o', longDate(R.updated));
-    setHTML('ex_rain', `<b>${fmt(rainAvg)} mm</b>${climate}`);
+    setAll('ex_range', tr(`${longDate(R.start)} to ${longDate(R.end)}`, `${longDate(R.start)} tot ${longDate(R.end)}`));
+    setAll('updated_o', longDate(R.updated));
     const share = avgShare(s);
     const mixed = s.surfaces.some((x) => x.on && ownShare(x) && x.e !== s.eff);
-    setHTML('ex_area', `<b>${fmt(r.area)} m²</b>`);
-    setHTML('ex_eff', `<b>${mixed ? 'on average ' : ''}${fmt(share)}%</b>`);
-    setHTML('ex_usable', `<b>${m3(r.cap)}</b>`);
-    const season = `${MONTHS[s.s0 - 1]} to ${MONTHS[s.s1 - 1]}`;
-    setHTML('ex_use', `From ${season} the house uses <b>${fmt(r.d.season)} litres a day</b> on average ` +
-      `(${s.guests} ${plural(s.guests, 'guest', 'guests')} at about ${fmt(r.d.perGuest)} litres each` +
+    const season = tr(`${MONTHS[s.s0 - 1]} to ${MONTHS[s.s1 - 1]}`, `${MONTHS[s.s0 - 1]} tot ${MONTHS[s.s1 - 1]}`);
+    const g = s.guests;
+    const use = tr(`From ${season} the house uses <b>${fmt(r.d.season)} litres a day</b> on average ` +
+      `(${g} ${plural(g, 'guest', 'guests')} at about ${fmt(r.d.perGuest)} litres each` +
       `${s.occ < 100 ? `, the house full ${s.occ}% of the season` : ''})` +
-      `${s.offPeople > 0 ? `, and ${fmt(r.d.off)} litres a day the rest of the year` : ''}.`);
-    setHTML('ex_tanker', s.tanker
-      ? `When the tanks fall to ${s.trig}%, a tanker is ordered and brings ${fmt(s.load)} m³ ${s.lead} ${plural(s.lead, 'day', 'days')} later.`
-      : `There's no tanker in these settings, so when the tanks are empty the house has no water until it rains.`);
+      `${s.offPeople > 0 ? `, and ${fmt(r.d.off)} litres a day the rest of the year` : ''}.`,
+    `Van ${season} verbruikt het huis gemiddeld <b>${fmt(r.d.season)} liter per dag</b> ` +
+      `(${g} ${plural(g, 'gast', 'gasten')} met elk ongeveer ${fmt(r.d.perGuest)} liter` +
+      `${s.occ < 100 ? `, het huis ${s.occ}% van het seizoen vol` : ''})` +
+      `${s.offPeople > 0 ? `, en ${fmt(r.d.off)} liter per dag de rest van het jaar` : ''}.`);
+    const tanker = s.tanker
+      ? tr(`When the tanks fall to ${s.trig}%, a tanker is ordered and brings ${fmt(s.load)} m³ ${s.lead} ${plural(s.lead, 'day', 'days')} later.`,
+        `Als de tanks dalen tot ${s.trig}%, wordt er een tankwagen besteld die ${s.lead} ${plural(s.lead, 'dag', 'dagen')} later ${fmt(s.load)} m³ brengt.`)
+      : tr('There\'s no tanker in these settings, so when the tanks are empty the house has no water until it rains.',
+        'Er is in deze instellingen geen tankwagen, dus als de tanks leeg zijn heeft het huis geen water tot het regent.');
+    const areaB = `<b>${fmt(r.area)} m²</b>`;
+    const effB = `<b>${mixed ? tr('on average ', 'gemiddeld ') : ''}${fmt(share)}%</b>`;
+    setHTML('ex_steps', tr(
+      `<li><b>Rain falls on the roofs.</b> The page uses the rain actually measured each day by Météo-France's rain gauge at Anglars-Juillac, 3 km from the house: <b>${fmt(rainAvg)} mm</b>${climate} a year on average since ${s.from}. One millimetre of rain on one square metre of roof is one litre of water.</li>` +
+      `<li><b>Most of it reaches the tanks.</b> Of the rain landing on ${areaB} of collecting surface, ${effB} is counted as reaching the tanks. The rest is lost wetting the tiles, in the first rinse that washes dirt off the roof, and when gutters and filters spill in heavy downpours.</li>` +
+      `<li><b>The tanks store it, up to a limit.</b> They hold <b>${m3(r.cap)}</b> of usable water. Rain that arrives when they're already full overflows and is lost, which is why a wet winter can't be saved up for a dry summer.</li>` +
+      `<li><b>Guests use it.</b> ${use} ${tanker}</li>`,
+      `<li><b>Regen valt op de daken.</b> De pagina gebruikt de regen die Météo-France elke dag echt heeft gemeten met de regenmeter in Anglars-Juillac, 3 km van het huis: gemiddeld <b>${fmt(rainAvg)} mm</b>${climate} per jaar sinds ${s.from}. Eén millimeter regen op één vierkante meter dak is één liter water.</li>` +
+      `<li><b>Het meeste komt in de tanks.</b> Van de regen die op ${areaB} opvangoppervlak valt, telt ${effB} als water dat de tanks bereikt. De rest gaat verloren aan het nat worden van de pannen, aan de eerste spoeling die het vuil van het dak spoelt, en aan dakgoten en filters die overlopen bij stortbuien.</li>` +
+      `<li><b>De tanks slaan het op, tot een grens.</b> Ze bevatten <b>${m3(r.cap)}</b> bruikbaar water. Regen die valt als ze al vol zijn, loopt over en gaat verloren; daarom kan een natte winter niet worden bewaard voor een droge zomer.</li>` +
+      `<li><b>Gasten gebruiken het.</b> ${use} ${tanker}</li>`));
 
-    setHTML('fl_rain', `${fmt(rainAvg)} mm a year`);
-    setHTML('fl_area', `${fmt(r.area)} m² collecting, ${mixed ? 'about ' : ''}${fmt(share)}% reaches the tanks`);
-    setHTML('fl_collect', `${fmt(r.T.collected / r.span)} m³ a year`);
-    setHTML('fl_tank', `${m3(r.cap)} usable`);
-    setHTML('fl_season', `${season}, ${s.guests} ${plural(s.guests, 'guest', 'guests')}${s.occ < 100 ? `, ${s.occ}% full` : ''}`);
-    setHTML('fl_use', `${fmt(r.d.season)} litres a day`);
+    setHTML('fl_rain', tr(`${fmt(rainAvg)} mm a year`, `${fmt(rainAvg)} mm per jaar`));
+    setHTML('fl_area', tr(`${fmt(r.area)} m² collecting, ${mixed ? 'about ' : ''}${fmt(share)}% reaches the tanks`,
+      `${fmt(r.area)} m² opvang, ${mixed ? 'ongeveer ' : ''}${fmt(share)}% komt in de tanks`));
+    setHTML('fl_collect', tr(`${fmt(r.T.collected / r.span)} m³ a year`, `${fmt(r.T.collected / r.span)} m³ per jaar`));
+    setHTML('fl_tank', tr(`${m3(r.cap)} usable`, `${m3(r.cap)} bruikbaar`));
+    setHTML('fl_season', tr(`${season}, ${g} ${plural(g, 'guest', 'guests')}${s.occ < 100 ? `, ${s.occ}% full` : ''}`,
+      `${season}, ${g} ${plural(g, 'gast', 'gasten')}${s.occ < 100 ? `, ${s.occ}% vol` : ''}`));
+    setHTML('fl_use', tr(`${fmt(r.d.season)} litres a day`, `${fmt(r.d.season)} liter per dag`));
     setHTML('fl_tanker', s.tanker
-      ? `Backup: a tanker brings ${fmt(s.load)} m³ when the tanks fall to ${s.trig}% (${m3(r.trigger)}).`
-      : 'No tanker backup in these settings.');
+      ? tr(`Backup: a tanker brings ${fmt(s.load)} m³ when the tanks fall to ${s.trig}% (${m3(r.trigger)}).`,
+        `Achtervang: een tankwagen brengt ${fmt(s.load)} m³ als de tanks dalen tot ${s.trig}% (${m3(r.trigger)}).`)
+      : tr('No tanker backup in these settings.', 'Geen tankwagen als achtervang in deze instellingen.'));
 
     // Cross-check against the other rainfall source with the same settings.
     const otherKey = Object.keys(R.sources).find((k) => k !== s.src);
-    const gaugeKey = 'anglars';
-    const eraKey = 'era5';
-    setHTML('chk_gauge', `${fmt(avg(gaugeKey))} mm`);
-    setHTML('chk_era', `${fmt(avg(eraKey))} mm`);
-    setHTML('chk_years', fullYears.length > 1 ? `${s.from} to ${LAST_FULL_YEAR}` : String(s.from));
+    const years = fullYears.length > 1 ? tr(`${s.from} to ${LAST_FULL_YEAR}`, `${s.from} tot ${LAST_FULL_YEAR}`) : String(s.from);
+    let alt = '';
     if (otherKey) {
-      const alt = simulate(Object.assign({}, s, { src: otherKey }));
-      const name = (k) => R.sources[k].short;
-      const [what, a, b] = s.tanker
-        ? ['tanker deliveries a summer', alt.T.deliveries / alt.span, r.T.deliveries / r.span]
-        : ['days without water a summer', alt.T.dryDays / alt.span, r.T.dryDays / r.span];
-      setHTML('chk_alt', a === 0 && b === 0
-        ? `no ${what.replace(' a summer', '')} with either source`
-        : `about <b>${oneDp(a)} ${what}</b> with the ${name(otherKey)}, against <b>${oneDp(b)}</b> with the ${name(s.src)}`);
+      const a = simulate(Object.assign({}, s, { src: otherKey }));
+      const [what, x, y] = s.tanker
+        ? [tr('tanker deliveries a summer', 'tankwagens per zomer'), a.T.deliveries / a.span, r.T.deliveries / r.span]
+        : [tr('days without water a summer', 'dagen zonder water per zomer'), a.T.dryDays / a.span, r.T.dryDays / r.span];
+      alt = x === 0 && y === 0
+        ? tr('none with either source', 'met geen van beide bronnen iets')
+        : tr(`about <b>${oneDp(x)} ${what}</b> with the ${sourceShort(otherKey)}, against <b>${oneDp(y)}</b> with the ${sourceShort(s.src)}`,
+          `ongeveer <b>${oneDp(x)} ${what}</b> met ${sourceShort(otherKey)}, tegen <b>${oneDp(y)}</b> met ${sourceShort(s.src)}`);
     }
+    setAllHTML('chk_li', tr(
+      `<b>An independent source tells the same story.</b> ERA5, a completely separate reconstruction of the weather from satellites and weather models, averages ${fmt(avg('era5'))} mm a year here, against the gauge's ${fmt(avg('anglars'))} mm (${years}). With the settings on this page it gives ${alt}. It reads wetter than the gauge in several recent summers, so the gauge is the cautious choice. You can switch to it under <i>Rainfall data and climate</i>.`,
+      `<b>Een onafhankelijke bron vertelt hetzelfde verhaal.</b> ERA5, een volledig losse reconstructie van het weer uit satellieten en weermodellen, komt hier gemiddeld op ${fmt(avg('era5'))} mm per jaar, tegen ${fmt(avg('anglars'))} mm bij de regenmeter (${years}). Met de instellingen op deze pagina geeft het ${alt}. In een aantal recente zomers is het natter dan de regenmeter, dus de regenmeter is de voorzichtige keuze. Je kunt het kiezen onder <i>Neerslaggegevens en klimaat</i>.`));
   }
 
   function renderCards(r) {
@@ -520,36 +611,44 @@
       setHTML(id + '_s', sub);
     };
     if (s.tanker) {
-      card('c_del', `${oneDp(T.deliveries / r.span)} a summer`, `${fmt(T.deliveries)} in total since ${s.from}`, T.deliveries ? '' : 'good');
-      card('c_cost', `${eur(T.cost / r.span)} a year`, `${eur(T.cost)} in total`, T.cost ? 'bad' : 'good');
+      card('c_del', tr(`${oneDp(T.deliveries / r.span)} a summer`, `${oneDp(T.deliveries / r.span)} per zomer`),
+        tr(`${fmt(T.deliveries)} in total since ${s.from}`, `${fmt(T.deliveries)} in totaal sinds ${s.from}`), T.deliveries ? '' : 'good');
+      card('c_cost', tr(`${eur(T.cost / r.span)} a year`, `${eur(T.cost / r.span)} per jaar`),
+        tr(`${eur(T.cost)} in total`, `${eur(T.cost)} in totaal`), T.cost ? 'bad' : 'good');
     } else {
-      card('c_del', 'Off', 'Tanker switched off', '');
-      card('c_cost', '–', 'Tanker switched off', '');
+      card('c_del', tr('Off', 'Uit'), tr('Tanker switched off', 'Tankwagen uitgezet'), '');
+      card('c_cost', '–', tr('Tanker switched off', 'Tankwagen uitgezet'), '');
     }
     if (w && !w.calm) {
       const parts = [];
-      if (s.tanker && w.deliveries) parts.push(`${w.deliveries} ${plural(w.deliveries, 'delivery', 'deliveries')}, ${eur(w.cost)}`);
-      if (w.dryDays) parts.push(`${w.dryDays} ${plural(w.dryDays, 'day', 'days')} without water`);
+      if (s.tanker && w.deliveries) {
+        parts.push(tr(`${w.deliveries} ${plural(w.deliveries, 'delivery', 'deliveries')}, ${eur(w.cost)}`,
+          `${w.deliveries} ${plural(w.deliveries, 'levering', 'leveringen')}, ${eur(w.cost)}`));
+      }
+      if (w.dryDays) parts.push(tr(`${w.dryDays} ${plural(w.dryDays, 'day', 'days')} without water`, `${w.dryDays} ${plural(w.dryDays, 'dag', 'dagen')} zonder water`));
       card('c_worst', String(w.year), parts.join('; '), '');
     } else if (w) {
-      card('c_worst', 'None', `Closest call: ${w.year}, down to ${m3(w.min)}`, 'good');
+      card('c_worst', tr('None', 'Geen'), tr(`Closest call: ${w.year}, down to ${m3(w.min)}`, `Het krapst: ${w.year}, tot ${m3(w.min)}`), 'good');
     } else {
       card('c_worst', '–', '', '');
     }
-    card('c_dry', fmt(T.dryDays), T.dryDays ? `in ${r.yearsDry} of ${r.summers} ${plural(r.summers, 'summer', 'summers')}` : 'Never ran dry', T.dryDays ? 'bad' : 'good');
+    card('c_dry', fmt(T.dryDays), T.dryDays
+      ? tr(`in ${r.yearsDry} of ${r.summers} ${plural(r.summers, 'summer', 'summers')}`, `in ${r.yearsDry} van de ${r.summers} ${plural(r.summers, 'zomer', 'zomers')}`)
+      : tr('Never ran dry', 'Nooit droog'), T.dryDays ? 'bad' : 'good');
     const pct = r.cap > 0 ? Math.round(r.minLevel / r.cap * 100) : 0;
-    card('c_min', m3(r.minLevel), `${pct}% full${r.minYear ? ', in ' + r.minYear : ''}`, pct <= 5 ? 'warn' : '');
+    card('c_min', m3(r.minLevel), tr(`${pct}% full`, `${pct}% vol`) + (r.minYear ? ', in ' + r.minYear : ''), pct <= 5 ? 'warn' : '');
     card('c_bal', `${fmt(T.collected / r.span)} / ${fmt(T.used / r.span)} m³`,
-      `collected / used a year; ${fmt(T.overflow / r.span)} m³ a year overflowed`, '');
+      tr(`collected / used a year; ${fmt(T.overflow / r.span)} m³ a year overflowed`,
+        `opgevangen / verbruikt per jaar; ${fmt(T.overflow / r.span)} m³ per jaar liep over`), '');
   }
 
   function renderYears(r) {
     const s = r.s;
     const w = worstYear(r);
-    let h = '<thead><tr><th>Year</th><th class="num">Rain in season</th><th class="num">Collected</th>' +
-      '<th class="num">Overflowed</th><th class="num">Used</th>' +
-      (s.tanker ? '<th class="num">Deliveries</th><th class="num">Tanker cost</th>' : '') +
-      '<th class="num">Lowest level</th><th class="num">Days without water</th></tr></thead><tbody>';
+    let h = `<thead><tr><th>${tr('Year', 'Jaar')}</th><th class="num">${tr('Rain in season', 'Regen in het seizoen')}</th>` +
+      `<th class="num">${tr('Collected', 'Opgevangen')}</th><th class="num">${tr('Overflowed', 'Overgelopen')}</th><th class="num">${tr('Used', 'Verbruikt')}</th>` +
+      (s.tanker ? `<th class="num">${tr('Deliveries', 'Leveringen')}</th><th class="num">${tr('Tanker cost', 'Kosten tankwagens')}</th>` : '') +
+      `<th class="num">${tr('Lowest level', 'Laagste peil')}</th><th class="num">${tr('Days without water', 'Dagen zonder water')}</th></tr></thead><tbody>`;
     for (const y of r.years.slice().reverse()) {
       const partial = y.days < 365;
       const worst = w && !w.calm && y.year === w.year;
@@ -562,25 +661,30 @@
     }
     setHTML('years', h + '</tbody>');
     const notes = [];
-    if (r.years.length && r.years[r.years.length - 1].days < 365) notes.push(`* ${LAST_YEAR} runs to ${longDate(R.end)}.`);
-    if (w && !w.calm) notes.push(`The highlighted row is the worst year.`);
-    notes.push('Rain in season is the rain that fell during the guest season.');
+    if (r.years.length && r.years[r.years.length - 1].days < 365) notes.push(tr(`* ${LAST_YEAR} runs to ${longDate(R.end)}.`, `* ${LAST_YEAR} loopt tot ${longDate(R.end)}.`));
+    if (w && !w.calm) notes.push(tr('The highlighted row is the worst year.', 'De gemarkeerde rij is het slechtste jaar.'));
+    notes.push(tr('Rain in season is the rain that fell during the guest season.', 'Regen in het seizoen is de regen die tijdens het gastenseizoen viel.'));
     setHTML('years_note', notes.join(' '));
   }
 
   function renderCompare(r, rb, bs, same) {
-    setHTML('base_o', (pinned ? 'the settings you pinned' : 'the default setup') + ` (${describe(bs)})` + (same ? ', which matches the current settings.' : '.'));
+    const who = pinned ? tr('the settings you pinned', 'de instellingen die je hebt vastgezet') : tr('the default setup', 'de standaardopzet');
+    setHTML('base_o', who + ` (${describe(bs)})` + (same ? tr(', which matches the current settings.', ', gelijk aan de huidige instellingen.') : '.'));
     $('lg_base').style.display = rb ? '' : 'none';
     $('lg_tanker').style.display = r.s.tanker ? '' : 'none';
     let pay;
-    if (same) pay = 'Change a setting first, then enter what that change would cost.';
-    else if (!(r.s.upCost > 0)) pay = 'Enter what the changes would cost to see how long they take to pay back.';
+    if (same) pay = tr('Change a setting first, then enter what that change would cost.', 'Verander eerst een instelling en vul dan in wat die verandering zou kosten.');
+    else if (!(r.s.upCost > 0)) pay = tr('Enter what the changes would cost to see how long they take to pay back.', 'Vul in wat de veranderingen kosten om te zien hoe snel ze zich terugverdienen.');
     else if (r.s.tanker && bs.tanker) {
       const save = (rb.T.cost - r.T.cost) / r.span;
       pay = save > 0
-        ? `<b>Pays for itself in about ${fmt(r.s.upCost / save, 1)} years</b> (${eur(save)} of tanker costs saved a year).`
-        : 'These changes don\'t reduce tanker costs, so they wouldn\'t pay back.';
-    } else pay = 'Payback needs the tanker switched on in both setups, so there\'s a cost to compare.';
+        ? tr(`<b>Pays for itself in about ${fmt(r.s.upCost / save, 1)} years</b> (${eur(save)} of tanker costs saved a year).`,
+          `<b>Verdient zichzelf terug in ongeveer ${fmt(r.s.upCost / save, 1)} jaar</b> (${eur(save)} per jaar minder aan tankwagens).`)
+        : tr('These changes don\'t reduce tanker costs, so they wouldn\'t pay back.', 'Deze veranderingen verlagen de kosten van tankwagens niet, dus ze verdienen zich niet terug.');
+    } else {
+      pay = tr('Payback needs the tanker switched on in both setups, so there\'s a cost to compare.',
+        'Voor de terugverdientijd moet de tankwagen in beide opzetten aanstaan, zodat er kosten zijn om te vergelijken.');
+    }
     setHTML('payback_o', pay);
   }
 
@@ -611,9 +715,12 @@
     const roofs = step1Rows(s);
     const kt = newTankRow(s);
     const ks = sheetIndex(s);
-    $('fix_btn').textContent = roofs.length && roofs.every((i) => s.surfaces[i].on) ? 'Undo step 1' : 'Step 1: gutter the three roofs';
-    $('fix_btn2').textContent = kt >= 0 && s.tanklist[kt].on ? 'Undo step 2' : 'Step 2: add the new tank';
-    $('fix_btn3').textContent = ks >= 0 && s.surfaces[ks].on ? 'Take the rain sheet off' : 'Plan B: add the rain sheet';
+    $('fix_btn').textContent = roofs.length && roofs.every((i) => s.surfaces[i].on)
+      ? tr('Undo step 1', 'Stap 1 terugdraaien') : tr('Step 1: gutter the three roofs', 'Stap 1: dakgoten op de drie daken');
+    $('fix_btn2').textContent = kt >= 0 && s.tanklist[kt].on
+      ? tr('Undo step 2', 'Stap 2 terugdraaien') : tr('Step 2: add the new tank', 'Stap 2: de nieuwe tank erbij');
+    $('fix_btn3').textContent = ks >= 0 && s.surfaces[ks].on
+      ? tr('Take the rain sheet off', 'Opvangfolie weghalen') : tr('Plan B: add the rain sheet', 'Plan B: opvangfolie erbij');
   }
 
   // ---- The story at the top --------------------------------------------------
@@ -636,19 +743,26 @@
     const d = new Date(Date.UTC(2001, 0, 1 + Math.round(doy)));
     const day = d.getUTCDate();
     const m = MONTHS[d.getUTCMonth()];
+    if (LANG === 'nl') return (day <= 10 ? 'begin ' : day <= 20 ? 'half ' : 'eind ') + m;
     return day <= 10 ? 'early ' + m : day <= 20 ? 'mid-' + m : 'late ' + m;
   }
-  const weeksText = (days) => (days < 7 ? `${fmt(days)} ${plural(days, 'day', 'days')}` : `${fmt(Math.round(days / 7))} ${plural(Math.round(days / 7), 'week', 'weeks')}`);
+  function weeksText(days) {
+    const w = Math.round(days / 7);
+    if (days < 7) return `${fmt(days)} ${tr(plural(days, 'day', 'days'), plural(days, 'dag', 'dagen'))}`;
+    return `${fmt(w)} ${tr(plural(w, 'week', 'weeks'), plural(w, 'week', 'weken'))}`;
+  }
   const halves = (x) => {
     const h = Math.round(x * 2) / 2;
     const whole = Math.floor(h);
     return (whole || h % 1 === 0 ? fmt(whole) : '') + (h % 1 ? '½' : '');
   };
   function sizeWords(x) {
-    if (x > 1.2) return `about ${fmt(x, 1)} times the size of`;
-    const opts = [[0.25, 'a quarter'], [1 / 3, 'a third'], [0.5, 'half'], [2 / 3, 'two-thirds'], [0.75, 'three-quarters'], [1, 'the same size as']];
-    const [v, w] = opts.reduce((a, b) => (Math.abs(b[0] - x) < Math.abs(a[0] - x) ? b : a));
-    return v === 1 ? 'about ' + w : `about ${w} the size of`;
+    if (x > 1.2) return tr(`about ${fmt(x, 1)} times the size of`, `ongeveer ${fmt(x, 1)} keer zo groot als`);
+    const opts = [[0.25, 'a quarter', 'een kwart'], [1 / 3, 'a third', 'een derde'], [0.5, 'half', 'half'],
+      [2 / 3, 'two-thirds', 'twee derde'], [0.75, 'three-quarters', 'driekwart'], [1, '', '']];
+    const [v, en, nl] = opts.reduce((a, b) => (Math.abs(b[0] - x) < Math.abs(a[0] - x) ? b : a));
+    if (v === 1) return tr('about the same size as', 'ongeveer even groot als');
+    return tr(`about ${en} the size of`, `ongeveer ${nl} zo groot als`);
   }
 
   function summaryOf(r) {
@@ -668,9 +782,9 @@
   }
 
   const STORY_RUNS = [
-    { key: 'now', name: 'Today', short: 'Today' },
-    { key: 's1', name: 'With step 1', short: 'Step 1', roofs: 1 },
-    { key: 's12', name: 'With steps 1 and 2', short: 'Steps 1 + 2', roofs: 1, tank: 1 },
+    { key: 'now', name: { en: 'Today', nl: 'Nu' }, short: { en: 'Today', nl: 'Nu' } },
+    { key: 's1', name: { en: 'With step 1', nl: 'Met stap 1' }, short: { en: 'Step 1', nl: 'Stap 1' }, roofs: 1 },
+    { key: 's12', name: { en: 'With steps 1 and 2', nl: 'Met stap 1 en 2' }, short: { en: 'Steps 1 + 2', nl: 'Stap 1 + 2' }, roofs: 1, tank: 1 },
   ];
   let story = null;
 
@@ -698,56 +812,69 @@
     const s1 = runs.s1.st;
     const s12 = runs.s12.st;
     const d = demand(base);
-    const since = `since ${base.from}`;
-    const season = `${MONTHS[base.s0 - 1]} to ${MONTHS[base.s1 - 1]}`;
+    const from = base.from;
+    const season = tr(`${MONTHS[base.s0 - 1]} to ${MONTHS[base.s1 - 1]}`, `${MONTHS[base.s0 - 1]} tot ${MONTHS[base.s1 - 1]}`);
+    const g = base.guests;
 
     let h1;
-    if (now.ranDry === now.n) h1 = 'The rainwater runs out every summer.';
-    else if (now.ranDry > now.n / 2) h1 = 'The rainwater runs out most summers.';
-    else if (now.ranDry > 0) h1 = `The rainwater runs out in ${now.ranDry} of ${now.n} summers.`;
-    else h1 = 'The rainwater lasts the summer.';
+    if (now.ranDry === now.n) h1 = tr('The rainwater runs out every summer.', 'Het regenwater raakt elke zomer op.');
+    else if (now.ranDry > now.n / 2) h1 = tr('The rainwater runs out most summers.', 'Het regenwater raakt de meeste zomers op.');
+    else if (now.ranDry > 0) h1 = tr(`The rainwater runs out in ${now.ranDry} of ${now.n} summers.`, `Het regenwater raakt op in ${now.ranDry} van de ${now.n} zomers.`);
+    else h1 = tr('The rainwater lasts the summer.', 'Het regenwater houdt de zomer vol.');
     setHTML('st_h1', h1);
 
-    let t = `With a full house (${base.guests} guests, ${season}), `;
+    let t;
     if (now.ranDry) {
-      t += `the tanks run dry around <b>${roughDate(now.runOut)}</b> and the house is ` +
-        `<b>without water for about ${weeksText(Math.round(now.medianDry))}</b>, unless water is trucked in. `;
-      t += now.ranDry === now.n
-        ? `That's <b>every summer ${since}</b>`
-        : `That's <b>${now.ranDry} of the ${now.n} summers ${since}</b>`;
       const wet = now.byYear[story.wettest];
-      t += wet && wet.dryDays >= 7
-        ? `; even the wettest (${story.wettest}) left ${weeksText(wet.dryDays)} without water.`
-        : '.';
-    } else t += `the tanks would have lasted every summer ${since}.`;
+      const wetDry = wet && wet.dryDays >= 7;
+      t = tr(`With a full house (${g} guests, ${season}), the tanks run dry around <b>${roughDate(now.runOut)}</b> and the house is ` +
+        `<b>without water for about ${weeksText(Math.round(now.medianDry))}</b>, unless water is trucked in. ` +
+        (now.ranDry === now.n ? `That's <b>every summer since ${from}</b>` : `That's <b>${now.ranDry} of the ${now.n} summers since ${from}</b>`) +
+        (wetDry ? `; even the wettest (${story.wettest}) left ${weeksText(wet.dryDays)} without water.` : '.'),
+      `Met een vol huis (${g} gasten, ${season}) staan de tanks rond <b>${roughDate(now.runOut)}</b> droog en zit het huis ` +
+        `<b>ongeveer ${weeksText(Math.round(now.medianDry))} zonder water</b>, tenzij er water wordt aangevoerd. ` +
+        (now.ranDry === now.n ? `Dat geldt voor <b>elke zomer sinds ${from}</b>` : `Dat geldt voor <b>${now.ranDry} van de ${now.n} zomers sinds ${from}</b>`) +
+        (wetDry ? `; zelfs de natste (${story.wettest}) gaf ${weeksText(wet.dryDays)} zonder water.` : '.'));
+    } else {
+      t = tr(`With a full house (${g} guests, ${season}), the tanks would have lasted every summer since ${from}.`,
+        `Met een vol huis (${g} gasten, ${season}) zouden de tanks het elke zomer sinds ${from} hebben volgehouden.`);
+    }
     setHTML('st_today', t);
 
     // Step 1 on its own.
     const lastS1 = s1.byYear[story.last];
     setHTML('st_s1', !s1.ranDry
-      ? 'On its own, that would already be enough.'
+      ? tr('On its own, that would already be enough.', 'Dat alleen zou al genoeg zijn.')
       : lastS1 && lastS1.dryDays
-        ? `Not enough on its own: last summer would still have run dry on ${dayMonth(lastS1.firstDry)}.`
-        : `Not enough on its own: ${s1.ranDry} of ${s1.n} summers would still run dry.`);
+        ? tr(`Not enough on its own: last summer would still have run dry on ${dayMonth(lastS1.firstDry)}.`,
+          `Alleen dit is niet genoeg: vorige zomer zou het huis dan nog steeds op ${dayMonth(lastS1.firstDry)} droog hebben gestaan.`)
+        : tr(`Not enough on its own: ${s1.ranDry} of ${s1.n} summers would still run dry.`,
+          `Alleen dit is niet genoeg: ${s1.ranDry} van de ${s1.n} zomers zouden nog steeds droogvallen.`));
 
     // Step 2: the new tank, against the biggest tank there now.
     const kt = newTankRow(base);
     const tanks = base.tanklist.filter((x, k) => k !== kt && !x.g && x.on);
     const big = tanks.reduce((a, b) => (tankFootprint(b) * b.d > tankFootprint(a) * a.d ? b : a), tanks[0]);
     const newVol = kt >= 0 ? tankFootprint(base.tanklist[kt]) * base.tanklist[kt].d : 0;
+    const size = big && newVol ? sizeWords(newVol / (tankFootprint(big) * big.d)) : '';
     setHTML('st_s2', big && newVol
-      ? `2. Add a buried tank ${sizeWords(newVol / (tankFootprint(big) * big.d))} the ${big.n.toLowerCase()}.`
-      : '2. Add a buried tank.');
+      ? tr(`2. Add a buried tank ${size} the ${big.n.toLowerCase()}.`, `2. Plaats een ondergrondse tank, ${size} de ${showName(big.n).toLowerCase()}.`)
+      : tr('2. Add a buried tank.', '2. Plaats een ondergrondse tank.'));
 
     // Both together.
     const dryNow = now.byYear[story.driest];
     const dry12 = s12.byYear[story.driest];
-    let both = `<b>Together:</b> ` + (s12.ranDry
-      ? `the water lasts the whole season in <b>${s12.n - s12.ranDry} of the ${s12.n} summers ${since}</b>.`
-      : `the water lasts the whole season <b>every summer ${since}</b>.`);
+    let both = s12.ranDry
+      ? tr(`<b>Together:</b> the water lasts the whole season in <b>${s12.n - s12.ranDry} of the ${s12.n} summers since ${from}</b>.`,
+        `<b>Samen:</b> het water houdt het hele seizoen vol in <b>${s12.n - s12.ranDry} van de ${s12.n} zomers sinds ${from}</b>.`)
+      : tr(`<b>Together:</b> the water lasts the whole season <b>every summer since ${from}</b>.`,
+        `<b>Samen:</b> het water houdt het hele seizoen vol, <b>elke zomer sinds ${from}</b>.`);
     if (dry12 && dry12.dryDays && dryNow && dryNow.dryDays) {
-      both += ` In the driest summer on record (${story.driest}) it runs out on ${dayMonth(dry12.firstDry)} instead of ${dayMonth(dryNow.firstDry)}.`;
-    } else if (dry12 && !dry12.dryDays) both += ` Even the driest summer on record (${story.driest}) gets through.`;
+      both += tr(` In the driest summer on record (${story.driest}) it runs out on ${dayMonth(dry12.firstDry)} instead of ${dayMonth(dryNow.firstDry)}.`,
+        ` In de droogste zomer ooit gemeten (${story.driest}) raakt het water pas op ${dayMonth(dry12.firstDry)} op, in plaats van op ${dayMonth(dryNow.firstDry)}.`);
+    } else if (dry12 && !dry12.dryDays) {
+      both += tr(` Even the driest summer on record (${story.driest}) gets through.`, ` Zelfs de droogste zomer ooit gemeten (${story.driest}) komt erdoor.`);
+    }
     setHTML('st_both', both);
 
     // Why it runs out.
@@ -755,16 +882,12 @@
     const seasonLen = now.ys.length ? median(now.ys.map((y) => y.seasonDays)) : 184;
     const capNow = usableVolume(base);
     const cap12 = usableVolume(withSteps(base, { roofs: 1, tank: 1 }));
-    setHTML('why_use', `about ${fmt(Math.round(d.season / 10) * 10)} litres a day`);
-    setHTML('why_parts', d.u.parts
-      ? `${fmt(d.perGuest)} litres a guest including the dual-flush toilets, laundry and dishwasher`
-      : `${fmt(d.perGuest)} litres a guest`);
-    setAll('why_tankw', halves(capNow / perDay / 7));
-    setAll('why_tankw12', halves(cap12 / perDay / 7));
-    setAll('why_seasonw', fmt(Math.round(seasonLen / 7)));
-    setAll('why_season', season);
-    setAll('why_from', String(base.from));
-    setHTML('why_need', fmt(Math.round(seasonLen / 7 - capNow / perDay / 7)));
+    const tankw = halves(capNow / perDay / 7);
+    const tankw12 = halves(cap12 / perDay / 7);
+    const seasonw = fmt(Math.round(seasonLen / 7));
+    const need = fmt(Math.round(seasonLen / 7 - capNow / perDay / 7));
+    const litres = fmt(Math.round(d.season / 10) * 10);
+    setAll('why_from', String(from));
 
     // How summer rain arrives, from the gauge over the same summers.
     const mm = R.sources[base.src].mm;
@@ -783,18 +906,40 @@
       }
       spells.push(longest);
     }
-    const nY = Math.max(1, story.years.length);
-    setHTML('why_rain', `${fmt(tot / nY)} mm`);
-    setHTML('why_heavy', `${fmt(heavy / Math.max(1, tot) * 100)}%`);
-    setHTML('why_gap', weeksText(Math.round(median(spells))));
-    setHTML('why_gapmax', weeksText(Math.max(...spells)));
-    const storm = (s) => 20 * wetArea(s) / 1000 / perDay;
-    setHTML('why_storm_now', `${halves(storm(base))} days`);
-    setHTML('why_storm_s1', `${halves(storm(withSteps(base, { roofs: 1 })))} days`);
-    const ofN = (st) => `${st.ranDry} of ${st.n}`;
-    setHTML('why_s1only', ofN(s1));
-    setHTML('why_s2only', ofN(runs.s2only.st));
-    setHTML('why_both', ofN(s12));
+    const rain = `${fmt(tot / Math.max(1, story.years.length))} mm`;
+    const heavyPct = `${fmt(heavy / Math.max(1, tot) * 100)}%`;
+    const gap = weeksText(Math.round(median(spells)));
+    const gapMax = weeksText(Math.max(...spells));
+    setHTML('why_text', tr(
+      `<p><b>The house uses water every day, but rain doesn't fall every day.</b> A full house uses about ${litres} litres a day ` +
+        `(${fmt(d.perGuest)} litres a guest including the dual-flush toilets, laundry and dishwasher). Full tanks hold enough for about <b>${tankw} weeks</b>. ` +
+        `The season is <b>${seasonw} weeks</b> long, so the other ${need} weeks' worth has to come from rain that falls during the summer itself.</p>` +
+        `<p><b>Summer rain comes in bursts, with long gaps.</b> From ${season}, an average year brings ${rain} of rain, but ${heavyPct} of it falls ` +
+        `on a few stormy days of 10 mm or more. A dry spell of ${gap} is normal, and the longest since ${from} lasted ${gapMax}.</p>`,
+      `<p><b>Het huis verbruikt elke dag water, maar het regent niet elke dag.</b> Een vol huis verbruikt ongeveer ${litres} liter per dag ` +
+        `(${fmt(d.perGuest)} liter per gast, inclusief de toiletten met spaarknop, de was en de vaatwasser). Volle tanks hebben genoeg voor ongeveer <b>${tankw} weken</b>. ` +
+        `Het seizoen duurt <b>${seasonw} weken</b>, dus de overige ${need} weken moeten komen van regen die tijdens de zomer zelf valt.</p>` +
+        `<p><b>Zomerregen komt in buien, met lange droge periodes ertussen.</b> Van ${season} valt er in een gemiddeld jaar ${rain} regen, maar ${heavyPct} daarvan ` +
+        `valt op een paar stormachtige dagen met 10 mm of meer. Een droge periode van ${gap} is normaal, en de langste sinds ${from} duurde ${gapMax}.</p>`));
+
+    const storm = (s) => halves(20 * wetArea(s) / 1000 / perDay);
+    const days = (x) => `${x} ${tr('days', 'dagen')}`;
+    const stormNow = days(storm(base));
+    const storm1 = days(storm(withSteps(base, { roofs: 1 })));
+    const ofN = (st) => tr(`${st.ranDry} of ${st.n}`, `${st.ranDry} van de ${st.n}`);
+    setHTML('why_two', tr(
+      `<ol class="steps"><li><b>More roof, so each storm brings in more.</b> A 20 mm downpour gives today's roofs ${stormNow} of water. ` +
+        `With step 1, the same downpour gives ${storm1}.</li>` +
+        `<li><b>More tank, to get through the gaps.</b> A bigger tank starts the summer with more weeks of water (${tankw12} instead of ${tankw}), ` +
+        `and keeps more of the big storms instead of letting them overflow.</li></ol>` +
+        `<p><b>Neither is enough alone.</b> Since ${from}, step 1 alone would still run dry in ${ofN(s1)} summers, ` +
+        `and the new tank alone in ${ofN(runs.s2only.st)}. Both together: ${ofN(s12)}.</p>`,
+      `<ol class="steps"><li><b>Meer dak, zodat elke bui meer oplevert.</b> Een stortbui van 20 mm levert de huidige daken ${stormNow} water op. ` +
+        `Met stap 1 levert dezelfde bui ${storm1} op.</li>` +
+        `<li><b>Meer tank, om de droge periodes te overbruggen.</b> Een grotere tank begint de zomer met meer weken water (${tankw12} in plaats van ${tankw}), ` +
+        `en houdt meer van de grote buien vast in plaats van ze te laten overlopen.</li></ol>` +
+        `<p><b>Geen van beide is in zijn eentje genoeg.</b> Sinds ${from} zou het huis met alleen stap 1 nog steeds droogvallen in ${ofN(s1)} zomers, ` +
+        `en met alleen de nieuwe tank in ${ofN(runs.s2only.st)}. Met allebei: ${ofN(s12)}.</p>`));
   }
 
   // ---- The example summer: calendar strips and the tank level ---------------
@@ -803,9 +948,9 @@
     const seen = new Set();
     const opts = [];
     const add = (y, label) => { if (y && !seen.has(y)) { seen.add(y); opts.push({ y, label }); } };
-    add(story.last, `Last summer (${story.last})`);
-    add(story.driest, `Driest summer (${story.driest})`);
-    add(story.wettest, `Wettest summer (${story.wettest})`);
+    add(story.last, tr(`Last summer (${story.last})`, `Vorige zomer (${story.last})`));
+    add(story.driest, tr(`Driest summer (${story.driest})`, `Droogste zomer (${story.driest})`));
+    add(story.wettest, tr(`Wettest summer (${story.wettest})`, `Natste zomer (${story.wettest})`));
     return opts;
   }
 
@@ -844,9 +989,10 @@
       }
       const Y = st.byYear[y];
       const out = Y && Y.dryDays
-        ? `Runs dry on ${dayMonth(Y.firstDry)}: <b class="bad">${weeksText(Y.dryDays)} without water</b>`
-        : '<b class="good">Water all season</b>';
-      html += `<div class="strip-row"><div class="strip-name">${o.name}</div><div class="strip">${segs}</div><div class="strip-out">${out}</div></div>`;
+        ? tr(`Runs dry on ${dayMonth(Y.firstDry)}: <b class="bad">${weeksText(Y.dryDays)} without water</b>`,
+          `Droog vanaf ${dayMonth(Y.firstDry)}: <b class="bad">${weeksText(Y.dryDays)} zonder water</b>`)
+        : `<b class="good">${tr('Water all season', 'Het hele seizoen water')}</b>`;
+      html += `<div class="strip-row"><div class="strip-name">${pick(o.name)}</div><div class="strip">${segs}</div><div class="strip-out">${out}</div></div>`;
     }
     // Month marks under the strips.
     const r0 = story.runs.now.st.r;
@@ -857,10 +1003,13 @@
     });
     html += `<div class="strip-axis"><div>${axis}</div></div>`;
     setHTML('strips', html);
-    $('strips').setAttribute('aria-label', `Each day of the ${y} season, with and without water, for the house today, with step 1, and with steps 1 and 2.`);
+    $('strips').setAttribute('aria-label', tr(`Each day of the ${y} season, with and without water, for the house today, with step 1, and with steps 1 and 2.`,
+      `Elke dag van het seizoen ${y}, met en zonder water, voor het huis nu, met stap 1, en met stap 1 en 2.`));
+    const g = story.base.guests;
     setHTML('strip_note', (y === story.last
-      ? `Last summer the house wasn't full; this shows what ${story.base.guests} guests all season would have faced. `
-      : '') + 'Blue: water in the tanks. Red: tanks empty. Nothing trucked in.');
+      ? tr(`Last summer the house wasn't full; this shows what ${g} guests all season would have faced. `,
+        `Vorige zomer was het huis niet vol; dit laat zien wat ${g} gasten het hele seizoen zouden hebben meegemaakt. `)
+      : '') + tr('Blue: water in the tanks. Red: tanks empty. Nothing trucked in.', 'Blauw: water in de tanks. Rood: tanks leeg. Niets aangevoerd.'));
   }
 
   // The level in the tanks through the example summer, in weeks of water for a full house.
@@ -923,7 +1072,7 @@
       days.forEach((j, k) => { const v = r.vol[j] / perDay / 7; if (k) ctx.lineTo(X(k), Yw(v)); else ctx.moveTo(X(k), Yw(v)); });
       ctx.stroke();
       ctx.setLineDash([]);
-      ends.push({ y: Yw(r.vol[days[days.length - 1]] / perDay / 7), col, name: o.short });
+      ends.push({ y: Yw(r.vol[days[days.length - 1]] / perDay / 7), col, name: pick(o.short) });
     }
     // Names at the right-hand end, nudged apart so they don't overlap.
     ends.sort((a, b) => a.y - b.y);
@@ -943,8 +1092,10 @@
       const i = r0.i0 + j;
       if (DOM[i] === 15) ctx.fillText(MONTHS_SHORT[MONTH[i] - 1], X(k), pad.t + ph + 5);
     });
-    $('why_chart').setAttribute('aria-label', `Weeks of water left in the tanks through the ${y} season, for the house today, with step 1, and with steps 1 and 2, with the daily rain.`);
-    setHTML('why_chart_title', `Water left in the tanks through the ${y} season, in weeks for a full house`);
+    $('why_chart').setAttribute('aria-label', tr(`Weeks of water left in the tanks through the ${y} season, for the house today, with step 1, and with steps 1 and 2, with the daily rain.`,
+      `Weken water in de tanks door het seizoen ${y} heen, voor het huis nu, met stap 1, en met stap 1 en 2, met de regen per dag.`));
+    setHTML('why_chart_title', tr(`Water left in the tanks through the ${y} season, in weeks for a full house`,
+      `Water in de tanks door het seizoen ${y} heen, in weken voor een vol huis`));
   }
 
   function setExample(y) {
@@ -971,47 +1122,66 @@
     const driest = story.driest;
     const dryLine = (x) => {
       const Y = x.byYear[driest];
-      return Y && Y.dryDays ? `${weeksText(Y.dryDays)} without water in ${driest}` : `water all through ${driest}`;
+      return Y && Y.dryDays
+        ? tr(`${weeksText(Y.dryDays)} without water in ${driest}`, `${weeksText(Y.dryDays)} zonder water in ${driest}`)
+        : tr(`water all through ${driest}`, `in ${driest} het hele seizoen water`);
     };
-    const runs = (x) => (x.ranDry ? `runs dry in <b>${x.ranDry} of ${x.n} summers</b>` : `<b>never runs dry</b>`);
+    const runs = (x) => (x.ranDry
+      ? tr(`runs dry in <b>${x.ranDry} of ${x.n} summers</b>`, `valt droog in <b>${x.ranDry} van de ${x.n} zomers</b>`)
+      : tr('<b>never runs dry</b>', '<b>valt nooit droog</b>'));
     setHTML('pb_both', a > 0
-      ? `<b>On top of steps 1 and 2:</b> ${runs(both)} (${both0.ranDry} without the sheet); ${dryLine(both)}.`
-      : `<b>Steps 1 and 2 without a sheet:</b> ${runs(both0)}; ${dryLine(both0)}.`);
+      ? tr(`<b>On top of steps 1 and 2:</b> ${runs(both)} (${both0.ranDry} without the sheet); ${dryLine(both)}.`,
+        `<b>Bovenop stap 1 en 2:</b> ${runs(both)} (${both0.ranDry} zonder folie); ${dryLine(both)}.`)
+      : tr(`<b>Steps 1 and 2 without a sheet:</b> ${runs(both0)}; ${dryLine(both0)}.`,
+        `<b>Stap 1 en 2 zonder folie:</b> ${runs(both0)}; ${dryLine(both0)}.`));
+    const typical = instead.medianDry
+      ? tr(`a typical summer has ${weeksText(Math.round(instead.medianDry))} without water`, `een gewone zomer heeft ${weeksText(Math.round(instead.medianDry))} zonder water`)
+      : tr('a typical summer has water all season', 'een gewone zomer heeft het hele seizoen water');
     setHTML('pb_instead', a > 0
-      ? `<b>Instead of the new tank (step 1 and the sheet):</b> ${runs(instead)}; ` +
-        `${instead.medianDry ? `a typical summer has ${weeksText(Math.round(instead.medianDry))} without water` : 'a typical summer has water all season'}; ${dryLine(instead)}.`
+      ? tr(`<b>Instead of the new tank (step 1 and the sheet):</b> ${runs(instead)}; ${typical}; ${dryLine(instead)}.`,
+        `<b>In plaats van de nieuwe tank (stap 1 en de folie):</b> ${runs(instead)}; ${typical}; ${dryLine(instead)}.`)
       : '');
     const tb = wt({ roofs: 1, tank: 1, sheet: a });
     const ti = wt({ roofs: 1, sheet: a });
-    setHTML('pb_tankers', `If tankers are called: worst summer ${tb.worstDel} ${plural(tb.worstDel, 'delivery', 'deliveries')} with steps 1 and 2${a > 0 ? ' and the sheet' : ''}` +
-      (a > 0 ? `, ${ti.worstDel} with step 1 and the sheet` : '') + '.');
+    setHTML('pb_tankers', a > 0
+      ? tr(`If tankers are called: worst summer ${tb.worstDel} ${plural(tb.worstDel, 'delivery', 'deliveries')} with steps 1 and 2 and the sheet, ${ti.worstDel} with step 1 and the sheet.`,
+        `Als er tankwagens komen: in de slechtste zomer ${tb.worstDel} ${plural(tb.worstDel, 'levering', 'leveringen')} met stap 1 en 2 en de folie, ${ti.worstDel} met stap 1 en de folie.`)
+      : tr(`If tankers are called: worst summer ${tb.worstDel} ${plural(tb.worstDel, 'delivery', 'deliveries')} with steps 1 and 2.`,
+        `Als er tankwagens komen: in de slechtste zomer ${tb.worstDel} ${plural(tb.worstDel, 'levering', 'leveringen')} met stap 1 en 2.`));
     setHTML('pb_site', a > 155
-      ? '<span class="warn">Beyond about 155 m², check the map and the ground again: the slope surveyed so far takes a sheet of about 20 × 7.75 m.</span>'
-      : 'Fits the open slope south of the buildings: the survey shows room for at least 20 × 7.75 m (155 m²).');
+      ? `<span class="warn">${tr('Beyond about 155 m², check the map and the ground again: the slope surveyed so far takes a sheet of about 20 × 7.75 m.',
+        'Boven ongeveer 155 m² moeten de kaart en het terrein opnieuw bekeken worden: op de tot nu toe opgemeten helling past een folie van ongeveer 20 × 7,75 m.')}</span>`
+      : tr('Fits the open slope south of the buildings: the survey shows room for at least 20 × 7.75 m (155 m²).',
+        'Past op de open helling ten zuiden van de gebouwen: volgens de opname is er ruimte voor minstens 20 × 7,75 m (155 m²).'));
   }
 
   // ---- The numbers behind it: the options and how much roof and tank it takes -
 
   function renderOptions() {
+    const sheet = fmt(SHEET_DEFAULT);
     const rows = [
-      { name: 'As now', o: {}, cost: 'None' },
-      { name: 'Step 1: gutter the yoga building, car port and house terrace', o: { roofs: 1 }, cost: 'Rough guess €1,500–5,000' },
-      { name: 'Steps 1 and 2: plus the new buried tank', o: { roofs: 1, tank: 1 }, cost: 'Step 1 plus the tank: to be quoted', best: 1 },
-      { name: `Steps 1 and 2 plus a ${fmt(SHEET_DEFAULT)} m² rain sheet (plan B on top)`, o: { roofs: 1, tank: 1, sheet: SHEET_DEFAULT }, cost: 'Plus about €2,500–4,500 for the sheet (rough)' },
-      { name: `Step 1 and a ${fmt(SHEET_DEFAULT)} m² rain sheet, no new tank`, o: { roofs: 1, sheet: SHEET_DEFAULT }, cost: 'Step 1 plus about €2,500–4,500 (rough)' },
+      { name: tr('As now', 'Zoals nu'), o: {}, cost: tr('None', 'Geen') },
+      { name: tr('Step 1: gutter the yoga building, car port and house terrace', 'Stap 1: dakgoten op het yogagebouw, de carport en het terras bij het huis'),
+        o: { roofs: 1 }, cost: tr('Rough guess €1,500–5,000', 'Ruwe schatting € 1.500–5.000') },
+      { name: tr('Steps 1 and 2: plus the new buried tank', 'Stap 1 en 2: plus de nieuwe ondergrondse tank'),
+        o: { roofs: 1, tank: 1 }, cost: tr('Step 1 plus the tank: to be quoted', 'Stap 1 plus de tank: offerte aanvragen'), best: 1 },
+      { name: tr(`Steps 1 and 2 plus a ${sheet} m² rain sheet (plan B on top)`, `Stap 1 en 2 plus een opvangfolie van ${sheet} m² (plan B erbovenop)`),
+        o: { roofs: 1, tank: 1, sheet: SHEET_DEFAULT }, cost: tr('Plus about €2,500–4,500 for the sheet (rough)', 'Plus ongeveer € 2.500–4.500 voor de folie (ruw)') },
+      { name: tr(`Step 1 and a ${sheet} m² rain sheet, no new tank`, `Stap 1 en een opvangfolie van ${sheet} m², geen nieuwe tank`),
+        o: { roofs: 1, sheet: SHEET_DEFAULT }, cost: tr('Step 1 plus about €2,500–4,500 (rough)', 'Stap 1 plus ongeveer € 2.500–4.500 (ruw)') },
     ];
     const limit = 3;
-    let h = '<thead><tr><th>Option</th><th class="num">Typical summer without water</th>' +
-      `<th class="num">Driest summer (${story.driest})</th><th class="num">Summers that run dry</th>` +
-      '<th class="num">Tankers a summer: average / worst</th><th>Cost</th></tr></thead><tbody>';
+    let h = `<thead><tr><th>${tr('Option', 'Optie')}</th><th class="num">${tr('Typical summer without water', 'Gewone zomer zonder water')}</th>` +
+      `<th class="num">${tr('Driest summer', 'Droogste zomer')} (${story.driest})</th><th class="num">${tr('Summers that run dry', 'Zomers die droogvallen')}</th>` +
+      `<th class="num">${tr('Tankers a summer: average / worst', 'Tankwagens per zomer: gemiddeld / slechtste')}</th><th>${tr('Cost', 'Kosten')}</th></tr></thead><tbody>`;
     for (const row of rows) {
       const a = summaryOf(simulate(withSteps(story.off, row.o)));
       const b = summaryOf(simulate(withSteps(story.base, row.o)));
       const dry = a.byYear[story.driest];
       h += `<tr${row.best ? ' class="best"' : ''}><td>${row.best ? '<b>' + row.name + '</b>' : row.name}</td>` +
-        `<td class="num">${a.medianDry ? weeksText(Math.round(a.medianDry)) : 'none'}</td>` +
-        `<td class="num">${dry && dry.dryDays ? weeksText(dry.dryDays) : 'none'}</td>` +
-        `<td class="num">${a.ranDry} of ${a.n}</td>` +
+        `<td class="num">${a.medianDry ? weeksText(Math.round(a.medianDry)) : tr('none', 'geen')}</td>` +
+        `<td class="num">${dry && dry.dryDays ? weeksText(dry.dryDays) : tr('none', 'geen')}</td>` +
+        `<td class="num">${tr(`${a.ranDry} of ${a.n}`, `${a.ranDry} van ${a.n}`)}</td>` +
         `<td class="num">${oneDp(b.meanDel)} / <span class="${b.worstDel > limit ? 'bad' : 'good'}">${b.worstDel}</span></td>` +
         `<td>${row.cost}</td></tr>`;
     }
@@ -1029,12 +1199,12 @@
     const tag = (A, V, t) => { tags[key(A) + '|' + key(V)] = t; };
     const volNow = tankVolume(base);
     const vol12 = tankVolume(withSteps(base, { roofs: 1, tank: 1 }));
-    tag(catchment(base), volNow, 'today');
-    tag(catchment(s1), volNow, 'step 1');
-    tag(catchment(s1), vol12, 'steps 1 + 2');
+    tag(catchment(base), volNow, tr('today', 'nu'));
+    tag(catchment(s1), volNow, tr('step 1', 'stap 1'));
+    tag(catchment(s1), vol12, tr('steps 1 + 2', 'stap 1 + 2'));
     const rows = uniq([catchment(base), catchment(s1), catchment(s1) + extra, 230, 400]);
     const cols = uniq([volNow, vol12, 70, 100, 120]);
-    let h = '<thead><tr><th>Roof m² \\ tanks m³</th>' + cols.map((v) => `<th class="num">${fmt(v)}</th>`).join('') + '</tr></thead><tbody>';
+    let h = `<thead><tr><th>${tr('Roof m² \\ tanks m³', 'Dak m² \\ tanks m³')}</th>` + cols.map((v) => `<th class="num">${fmt(v)}</th>`).join('') + '</tr></thead><tbody>';
     for (const A of rows) {
       h += `<tr><th>${fmt(A)}</th>`;
       for (const V of cols) {
@@ -1044,7 +1214,7 @@
         const x = summaryOf(simulate(s));
         const t = tags[key(A) + '|' + key(V)];
         h += `<td class="num cell ${x.worstDel > 3 ? 'over' : x.worstDel ? 'near' : 'zero'}${t ? ' here' : ''}">` +
-          `<b>${x.worstDel}</b><span class="tag">${x.withDel ? `in ${x.withDel} of ${x.n}` : 'never'}</span>${t ? `<span class="tag here-tag">${t}</span>` : ''}</td>`;
+          `<b>${x.worstDel}</b><span class="tag">${x.withDel ? tr(`in ${x.withDel} of ${x.n}`, `in ${x.withDel} van ${x.n}`) : tr('never', 'nooit')}</span>${t ? `<span class="tag here-tag">${t}</span>` : ''}</td>`;
       }
       h += '</tr>';
     }
@@ -1052,7 +1222,6 @@
   }
 
   function renderStory() {
-    buildStory();
     renderStoryText();
     renderExampleSwitches();
     renderStrips();
@@ -1107,7 +1276,7 @@
     const sel = $('view_year');
     const first = String(YEAR[r.i0]);
     if (sel.dataset.first !== first) {
-      let options = '<option value="">choose…</option>';
+      let options = `<option value="">${tr('choose…', 'kies…')}</option>`;
       for (let y = LAST_YEAR; y >= YEAR[r.i0]; y--) options += `<option value="${y}">${y}</option>`;
       sel.innerHTML = options;
       sel.dataset.first = first;
@@ -1257,10 +1426,10 @@
     if (j < a || j > b) { hair.style.display = 'none'; tip.style.display = 'none'; return; }
     const i = r.i0 + j;
     const rain = R.sources[r.s.src].mm[i] * climateFactor(MONTH[i], r.s);
-    tip.innerHTML = `<b>${longDate(isoAt(i))}</b><br>In the tanks: ${m3(r.vol[j])}` +
-      (rb ? `<br>Comparison setup: ${m3(rb.vol[j])}` : '') +
-      `<br>Rain that day: ${fmt(rain, 1)} mm` +
-      (r.deliveryDays.includes(j) ? '<br>Tanker delivery' : '');
+    tip.innerHTML = `<b>${longDate(isoAt(i))}</b><br>${tr('In the tanks', 'In de tanks')}: ${m3(r.vol[j])}` +
+      (rb ? `<br>${tr('Comparison setup', 'Vergelijking')}: ${m3(rb.vol[j])}` : '') +
+      `<br>${tr('Rain that day', 'Regen die dag')}: ${fmt(rain, 1)} mm` +
+      (r.deliveryDays.includes(j) ? `<br>${tr('Tanker delivery', 'Levering per tankwagen')}` : '');
     const px = X(j);
     hair.style.left = px + 'px';
     hair.style.display = 'block';
@@ -1290,7 +1459,9 @@
     const maxDate = isoAt(N);
     const dateIn = (attrs) => `<input type="date" min="${R.start}" max="${maxDate}" ${attrs}>`;
     const numIn = (attrs) => `<input type="number" step="0.5" min="0" ${attrs}>`;
-    let h = '<thead><tr><th>Before: date</th><th>Depth (cm)</th><th>After: date</th><th>Depth (cm)</th><th>Result</th></tr></thead><tbody>';
+    const depth = tr('Depth (cm)', 'Diepte (cm)');
+    let h = `<thead><tr><th>${tr('Before: date', 'Voor: datum')}</th><th>${depth}</th><th>${tr('After: date', 'Na: datum')}</th>` +
+      `<th>${depth}</th><th>${tr('Result', 'Resultaat')}</th></tr></thead><tbody>`;
     cal.rain.forEach((row, k) => {
       h += `<tr><td>${dateIn(`data-cr="${k}" data-f="d0"`)}</td><td>${numIn(`data-cr="${k}" data-f="l0"`)}</td>` +
         `<td>${dateIn(`data-cr="${k}" data-f="d1"`)}</td><td>${numIn(`data-cr="${k}" data-f="l1"`)}</td>` +
@@ -1299,7 +1470,8 @@
     $('cal_rain').innerHTML = h + '</tbody>';
     document.querySelectorAll('[data-cr]').forEach((el) => { el.value = cal.rain[+el.dataset.cr][el.dataset.f]; });
 
-    $('cal_use').innerHTML = '<thead><tr><th>Start: date</th><th>Depth (cm)</th><th>End: date</th><th>Depth (cm)</th><th>Guests</th></tr></thead><tbody><tr>' +
+    $('cal_use').innerHTML = `<thead><tr><th>${tr('Start: date', 'Begin: datum')}</th><th>${depth}</th><th>${tr('End: date', 'Eind: datum')}</th>` +
+      `<th>${depth}</th><th>${tr('Guests', 'Gasten')}</th></tr></thead><tbody><tr>` +
       `<td>${dateIn('data-cu="d0"')}</td><td>${numIn('data-cu="l0"')}</td><td>${dateIn('data-cu="d1"')}</td><td>${numIn('data-cu="l1"')}</td>` +
       '<td><input type="number" min="1" max="30" step="1" data-cu="g"></td></tr></tbody>';
     document.querySelectorAll('[data-cu]').forEach((el) => { el.value = cal.use[el.dataset.cu]; });
@@ -1309,22 +1481,32 @@
     if (!row.d0 || !row.d1 || row.l0 === '' || row.l1 === '') return { text: '' };
     const i0 = indexOf(row.d0);
     const i1 = indexOf(row.d1);
-    if (!(i1 > i0)) return { text: 'The second reading needs to be after the first.' };
-    if (i0 < 0 || i1 > N) return { text: `Rain data covers ${longDate(R.start)} to ${longDate(R.end)}.` };
+    if (!(i1 > i0)) return { text: tr('The second reading needs to be after the first.', 'De tweede meting moet na de eerste komen.') };
+    if (i0 < 0 || i1 > N) {
+      return { text: tr(`Rain data covers ${longDate(R.start)} to ${longDate(R.end)}.`, `De neerslaggegevens lopen van ${longDate(R.start)} tot ${longDate(R.end)}.`) };
+    }
     const rain = rainBetween(i0, i1, state);
     // The proposed ground sheet isn't built, so it's left out. Other surfaces with their own share are
     // taken off first; what's left measures the surfaces that use the general setting.
     const general = state.surfaces.reduce((a, x) => a + (x.on && !x.g && !ownShare(x) ? x.l * x.w : 0), 0);
     const fixedWet = state.surfaces.reduce((a, x) => a + (x.on && !x.g && ownShare(x) ? x.l * x.w * x.e / 100 : 0), 0);
     const gained = (parseFloat(row.l1) - parseFloat(row.l0)) / 100 * planArea(state);
-    if (rain.raw < 3) return { text: `Only ${fmt(rain.raw, 1)} mm fell between those readings. Pick a wetter spell.` };
-    if (!(rain.usable > 0)) return { text: 'Tick at least one collecting surface first.' };
-    if (!(general > 0)) return { text: 'This measures the surfaces that use the general setting. Tick at least one roof.' };
+    if (rain.raw < 3) {
+      return { text: tr(`Only ${fmt(rain.raw, 1)} mm fell between those readings. Pick a wetter spell.`,
+        `Er viel maar ${fmt(rain.raw, 1)} mm tussen die metingen. Kies een nattere periode.`) };
+    }
+    if (!(rain.usable > 0)) return { text: tr('Tick at least one collecting surface first.', 'Vink eerst minstens één opvangoppervlak aan.') };
+    if (!(general > 0)) {
+      return { text: tr('This measures the surfaces that use the general setting. Tick at least one roof.',
+        'Dit meet de oppervlakken met de algemene instelling. Vink minstens één dak aan.') };
+    }
     const eff = (gained - rain.usable * fixedWet / 1000) / (rain.usable * general / 1000) * 100;
     return {
       eff,
-      text: `${fmt(rain.raw, 1)} mm of rain, tanks gained ${m3(gained)}: <b>${fmt(eff)}%</b> reached the tanks` +
+      text: tr(`${fmt(rain.raw, 1)} mm of rain, tanks gained ${m3(gained)}: <b>${fmt(eff)}%</b> reached the tanks` +
         (fixedWet > 0 ? ' from the roofs, after allowing for the surfaces with their own share.' : '.'),
+      `${fmt(rain.raw, 1)} mm regen, de tanks kregen ${m3(gained)} erbij: <b>${fmt(eff)}%</b> kwam in de tanks` +
+        (fixedWet > 0 ? ' van de daken, na aftrek van de oppervlakken met een eigen percentage.' : '.')),
     };
   }
 
@@ -1333,17 +1515,23 @@
     if (!u.d0 || !u.d1 || u.l0 === '' || u.l1 === '' || !(g > 0)) return { text: '' };
     const i0 = indexOf(u.d0);
     const i1 = indexOf(u.d1);
-    if (!(i1 > i0)) return { text: 'The end date needs to be after the start date.' };
+    if (!(i1 > i0)) return { text: tr('The end date needs to be after the start date.', 'De einddatum moet na de begindatum liggen.') };
     const days = i1 - i0;
     const rain = rainBetween(i0, i1, state);
     const built = Object.assign({}, state, { surfaces: state.surfaces.filter((x) => !x.g) });
     const fromRain = rain.usable * wetArea(built) / 1000;
     const drop = (parseFloat(u.l0) - parseFloat(u.l1)) / 100 * planArea(state);
     const lpd = (drop + fromRain) * 1000 / (g * days);
-    let text = `Over ${days} ${plural(days, 'day', 'days')} the tanks went down by ${m3(drop)}` +
+    let text = tr(`Over ${days} ${plural(days, 'day', 'days')} the tanks went down by ${m3(drop)}` +
       (fromRain > 0.05 ? ` while rain added about ${m3(fromRain)}` : '') +
-      `: <b>${fmt(lpd)} litres per guest per day</b>, laundry and dishwasher included.`;
-    if (i1 > N) text += ` Rain data only runs to ${longDate(R.end)}, so any rain after that isn't counted.`;
+      `: <b>${fmt(lpd)} litres per guest per day</b>, laundry and dishwasher included.`,
+    `In ${days} ${plural(days, 'dag', 'dagen')} daalden de tanks met ${m3(drop)}` +
+      (fromRain > 0.05 ? `, terwijl de regen ongeveer ${m3(fromRain)} toevoegde` : '') +
+      `: <b>${fmt(lpd)} liter per gast per dag</b>, inclusief was en vaatwasser.`);
+    if (i1 > N) {
+      text += tr(` Rain data only runs to ${longDate(R.end)}, so any rain after that isn't counted.`,
+        ` De neerslaggegevens lopen maar tot ${longDate(R.end)}, dus regen daarna telt niet mee.`);
+    }
     return { lpd, text };
   }
 
@@ -1356,12 +1544,14 @@
     });
     if (effs.length) {
       const avg = effs.reduce((a, b) => a + b, 0) / effs.length;
-      setHTML('cal_rain_out', `Average of ${effs.length} ${plural(effs.length, 'spell', 'spells')}: <b>${fmt(avg)}%</b> of the rain reaches the tanks ` +
-        `(the page is using ${state.eff}%). <button type="button" data-apply-eff="${Math.round(avg)}">Use ${fmt(avg)}%</button>`);
+      setHTML('cal_rain_out', tr(`Average of ${effs.length} ${plural(effs.length, 'spell', 'spells')}: <b>${fmt(avg)}%</b> of the rain reaches the tanks ` +
+        `(the page is using ${state.eff}%). <button type="button" data-apply-eff="${Math.round(avg)}">Use ${fmt(avg)}%</button>`,
+      `Gemiddelde van ${effs.length} ${plural(effs.length, 'periode', 'periodes')}: <b>${fmt(avg)}%</b> van de regen komt in de tanks ` +
+        `(de pagina gebruikt ${state.eff}%). <button type="button" data-apply-eff="${Math.round(avg)}">Gebruik ${fmt(avg)}%</button>`));
     } else setHTML('cal_rain_out', '');
     const u = calcUse(cal.use);
     setHTML('cal_use_out', u.text + (isFinite(u.lpd) && u.lpd > 0
-      ? ` <button type="button" data-apply-lpd="${Math.round(u.lpd)}">Use ${fmt(u.lpd)} litres per guest per day</button>` : ''));
+      ? ` <button type="button" data-apply-lpd="${Math.round(u.lpd)}">${tr(`Use ${fmt(u.lpd)} litres per guest per day`, `Gebruik ${fmt(u.lpd)} liter per gast per dag`)}</button>` : ''));
   }
 
   // ---- Settings in the page address ----------------------------------------
@@ -1388,6 +1578,7 @@
         return parts.join('~');
       }).join('|'));
     }
+    if (LANG === 'nl') p.set('lang', 'nl');
     if (view.from) p.set('vf', view.from);
     if (view.to) p.set('vt', view.to);
     return p.toString();
@@ -1493,16 +1684,17 @@
     surfRows = state.surfaces.map((x, k) => {
       const el = document.createElement('div');
       el.className = 'surf-row';
-      el.innerHTML = '<input type="checkbox" aria-label="Connected to the tanks"> ' +
-        '<input type="text" maxlength="40" aria-label="Name"> ' +
-        '<input type="number" min="0" max="200" step="0.1" aria-label="Length in metres"> × ' +
-        '<input type="number" min="0" max="200" step="0.1" aria-label="Width in metres"> m ' +
+      el.innerHTML = `<input type="checkbox" aria-label="${tr('Connected to the tanks', 'Aangesloten op de tanks')}"> ` +
+        `<input type="text" maxlength="40" aria-label="${tr('Name', 'Naam')}"> ` +
+        `<input type="number" min="0" max="200" step="0.1" aria-label="${tr('Length in metres', 'Lengte in meters')}"> × ` +
+        `<input type="number" min="0" max="200" step="0.1" aria-label="${tr('Width in metres', 'Breedte in meters')}"> m ` +
         '<span class="area"></span>' +
-        '<span class="share"><input type="number" min="1" max="100" step="1" aria-label="Share of rain reaching the tanks, %; blank uses the general setting"> % reaches tanks</span>' +
-        (k >= DEFAULT_SURFACES.length && !x.g ? ' <button type="button" class="small-btn">Remove</button>' : '');
+        `<span class="share"><input type="number" min="1" max="100" step="1" aria-label="${tr('Share of rain reaching the tanks, %; blank uses the general setting',
+          'Deel van de regen dat in de tanks komt, %; leeg gebruikt de algemene instelling')}"> ${tr('% reaches tanks', '% naar tanks')}</span>` +
+        (k >= DEFAULT_SURFACES.length && !x.g ? ` <button type="button" class="small-btn">${tr('Remove', 'Verwijderen')}</button>` : '');
       const [on, name, len, wid, share] = el.querySelectorAll('input');
       on.checked = !!x.on;
-      name.value = x.n;
+      name.value = showName(x.n);
       len.value = x.l;
       wid.value = x.w;
       share.value = ownShare(x) ? x.e : '';
@@ -1532,18 +1724,18 @@
     tankRows = state.tanklist.map((t, k) => {
       const el = document.createElement('div');
       el.className = 'surf-row';
-      el.innerHTML = '<input type="checkbox" aria-label="In use"> ' +
-        '<input type="text" maxlength="40" aria-label="Name"> ' +
-        '<select aria-label="Shape"><option value="box">Box</option><option value="round">Round</option></select> ' +
-        '<span class="lbl"></span><input type="number" min="0" max="50" step="0.1" aria-label="Length or diameter in metres">' +
-        '<span class="wpart"> × <input type="number" min="0" max="50" step="0.1" aria-label="Width in metres"></span> × ' +
-        '<input type="number" min="0" max="20" step="0.1" aria-label="Depth in metres"> m ' +
+      el.innerHTML = `<input type="checkbox" aria-label="${tr('In use', 'In gebruik')}"> ` +
+        `<input type="text" maxlength="40" aria-label="${tr('Name', 'Naam')}"> ` +
+        `<select aria-label="${tr('Shape', 'Vorm')}"><option value="box">${tr('Box', 'Rechthoekig')}</option><option value="round">${tr('Round', 'Rond')}</option></select> ` +
+        `<span class="lbl"></span><input type="number" min="0" max="50" step="0.1" aria-label="${tr('Length or diameter in metres', 'Lengte of diameter in meters')}">` +
+        `<span class="wpart"> × <input type="number" min="0" max="50" step="0.1" aria-label="${tr('Width in metres', 'Breedte in meters')}"></span> × ` +
+        `<input type="number" min="0" max="20" step="0.1" aria-label="${tr('Depth in metres', 'Diepte in meters')}"> m ` +
         '<span class="area"></span>' +
-        (k >= DEFAULT_TANKS.length && !t.g ? ' <button type="button" class="small-btn">Remove</button>' : '');
+        (k >= DEFAULT_TANKS.length && !t.g ? ` <button type="button" class="small-btn">${tr('Remove', 'Verwijderen')}</button>` : '');
       const [on, name, len, wid, dep] = el.querySelectorAll('input');
       const shape = el.querySelector('select');
       on.checked = !!t.on;
-      name.value = t.n;
+      name.value = showName(t.n);
       shape.value = t.shape;
       len.value = t.l;
       wid.value = t.w;
@@ -1633,19 +1825,66 @@
     setTimeout(() => { pending = false; update(); }, 16);
   }
 
-  function init() {
+  // ---- Language switching ----------------------------------------------------
+
+  // The page address first, then the last choice on this device, then the browser's first language.
+  function initialLang() {
+    const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if (p.get('lang') === 'nl' || p.get('lang') === 'en') return p.get('lang');
+    try {
+      const saved = localStorage.getItem('rainwater-lang');
+      if (saved === 'nl' || saved === 'en') return saved;
+    } catch (e) { /* storage blocked */ }
+    const first = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+    return /^nl\b/i.test(first) ? 'nl' : 'en';
+  }
+
+  function setLang(l) {
+    LANG = l === 'nl' ? 'nl' : 'en';
+    MONTHS = MONTH_NAMES[LANG];
+    MONTHS_SHORT = MONTH_SHORT[LANG];
+    document.documentElement.lang = LANG;
+    document.title = tr('Will the rainwater last the summer? — Prayssac, Lot', 'Houdt het regenwater de zomer vol? — Prayssac, Lot');
+    document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  }
+
+  // Options in the drop-downs, which CSS can't swap.
+  function localizeSelects() {
     document.querySelectorAll('select.months').forEach((sel) => {
       sel.innerHTML = MONTHS.map((m, k) => `<option value="${k + 1}">${m}</option>`).join('');
     });
-    $('src_select').innerHTML = Object.keys(R.sources)
-      .map((k) => `<option value="${k}">${R.sources[k].name}</option>`).join('');
+    $('src_select').innerHTML = Object.keys(R.sources).map((k) => `<option value="${k}">${sourceName(k)}</option>`).join('');
+    $('supplier_select').innerHTML = SUPPLIERS
+      .map((x) => `<option value="${x.id}">${pick(x.name)}${x.km !== null ? ` (${fmt(x.km, 1)} km)` : ''}</option>`).join('');
+    $('truck_select').innerHTML = TRUCKS
+      .map((x) => `<option value="${x.id}">${pick(x.name)}${x.load !== null ? `: ${x.load} m³` : ''}</option>`).join('');
+    const toilets = {
+      std: tr('Standard flush (9 L)', 'Gewone spoeling (9 L)'),
+      low: tr('Low flush (6 L)', 'Zuinige spoeling (6 L)'),
+      dual: tr('Dual flush 6/2 L (average 3.3 L)', 'Spaarknop 6/2 L (gemiddeld 3,3 L)'),
+      dry: tr('Dry / composting (no water)', 'Droog / composttoilet (geen water)'),
+      grey: tr('Flushed with used shower water', 'Doorgespoeld met gebruikt douchewater'),
+    };
+    $('toilet_select').querySelectorAll('option').forEach((o) => { if (toilets[o.value]) o.textContent = toilets[o.value]; });
+    $('view_year').dataset.first = '';
+  }
+
+  function switchLang(l) {
+    setLang(l);
+    try { localStorage.setItem('rainwater-lang', LANG); } catch (e) { /* storage blocked */ }
+    localizeSelects();
+    setInputs();
+    buildCalibration();
+    renderStory();
+    update();
+  }
+
+  function init() {
+    setLang(initialLang());
     let years = '';
     for (let y = FIRST_YEAR; y <= LAST_FULL_YEAR; y++) years += `<option value="${y}">${y}</option>`;
     $('from_select').innerHTML = years;
-    $('supplier_select').innerHTML = SUPPLIERS
-      .map((x) => `<option value="${x.id}">${x.name}${x.km !== null ? ` (${fmt(x.km, 1)} km)` : ''}</option>`).join('');
-    $('truck_select').innerHTML = TRUCKS
-      .map((x) => `<option value="${x.id}">${x.name}${x.load !== null ? `: ${x.load} m³` : ''}</option>`).join('');
+    localizeSelects();
 
     state = fromHash(location.hash);
     view = viewFromHash(location.hash);
@@ -1657,7 +1896,7 @@
       el.addEventListener(evt, () => { readInput(el); linkPresets(el.dataset.k); schedule(); });
     });
     $('add_surface').addEventListener('click', () => {
-      state.surfaces.push({ n: 'Other surface', l: 5, w: 4, on: 1 });
+      state.surfaces.push({ n: tr('Other surface', 'Ander oppervlak'), l: 5, w: 4, on: 1 });
       renderSurfaces();
       schedule();
     });
@@ -1685,13 +1924,16 @@
     $('share').addEventListener('click', () => {
       writeHash();
       const url = location.href;
-      const done = () => { setHTML('share_o', 'Link copied. Paste it into a message to share these exact settings.'); };
+      const done = () => {
+        setHTML('share_o', tr('Link copied. Paste it into a message to share these exact settings.',
+          'Link gekopieerd. Plak hem in een bericht om precies deze instellingen te delen.'));
+      };
       const fallback = () => {
         const box = $('share_url');
         box.style.display = '';
         box.value = url;
         box.select();
-        setHTML('share_o', 'Copy this link:');
+        setHTML('share_o', tr('Copy this link:', 'Kopieer deze link:'));
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fallback);
       else fallback();
@@ -1720,6 +1962,11 @@
       update();
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+
+    // The language switch at the top.
+    document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => {
+      if (b.dataset.lang !== LANG) switchLang(b.dataset.lang);
+    }));
 
     // The story: the example summer, and plan B's sheet size.
     document.addEventListener('click', (e) => {
@@ -1838,6 +2085,7 @@
       schedule();
     });
 
+    buildStory();
     renderStory();
     update();
   }
