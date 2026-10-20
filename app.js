@@ -7,7 +7,10 @@
   const R = window.RAINFALL;
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
-  const TOILET_LITRES = { std: 9, low: 6, dual: 4.5, dry: 0, grey: 9 };
+  const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
+  // Dual flush is the house's 6/2 L: one full flush for every two short ones, as in the UK water efficiency
+  // calculator (Approved Document G), averages (6 + 2 × 2) / 3 = 3.3 L.
+  const TOILET_LITRES = { std: 9, low: 6, dual: 10 / 3, dry: 0, grey: 9 };
   const STRING_KEYS = new Set(['src', 'mode', 'toilet', 'supplier', 'truck']);
 
   // Hauliers near the house that run tankers (researched October 2026), with the road
@@ -57,7 +60,7 @@
     { n: 'House tank', shape: 'box', l: 2, w: 2, d: 2.5, on: 1 },
     { n: 'Solar building tank', shape: 'box', l: 4.5, w: 4.45, d: 2.5, on: 1 },
     { n: 'Extra tank (sheet only)', shape: 'box', l: 4, w: 2.5, d: 1, on: 0, g: 1 },
-    { n: 'New buried tank', shape: 'box', l: 4.1, w: 4.1, d: 3, on: 0 },
+    { n: 'New buried tank', shape: 'box', l: 4, w: 2.5, d: 2.5, on: 0 },
   ];
   const NEW_TANK = 'New buried tank';
   const SHEET_TANK_ROW = DEFAULT_TANKS.findIndex((t) => t.g);
@@ -65,8 +68,8 @@
     // guests and season
     guests: 8, occ: 100, s0: 5, s1: 10, offPeople: 0,
     // water use: built up from parts, or one figure per guest
-    mode: 'build', direct: 120,
-    shN: 1, shL: 50, toilet: 'std', flush: 5, taps: 15, wmLoads: 8, wmL: 55, dwRuns: 1.5, dwL: 12, otherL: 0,
+    mode: 'build', direct: 82,
+    shN: 1, shL: 50, toilet: 'dual', flush: 5, taps: 15, wmLoads: 8, wmL: 55, dwRuns: 1.5, dwL: 12, otherL: 0,
     // collection
     eff: 75, loss: 0, cap: 0,
     // tanks (their sizes are in the tank list)
@@ -76,7 +79,7 @@
     supplier: 'delrieu', km: 15.6, truck: 'rigid2', load: 12,
     fixed: 150, perKm: 3, price: 2.8,
     // weather
-    src: 'anglars', from: 2010, sumAdj: 0, winAdj: 0,
+    src: 'anglars', from: 1994, sumAdj: 0, winAdj: 0,
     // payback
     upCost: 0,
   };
@@ -214,6 +217,7 @@
     const useOff = d.off / 1000;
 
     const vol = new Float32Array(L);
+    const dry = new Uint8Array(L); // 1 on a day the house ran short
     const deliveryDays = [];
     const years = [];
     let v = capM * s.fill / 100; // main tanks
@@ -239,7 +243,7 @@
       const m = MONTH[i];
       if (!Y || Y.year !== YEAR[i]) {
         Y = { year: YEAR[i], days: 0, seasonDays: 0, rain: 0, collected: 0, overflow: 0, used: 0,
-          deliveries: 0, delivered: 0, cost: 0, dryDays: 0, min: Infinity };
+          deliveries: 0, delivered: 0, cost: 0, dryDays: 0, firstDry: -1, min: Infinity };
         years.push(Y);
       }
       Y.days++;
@@ -267,7 +271,11 @@
       const use = occupied ? useSeason : useOff;
       v -= use;
       Y.used += use;
-      if (v < 0) { Y.used += v; if (use > 0) Y.dryDays++; v = 0; }
+      if (v < 0) {
+        Y.used += v;
+        v = 0;
+        if (use > 0) { Y.dryDays++; dry[j] = 1; if (Y.firstDry < 0) Y.firstDry = i; }
+      }
 
       // Order a tanker when the level falls to the trigger.
       if (s.tanker && use > 0 && arrival < 0 && v + sv <= trigger) {
@@ -287,7 +295,7 @@
     for (const y of years) for (const k of Object.keys(T)) T[k] += y[k];
     const summers = years.filter((y) => y.seasonDays > 0).length || 1;
     return {
-      s, i0, L, span: L / 365.25, area, cap, trigger, d, vol, deliveryDays, years, T, summers,
+      s, i0, L, span: L / 365.25, area, cap, trigger, d, vol, dry, deliveryDays, years, T, summers,
       minLevel: isFinite(minLevel) ? minLevel : cap,
       minYear: minDay >= 0 ? YEAR[i0 + minDay] : null,
       yearsDry: years.filter((y) => y.dryDays > 0).length,
@@ -362,7 +370,7 @@
     if (same) {
       return pinned
         ? 'These are the settings you pinned for comparison. Change something to see the difference it makes.'
-        : 'These are the default settings for the house as it is now. Try ticking the yoga building, car port roof and house terrace, then the new buried tank, or switching the toilets to dual flush, to see what changes.';
+        : 'These are the default settings for the house as it is now. Try the buttons below: step 1, step 2 and plan B.';
     }
     const intro = `Compared with ${who} (${describe(bs)}): `;
     if (r.s.tanker && bs.tanker) {
@@ -576,46 +584,482 @@
     setHTML('payback_o', pay);
   }
 
-  // The solution section: the same settings with the ground sheet off and on.
-  // The roofs to connect in step 1 of the recommended fix.
+  // ---- The fixes -------------------------------------------------------------
+  // Step 1 gutters the roofs that are built but not connected; step 2 is the new buried tank;
+  // plan B is the rain sheet on the slope, made as big as it takes.
   const STEP1 = ['Yoga building', 'Car port roof', 'House terrace'];
   const step1Rows = (s) => s.surfaces.map((x, k) => (!x.g && STEP1.includes(x.n) ? k : -1)).filter((k) => k >= 0);
-
   const newTankRow = (s) => s.tanklist.findIndex((t) => !t.g && t.n === NEW_TANK);
+  const SHEET_DEFAULT = DEFAULT_SURFACES[SHEET_ROW].l * DEFAULT_SURFACES[SHEET_ROW].w;
 
-  // The recommended fix, step by step: as now, other roofs connected, a new buried tank, dual flush.
-  function renderFix(s) {
-    if (!$('fix_live')) return;
+  // A copy of the settings with the steps switched on or off; sheet is the rain sheet's area in m²
+  // (0 for none), laid as the default sheet's length along the contour and as deep as it needs.
+  function withSteps(base, { roofs = 0, tank = 0, sheet = 0 } = {}) {
+    const s = clone(base);
+    step1Rows(s).forEach((i) => { s.surfaces[i].on = roofs ? 1 : 0; });
+    const kt = newTankRow(s);
+    if (kt >= 0) s.tanklist[kt].on = tank ? 1 : 0;
+    const ks = sheetIndex(s);
+    if (ks >= 0) {
+      s.surfaces[ks].on = sheet > 0 ? 1 : 0;
+      if (sheet > 0 && s.surfaces[ks].l > 0) s.surfaces[ks].w = Math.round(sheet / s.surfaces[ks].l * 100) / 100;
+    }
+    return s;
+  }
+
+  function renderFixButtons(s) {
     const roofs = step1Rows(s);
     const kt = newTankRow(s);
-    const variant = (step) => {
-      const c = clone(s);
-      roofs.forEach((i) => { c.surfaces[i].on = step >= 1 ? 1 : 0; });
-      if (kt >= 0) c.tanklist[kt].on = step >= 2 ? 1 : 0;
-      if (step >= 3) { c.mode = 'build'; c.toilet = 'dual'; }
-      return simulate(c);
+    const ks = sheetIndex(s);
+    $('fix_btn').textContent = roofs.length && roofs.every((i) => s.surfaces[i].on) ? 'Undo step 1' : 'Step 1: gutter the three roofs';
+    $('fix_btn2').textContent = kt >= 0 && s.tanklist[kt].on ? 'Undo step 2' : 'Step 2: add the new tank';
+    $('fix_btn3').textContent = ks >= 0 && s.surfaces[ks].on ? 'Take the rain sheet off' : 'Plan B: add the rain sheet';
+  }
+
+  // ---- The story at the top --------------------------------------------------
+  // The top half of the page is worked out here from the default settings, not the simulator's, with
+  // nothing trucked in. So it can't go out of date when a default changes or a new summer comes in.
+
+  const seasonEndIso = (y, s) => new Date(Date.UTC(y, s.s1, 0)).toISOString().slice(0, 10);
+  // Only guest seasons that are over count.
+  const fullSummers = (r) => r.years.filter((y) => y.seasonDays > 0 && seasonEndIso(y.year, r.s) <= R.end);
+  const median = (xs) => {
+    const a = xs.slice().sort((p, q) => p - q);
+    const m = a.length >> 1;
+    if (!a.length) return 0;
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  };
+  const dayOfYear = (i) => i - yearStart(YEAR[i]);
+  const dayMonth = (i) => `${DOM[i]} ${MONTHS[MONTH[i] - 1]}`;
+  // A day of the year as "early August", "mid-August" or "late August".
+  function roughDate(doy) {
+    const d = new Date(Date.UTC(2001, 0, 1 + Math.round(doy)));
+    const day = d.getUTCDate();
+    const m = MONTHS[d.getUTCMonth()];
+    return day <= 10 ? 'early ' + m : day <= 20 ? 'mid-' + m : 'late ' + m;
+  }
+  const weeksText = (days) => (days < 7 ? `${fmt(days)} ${plural(days, 'day', 'days')}` : `${fmt(Math.round(days / 7))} ${plural(Math.round(days / 7), 'week', 'weeks')}`);
+  const halves = (x) => {
+    const h = Math.round(x * 2) / 2;
+    const whole = Math.floor(h);
+    return (whole || h % 1 === 0 ? fmt(whole) : '') + (h % 1 ? '½' : '');
+  };
+  function sizeWords(x) {
+    if (x > 1.2) return `about ${fmt(x, 1)} times the size of`;
+    const opts = [[0.25, 'a quarter'], [1 / 3, 'a third'], [0.5, 'half'], [2 / 3, 'two-thirds'], [0.75, 'three-quarters'], [1, 'the same size as']];
+    const [v, w] = opts.reduce((a, b) => (Math.abs(b[0] - x) < Math.abs(a[0] - x) ? b : a));
+    return v === 1 ? 'about ' + w : `about ${w} the size of`;
+  }
+
+  function summaryOf(r) {
+    const ys = fullSummers(r);
+    const dryYs = ys.filter((y) => y.dryDays > 0);
+    const byYear = {};
+    ys.forEach((y) => { byYear[y.year] = y; });
+    return {
+      r, ys, n: ys.length, byYear,
+      ranDry: dryYs.length,
+      medianDry: median(ys.map((y) => y.dryDays)),
+      runOut: dryYs.length ? median(dryYs.map((y) => dayOfYear(y.firstDry))) : null,
+      worstDel: ys.reduce((a, y) => Math.max(a, y.deliveries), 0),
+      withDel: ys.filter((y) => y.deliveries > 0).length,
+      meanDel: ys.length ? ys.reduce((a, y) => a + y.deliveries, 0) / ys.length : 0,
     };
-    const r = [0, 1, 2, 3].map(variant);
-    const tankV = kt >= 0 ? tankFootprint(s.tanklist[kt]) * s.tanklist[kt].d : 0;
-    let t;
-    if (s.tanker) {
-      const del = (x) => (x.T.deliveries
-        ? `about <b>${oneDp(x.T.deliveries / x.span)} tanker ${plural(Math.round(x.T.deliveries / x.span * 10) / 10, 'delivery', 'deliveries')} a summer</b> (${eur(x.T.cost / x.span)} a year, in ${x.yearsTanker} of ${x.summers} summers)`
-        : `<b>no tanker at all</b> in any summer since ${s.from}`);
-      t = `With the settings on this page: as now, ${del(r[0])}. ` +
-        `With the yoga building, car port and house terrace connected, ${del(r[1])}. ` +
-        `With a new ${fmt(tankV)} m³ buried tank as well, ${del(r[2])}. ` +
-        `And with dual-flush toilets too, ${del(r[3])}, the tanks never getting below ${m3(r[3].minLevel)}.`;
-    } else {
-      const dry = (x) => (x.T.dryDays ? `${oneDp(x.T.dryDays / x.span)} days without water a summer` : 'no days without water');
-      t = `With the settings on this page and no tanker: ${dry(r[0])} as now, ${dry(r[1])} with the other roofs connected, ` +
-        `${dry(r[2])} with a new ${fmt(tankV)} m³ tank as well, and ${dry(r[3])} with dual-flush toilets too, on average since ${s.from}.`;
+  }
+
+  const STORY_RUNS = [
+    { key: 'now', name: 'Today', short: 'Today' },
+    { key: 's1', name: 'With step 1', short: 'Step 1', roofs: 1 },
+    { key: 's12', name: 'With steps 1 and 2', short: 'Steps 1 + 2', roofs: 1, tank: 1 },
+  ];
+  let story = null;
+
+  function buildStory() {
+    const base = freshDefaults();
+    const off = Object.assign(clone(base), { tanker: 0 });
+    const runs = {};
+    for (const o of STORY_RUNS) runs[o.key] = Object.assign({}, o, { st: summaryOf(simulate(withSteps(off, o))) });
+    runs.s2only = { st: summaryOf(simulate(withSteps(off, { tank: 1 }))) };
+    const now = runs.now.st;
+    const years = now.ys.map((y) => y.year);
+    const byRain = now.ys.slice().sort((a, b) => a.rain - b.rain);
+    story = {
+      base, off, runs, years,
+      last: years[years.length - 1],
+      driest: byRain.length ? byRain[0].year : null,
+      wettest: byRain.length ? byRain[byRain.length - 1].year : null,
+    };
+    story.example = story.last;
+  }
+
+  function renderStoryText() {
+    const { base, runs } = story;
+    const now = runs.now.st;
+    const s1 = runs.s1.st;
+    const s12 = runs.s12.st;
+    const d = demand(base);
+    const since = `since ${base.from}`;
+    const season = `${MONTHS[base.s0 - 1]} to ${MONTHS[base.s1 - 1]}`;
+
+    let h1;
+    if (now.ranDry === now.n) h1 = 'The rainwater runs out every summer.';
+    else if (now.ranDry > now.n / 2) h1 = 'The rainwater runs out most summers.';
+    else if (now.ranDry > 0) h1 = `The rainwater runs out in ${now.ranDry} of ${now.n} summers.`;
+    else h1 = 'The rainwater lasts the summer.';
+    setHTML('st_h1', h1);
+
+    let t = `With a full house (${base.guests} guests, ${season}), `;
+    if (now.ranDry) {
+      t += `the tanks run dry around <b>${roughDate(now.runOut)}</b> and the house is ` +
+        `<b>without water for about ${weeksText(Math.round(now.medianDry))}</b>, unless water is trucked in. `;
+      t += now.ranDry === now.n
+        ? `That's <b>every summer ${since}</b>`
+        : `That's <b>${now.ranDry} of the ${now.n} summers ${since}</b>`;
+      const wet = now.byYear[story.wettest];
+      t += wet && wet.dryDays >= 7
+        ? `; even the wettest (${story.wettest}) left ${weeksText(wet.dryDays)} without water.`
+        : '.';
+    } else t += `the tanks would have lasted every summer ${since}.`;
+    setHTML('st_today', t);
+
+    // Step 1 on its own.
+    const lastS1 = s1.byYear[story.last];
+    setHTML('st_s1', !s1.ranDry
+      ? 'On its own, that would already be enough.'
+      : lastS1 && lastS1.dryDays
+        ? `Not enough on its own: last summer would still have run dry on ${dayMonth(lastS1.firstDry)}.`
+        : `Not enough on its own: ${s1.ranDry} of ${s1.n} summers would still run dry.`);
+
+    // Step 2: the new tank, against the biggest tank there now.
+    const kt = newTankRow(base);
+    const tanks = base.tanklist.filter((x, k) => k !== kt && !x.g && x.on);
+    const big = tanks.reduce((a, b) => (tankFootprint(b) * b.d > tankFootprint(a) * a.d ? b : a), tanks[0]);
+    const newVol = kt >= 0 ? tankFootprint(base.tanklist[kt]) * base.tanklist[kt].d : 0;
+    setHTML('st_s2', big && newVol
+      ? `2. Add a buried tank ${sizeWords(newVol / (tankFootprint(big) * big.d))} the ${big.n.toLowerCase()}.`
+      : '2. Add a buried tank.');
+
+    // Both together.
+    const dryNow = now.byYear[story.driest];
+    const dry12 = s12.byYear[story.driest];
+    let both = `<b>Together:</b> ` + (s12.ranDry
+      ? `the water lasts the whole season in <b>${s12.n - s12.ranDry} of the ${s12.n} summers ${since}</b>.`
+      : `the water lasts the whole season <b>every summer ${since}</b>.`);
+    if (dry12 && dry12.dryDays && dryNow && dryNow.dryDays) {
+      both += ` In the driest summer on record (${story.driest}) it runs out on ${dayMonth(dry12.firstDry)} instead of ${dayMonth(dryNow.firstDry)}.`;
+    } else if (dry12 && !dry12.dryDays) both += ` Even the driest summer on record (${story.driest}) gets through.`;
+    setHTML('st_both', both);
+
+    // Why it runs out.
+    const perDay = d.season / 1000;
+    const seasonLen = now.ys.length ? median(now.ys.map((y) => y.seasonDays)) : 184;
+    const capNow = usableVolume(base);
+    const cap12 = usableVolume(withSteps(base, { roofs: 1, tank: 1 }));
+    setHTML('why_use', `about ${fmt(Math.round(d.season / 10) * 10)} litres a day`);
+    setHTML('why_parts', d.u.parts
+      ? `${fmt(d.perGuest)} litres a guest including the dual-flush toilets, laundry and dishwasher`
+      : `${fmt(d.perGuest)} litres a guest`);
+    setAll('why_tankw', halves(capNow / perDay / 7));
+    setAll('why_tankw12', halves(cap12 / perDay / 7));
+    setAll('why_seasonw', fmt(Math.round(seasonLen / 7)));
+    setAll('why_season', season);
+    setAll('why_from', String(base.from));
+    setHTML('why_need', fmt(Math.round(seasonLen / 7 - capNow / perDay / 7)));
+
+    // How summer rain arrives, from the gauge over the same summers.
+    const mm = R.sources[base.src].mm;
+    let tot = 0;
+    let heavy = 0;
+    const spells = [];
+    for (const y of story.years) {
+      let run = 0;
+      let longest = 0;
+      for (let i = yearStart(y); i < N && YEAR[i] === y; i++) {
+        if (!inSeason(MONTH[i], base.s0, base.s1)) continue;
+        tot += mm[i];
+        if (mm[i] >= 10) heavy += mm[i];
+        run = mm[i] < 2 ? run + 1 : 0;
+        longest = Math.max(longest, run);
+      }
+      spells.push(longest);
     }
-    setHTML('fix_live', t);
-    const roofsOn = roofs.length && roofs.every((i) => s.surfaces[i].on);
-    $('fix_btn').textContent = roofsOn ? 'Disconnect the other roofs again' : '1. Connect the other roofs';
-    $('fix_btn2').textContent = kt >= 0 && s.tanklist[kt].on ? 'Remove the new tank again' : '2. Add the new tank';
-    $('fix_btn3').textContent = s.mode !== 'direct' && s.toilet === 'dual' ? 'Back to standard toilets' : '3. Dual-flush toilets';
+    const nY = Math.max(1, story.years.length);
+    setHTML('why_rain', `${fmt(tot / nY)} mm`);
+    setHTML('why_heavy', `${fmt(heavy / Math.max(1, tot) * 100)}%`);
+    setHTML('why_gap', weeksText(Math.round(median(spells))));
+    setHTML('why_gapmax', weeksText(Math.max(...spells)));
+    const storm = (s) => 20 * wetArea(s) / 1000 / perDay;
+    setHTML('why_storm_now', `${halves(storm(base))} days`);
+    setHTML('why_storm_s1', `${halves(storm(withSteps(base, { roofs: 1 })))} days`);
+    const ofN = (st) => `${st.ranDry} of ${st.n}`;
+    setHTML('why_s1only', ofN(s1));
+    setHTML('why_s2only', ofN(runs.s2only.st));
+    setHTML('why_both', ofN(s12));
+  }
+
+  // ---- The example summer: calendar strips and the tank level ---------------
+
+  function exampleButtons() {
+    const seen = new Set();
+    const opts = [];
+    const add = (y, label) => { if (y && !seen.has(y)) { seen.add(y); opts.push({ y, label }); } };
+    add(story.last, `Last summer (${story.last})`);
+    add(story.driest, `Driest summer (${story.driest})`);
+    add(story.wettest, `Wettest summer (${story.wettest})`);
+    return opts;
+  }
+
+  function renderExampleSwitches() {
+    const html = exampleButtons()
+      .map((o) => `<button type="button" data-example="${o.y}" aria-pressed="${o.y === story.example}">${o.label}</button>`).join('');
+    document.querySelectorAll('.ex-switch').forEach((el) => { el.innerHTML = html; });
+  }
+
+  // Days of the example summer's guest season, as indexes into a run.
+  function seasonDays(r, year) {
+    const out = [];
+    for (let i = yearStart(year); i < N && YEAR[i] === year; i++) {
+      if (inSeason(MONTH[i], r.s.s0, r.s.s1) && i >= r.i0) out.push(i - r.i0);
+    }
+    return out;
+  }
+
+  function renderStrips() {
+    const y = story.example;
+    let html = '';
+    let days = [];
+    for (const o of STORY_RUNS) {
+      const st = story.runs[o.key].st;
+      const r = st.r;
+      days = seasonDays(r, y);
+      // Runs of wet and dry days, as stretches of the strip.
+      let segs = '';
+      let k = 0;
+      while (k < days.length) {
+        const isDry = r.dry[days[k]];
+        let e = k;
+        while (e < days.length && r.dry[days[e]] === isDry) e++;
+        segs += `<i class="${isDry ? 'dry' : 'wet'}" style="width:${(e - k) / days.length * 100}%"></i>`;
+        k = e;
+      }
+      const Y = st.byYear[y];
+      const out = Y && Y.dryDays
+        ? `Runs dry on ${dayMonth(Y.firstDry)}: <b class="bad">${weeksText(Y.dryDays)} without water</b>`
+        : '<b class="good">Water all season</b>';
+      html += `<div class="strip-row"><div class="strip-name">${o.name}</div><div class="strip">${segs}</div><div class="strip-out">${out}</div></div>`;
+    }
+    // Month marks under the strips.
+    const r0 = story.runs.now.st.r;
+    let axis = '';
+    days.forEach((j, k) => {
+      const i = r0.i0 + j;
+      if (DOM[i] === 1) axis += `<span style="left:${k / days.length * 100}%">${MONTHS_SHORT[MONTH[i] - 1]}</span>`;
+    });
+    html += `<div class="strip-axis"><div>${axis}</div></div>`;
+    setHTML('strips', html);
+    $('strips').setAttribute('aria-label', `Each day of the ${y} season, with and without water, for the house today, with step 1, and with steps 1 and 2.`);
+    setHTML('strip_note', (y === story.last
+      ? `Last summer the house wasn't full; this shows what ${story.base.guests} guests all season would have faced. `
+      : '') + 'Blue: water in the tanks. Red: tanks empty. Nothing trucked in.');
+  }
+
+  // The level in the tanks through the example summer, in weeks of water for a full house.
+  function drawWhyChart() {
+    const canvas = $('why_chart');
+    if (!canvas || !story) return;
+    const y = story.example;
+    const w = canvas.clientWidth || 700;
+    const h = canvas.clientHeight || 280;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const perDay = demand(story.base).season / 1000;
+    const r0 = story.runs.now.st.r;
+    const days = seasonDays(r0, y);
+    if (!days.length || !(perDay > 0)) return;
+    const pad = { l: 30, r: 78, t: 8, b: 22 };
+    const pw = w - pad.l - pad.r;
+    const ph = h - pad.t - pad.b;
+    const top = Math.max(...STORY_RUNS.map((o) => story.runs[o.key].st.r.cap)) / perDay / 7;
+    const ymax = Math.ceil(top / 2) * 2 || 2;
+    const X = (k) => pad.l + k / (days.length - 1) * pw;
+    const Yw = (wk) => pad.t + (1 - wk / ymax) * ph;
+
+    // Grid in weeks.
+    ctx.strokeStyle = 'rgba(130, 130, 130, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#5f5e5a';
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let g = 0; g <= ymax; g += 2) {
+      ctx.beginPath(); ctx.moveTo(pad.l, Yw(g)); ctx.lineTo(pad.l + pw, Yw(g)); ctx.stroke();
+      ctx.fillText(String(g), pad.l - 6, Yw(g));
+    }
+
+    // Daily rain hanging from the top, up to 60 mm across the top third.
+    const mm = R.sources[story.base.src].mm;
+    ctx.fillStyle = 'rgba(61, 127, 196, 0.45)';
+    const bw = Math.max(1.5, pw / days.length * 0.8);
+    days.forEach((j, k) => {
+      const v = mm[r0.i0 + j];
+      if (v >= 1) ctx.fillRect(X(k) - bw / 2, pad.t, bw, Math.min(1, v / 60) * ph / 3);
+    });
+
+    // One line per option.
+    const styles = { now: ['#a32d2d', []], s1: ['#c46a1c', [5, 4]], s12: ['#0f6e56', []] };
+    const ends = [];
+    for (const o of STORY_RUNS) {
+      const r = story.runs[o.key].st.r;
+      const [col, dash] = styles[o.key];
+      ctx.strokeStyle = col;
+      ctx.setLineDash(dash);
+      ctx.lineWidth = o.key === 's12' ? 2.4 : 1.8;
+      ctx.beginPath();
+      days.forEach((j, k) => { const v = r.vol[j] / perDay / 7; if (k) ctx.lineTo(X(k), Yw(v)); else ctx.moveTo(X(k), Yw(v)); });
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ends.push({ y: Yw(r.vol[days[days.length - 1]] / perDay / 7), col, name: o.short });
+    }
+    // Names at the right-hand end, nudged apart so they don't overlap.
+    ends.sort((a, b) => a.y - b.y);
+    for (let k = 1; k < ends.length; k++) ends[k].y = Math.max(ends[k].y, ends[k - 1].y + 13);
+    const over = ends.length ? ends[ends.length - 1].y - (pad.t + ph) : 0;
+    if (over > 0) ends.forEach((e) => { e.y -= over; });
+    ctx.textAlign = 'left';
+    ctx.font = '600 11px system-ui, sans-serif';
+    for (const e of ends) { ctx.fillStyle = e.col; ctx.fillText(e.name, pad.l + pw + 6, e.y); }
+
+    // Months along the bottom.
+    ctx.fillStyle = '#5f5e5a';
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    days.forEach((j, k) => {
+      const i = r0.i0 + j;
+      if (DOM[i] === 15) ctx.fillText(MONTHS_SHORT[MONTH[i] - 1], X(k), pad.t + ph + 5);
+    });
+    $('why_chart').setAttribute('aria-label', `Weeks of water left in the tanks through the ${y} season, for the house today, with step 1, and with steps 1 and 2, with the daily rain.`);
+    setHTML('why_chart_title', `Water left in the tanks through the ${y} season, in weeks for a full house`);
+  }
+
+  function setExample(y) {
+    story.example = y;
+    renderExampleSwitches();
+    renderStrips();
+    drawWhyChart();
+  }
+
+  // ---- Plan B: the rain sheet ------------------------------------------------
+
+  let planBArea = SHEET_DEFAULT;
+  function renderPlanB() {
+    if (!story) return;
+    const a = planBArea;
+    setHTML('pb_area', `${fmt(a)} m²`);
+    const sheetL = DEFAULT_SURFACES[SHEET_ROW].l;
+    setHTML('pb_dims', `${fmt(sheetL)} × ${fmt(a / sheetL, 1)} m`);
+    const st = (o) => summaryOf(simulate(withSteps(story.off, o)));
+    const wt = (o) => summaryOf(simulate(withSteps(story.base, o)));
+    const both = st({ roofs: 1, tank: 1, sheet: a });
+    const instead = st({ roofs: 1, sheet: a });
+    const both0 = story.runs.s12.st;
+    const driest = story.driest;
+    const dryLine = (x) => {
+      const Y = x.byYear[driest];
+      return Y && Y.dryDays ? `${weeksText(Y.dryDays)} without water in ${driest}` : `water all through ${driest}`;
+    };
+    const runs = (x) => (x.ranDry ? `runs dry in <b>${x.ranDry} of ${x.n} summers</b>` : `<b>never runs dry</b>`);
+    setHTML('pb_both', a > 0
+      ? `<b>On top of steps 1 and 2:</b> ${runs(both)} (${both0.ranDry} without the sheet); ${dryLine(both)}.`
+      : `<b>Steps 1 and 2 without a sheet:</b> ${runs(both0)}; ${dryLine(both0)}.`);
+    setHTML('pb_instead', a > 0
+      ? `<b>Instead of the new tank (step 1 and the sheet):</b> ${runs(instead)}; ` +
+        `${instead.medianDry ? `a typical summer has ${weeksText(Math.round(instead.medianDry))} without water` : 'a typical summer has water all season'}; ${dryLine(instead)}.`
+      : '');
+    const tb = wt({ roofs: 1, tank: 1, sheet: a });
+    const ti = wt({ roofs: 1, sheet: a });
+    setHTML('pb_tankers', `If tankers are called: worst summer ${tb.worstDel} ${plural(tb.worstDel, 'delivery', 'deliveries')} with steps 1 and 2${a > 0 ? ' and the sheet' : ''}` +
+      (a > 0 ? `, ${ti.worstDel} with step 1 and the sheet` : '') + '.');
+    setHTML('pb_site', a > 155
+      ? '<span class="warn">Beyond about 155 m², check the map and the ground again: the slope surveyed so far takes a sheet of about 20 × 7.75 m.</span>'
+      : 'Fits the open slope south of the buildings: the survey shows room for at least 20 × 7.75 m (155 m²).');
+  }
+
+  // ---- The numbers behind it: the options and how much roof and tank it takes -
+
+  function renderOptions() {
+    const rows = [
+      { name: 'As now', o: {}, cost: 'None' },
+      { name: 'Step 1: gutter the yoga building, car port and house terrace', o: { roofs: 1 }, cost: 'Rough guess €1,500–5,000' },
+      { name: 'Steps 1 and 2: plus the new buried tank', o: { roofs: 1, tank: 1 }, cost: 'Step 1 plus the tank: to be quoted', best: 1 },
+      { name: `Steps 1 and 2 plus a ${fmt(SHEET_DEFAULT)} m² rain sheet (plan B on top)`, o: { roofs: 1, tank: 1, sheet: SHEET_DEFAULT }, cost: 'Plus about €2,500–4,500 for the sheet (rough)' },
+      { name: `Step 1 and a ${fmt(SHEET_DEFAULT)} m² rain sheet, no new tank`, o: { roofs: 1, sheet: SHEET_DEFAULT }, cost: 'Step 1 plus about €2,500–4,500 (rough)' },
+    ];
+    const limit = 3;
+    let h = '<thead><tr><th>Option</th><th class="num">Typical summer without water</th>' +
+      `<th class="num">Driest summer (${story.driest})</th><th class="num">Summers that run dry</th>` +
+      '<th class="num">Tankers a summer: average / worst</th><th>Cost</th></tr></thead><tbody>';
+    for (const row of rows) {
+      const a = summaryOf(simulate(withSteps(story.off, row.o)));
+      const b = summaryOf(simulate(withSteps(story.base, row.o)));
+      const dry = a.byYear[story.driest];
+      h += `<tr${row.best ? ' class="best"' : ''}><td>${row.best ? '<b>' + row.name + '</b>' : row.name}</td>` +
+        `<td class="num">${a.medianDry ? weeksText(Math.round(a.medianDry)) : 'none'}</td>` +
+        `<td class="num">${dry && dry.dryDays ? weeksText(dry.dryDays) : 'none'}</td>` +
+        `<td class="num">${a.ranDry} of ${a.n}</td>` +
+        `<td class="num">${oneDp(b.meanDel)} / <span class="${b.worstDel > limit ? 'bad' : 'good'}">${b.worstDel}</span></td>` +
+        `<td>${row.cost}</td></tr>`;
+    }
+    setHTML('options', h + '</tbody>');
+  }
+
+  function renderSizing() {
+    const base = story.base;
+    const key = (x) => Math.round(x);
+    // Close values count as one, keeping the first (the house's own options come first).
+    const uniq = (xs) => xs.filter((x, k) => xs.findIndex((y) => Math.abs(y - x) < 8) === k).sort((p, q) => p - q);
+    const s1 = withSteps(base, { roofs: 1 });
+    const extra = base.surfaces.reduce((a, x, k) => a + (!x.g && !x.on && !step1Rows(base).includes(k) ? x.l * x.w : 0), 0);
+    const tags = {};
+    const tag = (A, V, t) => { tags[key(A) + '|' + key(V)] = t; };
+    const volNow = tankVolume(base);
+    const vol12 = tankVolume(withSteps(base, { roofs: 1, tank: 1 }));
+    tag(catchment(base), volNow, 'today');
+    tag(catchment(s1), volNow, 'step 1');
+    tag(catchment(s1), vol12, 'steps 1 + 2');
+    const rows = uniq([catchment(base), catchment(s1), catchment(s1) + extra, 230, 400]);
+    const cols = uniq([volNow, vol12, 70, 100, 120]);
+    let h = '<thead><tr><th>Roof m² \\ tanks m³</th>' + cols.map((v) => `<th class="num">${fmt(v)}</th>`).join('') + '</tr></thead><tbody>';
+    for (const A of rows) {
+      h += `<tr><th>${fmt(A)}</th>`;
+      for (const V of cols) {
+        const s = clone(base);
+        s.surfaces = [{ n: 'Roofs', l: A, w: 1, on: 1 }];
+        s.tanklist = [{ n: 'Tanks', shape: 'box', l: V, w: 1, d: 1, on: 1 }];
+        const x = summaryOf(simulate(s));
+        const t = tags[key(A) + '|' + key(V)];
+        h += `<td class="num cell ${x.worstDel > 3 ? 'over' : x.worstDel ? 'near' : 'zero'}${t ? ' here' : ''}">` +
+          `<b>${x.worstDel}</b><span class="tag">${x.withDel ? `in ${x.withDel} of ${x.n}` : 'never'}</span>${t ? `<span class="tag here-tag">${t}</span>` : ''}</td>`;
+      }
+      h += '</tr>';
+    }
+    setHTML('sizing', h + '</tbody>');
+  }
+
+  function renderStory() {
+    buildStory();
+    renderStoryText();
+    renderExampleSwitches();
+    renderStrips();
+    drawWhyChart();
+    renderPlanB();
+    renderOptions();
+    renderSizing();
   }
 
   // ---- Chart ---------------------------------------------------------------
@@ -624,7 +1068,6 @@
   let layout = null;
   // The stretch of time shown on the chart, as ISO dates; null means the start or end of the period.
   let view = { from: null, to: null };
-  const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
   const MIN_VIEW_DAYS = 14;
 
   // Visible range as day offsets [a, b] into the simulation, clamped to the simulated period.
@@ -1173,7 +1616,7 @@
     renderCards(r);
     renderYears(r);
     renderCompare(r, rb, bs, same);
-    renderFix(state);
+    renderFixButtons(state);
     chartData = { r, rb };
     syncViewInputs();
     drawChart();
@@ -1270,11 +1713,30 @@
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('fix_btn3').addEventListener('click', () => {
-      if (state.mode !== 'direct' && state.toilet === 'dual') state.toilet = DEFAULTS.toilet;
-      else { state.mode = 'build'; state.toilet = 'dual'; }
-      setInputs();
+      const ks = sheetIndex(state);
+      if (ks < 0) return;
+      state.surfaces[ks].on = state.surfaces[ks].on ? 0 : 1;
+      renderSurfaces();
       update();
       $('headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // The story: the example summer, and plan B's sheet size.
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-example]');
+      if (b && story) setExample(+b.dataset.example);
+    });
+    let pbTimer = null;
+    $('pb_slider').addEventListener('input', (e) => {
+      planBArea = +e.target.value;
+      clearTimeout(pbTimer);
+      pbTimer = setTimeout(renderPlanB, 30);
+    });
+    $('pb_try').addEventListener('click', () => {
+      state = withSteps(state, { roofs: 1, tank: 1, sheet: planBArea });
+      setInputs();
+      update();
+      $('try').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     $('open_water').addEventListener('click', (e) => {
       e.preventDefault();
@@ -1367,7 +1829,7 @@
     });
     wrap.addEventListener('dblclick', () => setView(null, null));
     wrap.addEventListener('pointerleave', () => { if (!drag) hideTip(); });
-    window.addEventListener('resize', () => drawChart());
+    window.addEventListener('resize', () => { drawChart(); drawWhyChart(); });
     window.addEventListener('hashchange', () => {
       if (location.hash.replace(/^#/, '') === toHash(state)) return;
       state = fromHash(location.hash);
@@ -1376,6 +1838,7 @@
       schedule();
     });
 
+    renderStory();
     update();
   }
 

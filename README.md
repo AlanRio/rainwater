@@ -28,25 +28,30 @@ works when opened straight from disk.
 
 ## Continuing this project
 
-Where things stand (18 October 2026), for picking this up in a new session:
+Where things stand (20 October 2026), for picking this up in a new session:
 
-- **The recommendation** is on the page under "The recommended fix": 1. gutter the yoga
-  building, car port and house terrace into the tanks; 2. add about 50 m³ of buried storage;
-  3. dual-flush toilets. Alternative to 3: a 90 m² rain sheet with about 70 m³ of new storage.
-- **Tank sizes:** solar building tank 50 m³ and house tank 10 m³, both modelled 2.5 m deep. They may
-  need measuring to confirm them; the recommendation depends on the total.
-- **Next steps once measured** (inside length, width, depth to the overflow, height of the pump
-  intake for each tank):
-  1. Set the sizes of "House tank" and "Solar building tank" in `DEFAULT_TANKS` in `app.js`
-     (and the usable share in `DEFAULTS.usable` if it differs from 90%), and the size of
-     "New buried tank" once its volume is chosen.
-  2. Rerun the options with `python scripts/scenarios.py` (edit the list at the bottom) and
-     choose the new storage and step 3 again.
-  3. Update the hard-coded numbers in `index.html` (the caveat and steps at the top of the fix
-     section, the options table, which says "Worked out on 18 October 2026", and the storage
-     section), this README, and if the sheet changes, `DEFAULT_SURFACES` and
-     `data/sheet_layout.json`, then `python scripts/site_map.py` to redraw the map.
-  4. Commit and push to `main`; GitHub Actions publishes the page.
+- **The page is written for business partners with little time.** The top screen says it in
+  plain terms: the rainwater runs out every summer (mid-August, about 8 weeks without water,
+  with a full house and nothing trucked in); two fixes, both needed; plan B if it's still short.
+  It avoids m², m³, lorries and prices on purpose. Below it, in order: why it runs out, plan B
+  (a live sheet-size slider), the numbers (options table and a roof × tank grid), the details,
+  how the model works, and the simulator ("Try it yourself").
+- **Every number in the top half is worked out by the page** from the default settings
+  (`renderStory` and the functions after it in `app.js`), over complete summers since 1994. So
+  changing `DEFAULT_SURFACES`, `DEFAULT_TANKS` or `DEFAULTS` updates the story, the tables and the
+  charts, and each new summer is added by the weekly rainfall update. Only the costs and the
+  descriptive text in the details are typed in.
+- **The recommendation:** step 1, gutter the yoga building, car port and house terrace; step 2, a
+  new buried tank of about 25 m³ (`New buried tank` in `DEFAULT_TANKS`). Plan B, the "get out of
+  jail" card: the rain sheet on the slope, as big as it takes. The target is no summer with more
+  than 3 tanker deliveries.
+- **Settled:** the tanks are 10 m³ (house) and 50 m³ (solar building); the toilets are dual flush
+  6/2 L, modelled as 3.3 L a flush (one full for every two short).
+- **Open:** the cost of the new tank (quotes); the pump intake height in the existing tanks (the
+  usable share, `DEFAULTS.usable`, is 90% by assumption); how much rain really reaches the tanks
+  (75% by assumption; the dipstick tool on the page measures it once the guttering is done).
+- **Checking changes:** `python scripts/scenarios.py` uses the same model and gives the same tanker
+  numbers as the simulator for the same settings.
 - **Commits:** use the GitHub no-reply e-mail for this public repository, not a personal one.
 
 ## Publishing and updates
@@ -121,25 +126,27 @@ The extra tank is modelled as a separate store: only the sheet fills it, and eac
 empties into the main tanks as far as they have room (on site, a solar pump switched by a float
 switch in the main tanks). The level shown is the total of both.
 
-## The recommended fix: more roofs, more storage, dual-flush toilets
+## The recommended fix: gutter the other roofs, add a tank, plan B if needed
 
-Based on a solar building tank of 50 m³ and a house tank of 10 m³ (to be confirmed by measuring
-if needed). With only about 60 m³ of tanks the house can't keep what its roofs
-catch, so it needs both more collecting surface and more storage. With the default settings
-(8 guests May–October, 120 L each a day), tankers a summer since 2010:
+With a full house (8 guests May–October, dual flush), about 730 litres a day. The tanks hold
+about 10½ weeks of that; the season is 26 weeks. Every summer since 1994 runs dry with the
+house as it is. Since 1994 (32 complete summers), with the default settings:
 
-| Option | Tankers a summer | Rough cost |
-|---|---|---|
-| As now (house and gîte roofs) | 7.0 (about €1,900 a year) | none |
-| 1. Connect the yoga building, car port and house terrace (114 m²) | 4.5 | €1,500–5,000 |
-| 1 + 2. About 50 m³ of new buried storage | 1.3 (none in 7 of 17 summers) | plus €8,000–15,000 |
-| **1 + 2 + 3. Dual-flush toilets** | **0** (2009-like summer: 1) | plus €50–150 a toilet |
-| 1, about 70 m³ new storage and a 90 m² rain sheet | 0 (2009-like summer: 1–2) | about €12,000–22,000 in all |
-| 1 + 3 without new storage | 2.2 | |
+| Option | Typical summer without water | Driest (2009) | Summers that run dry | Tankers a summer: average / worst |
+|---|---|---|---|---|
+| As now | 8 weeks | 13 weeks | 32 of 32 | 3.6 / 6 |
+| Step 1: gutter the yoga building, car port and house terrace (+114 m²) | 2 weeks | 9 weeks | 23 of 32 | 1.4 / 4 |
+| **Steps 1 and 2: plus a 25 m³ buried tank** | **none** | **4 weeks** | **5 of 32** | **0.3 / 2** |
+| Steps 1 and 2 plus a 90 m² rain sheet | none | 1 week | 1 of 32 | 0.1 / 1 |
+| Step 1 and a 90 m² rain sheet, no new tank | none | 6 weeks | 11 of 32 | 0.5 / 3 |
 
-The new tank should hold about 110 m³ (130 m³ with the sheet instead of dual flush) minus what
-the existing tanks really hold. The rain sheet site (if used): 20 × 4.5 m on the slope south of
-the buildings (IGN LiDAR HD, flown 11 April 2022); the house sits
+(Worked out on 20 October 2026; the page recalculates these itself.) There's no fixed ratio of
+roof to tank: for the 3-tanker target, the tank needed shoots up below about 220 m² of roof (95 m³
+at 220 m², 285 m³ at 210 m²), and above it more roof lets the tank shrink only slowly (75 m³ at
+287 m², 55 m³ at 400 m²; the grid on the page).
+
+The rain sheet site: 20 × 4.5 m on the slope south of the buildings, with room for at least
+20 × 7.75 m (IGN LiDAR HD, flown 11 April 2022); the house sits
 on a saddle at about 229.5 m, the slope rises from about 231 to 232 m at 10° facing
 west-north-west, and about 25 m of buried pipe falls about 2 m to the main tanks at the
 southern corner of the north-east building.
@@ -168,17 +175,17 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 |---|---|---|
 | Collecting surfaces | House roof 15 × 5 m and gîte roof 14 × 7 m | Footprint (plan area), which is what catches rain |
 | Optional surfaces | Yoga building roof 5 × 7 m, terraces 10 × 4 m and 5 × 3 m, car port roof 12 × 4.5 m (meant for a swimming pool), house terrace 5 × 5 m (above the house tank) | Off by default |
-| Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; step 2 of the recommended fix (see above) |
+| Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; plan B (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
-| Tanks | Solar building tank 50 m³ (4.5 × 4.45 × 2.5 m) and house tank 10 m³ (2 × 2 × 2.5 m), 90% usable | May need measuring to confirm. Each tank has its own size and shape (box or round), and more can be added |
+| Tanks | Solar building tank 50 m³ (4.5 × 4.45 × 2.5 m) and house tank 10 m³ (2 × 2 × 2.5 m), 90% usable; new buried tank 25 m³ (4 × 2.5 × 2.5 m), off | Each tank has its own size and shape (box or round), and more can be added |
 | Guests | 8, house full, May to October | |
-| Water use | 120 L per guest per day | Showers 1 × 50 L, standard 9 L flush × 5, taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
+| Water use | 82 L per guest per day plus 81 L for the house | Showers 1 × 50 L, dual flush 6/2 L × 5 (3.3 L average: one full for every two short, as in the UK water efficiency calculator, Approved Document G), taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
 | Supplier | Transports Delrieu, Parnac, 15.6 km by road | Nearest haulier with food-grade tanks |
 | Tanker size | Small rigid lorry, 12 m³ | Cautious until access for a bigger lorry is checked; presets for 16, 20 and 28 m³ |
 | Delivery cost | €150 fixed + €3/km on the round trip + €2.80/m³ water | See below |
 | Climate | No change | "2050 outlook" preset: summer −15%, winter +12% (Météo-France, Occitanie) |
-| Period | From 2010 | Selectable back to 1994 |
+| Period | From 1994 | The whole gauge record |
 
 ## Tanker deliveries
 
