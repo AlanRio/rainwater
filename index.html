@@ -143,6 +143,12 @@
 
   footer { font-size: 12px; color: var(--text-3); padding: 4px 4px 24px; }
 
+  /* Language: static text carries both languages; the one not in use is hidden */
+  html[lang="nl"] body [lang="en"], html[lang="en"] body [lang="nl"] { display: none !important; }
+  .langbar { display: flex; justify-content: flex-end; gap: 6px; margin: 0 0 10px; }
+  .langbar button { padding: 5px 12px; font-size: 13px; }
+  .langbar button[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
+
   /* The top: the whole message in one screen */
   .top { border: 2px solid var(--dry); }
   .kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); font-weight: 600; margin-bottom: 4px; }
@@ -217,8 +223,13 @@
 <body>
 <div class="wrap">
 
+<nav class="langbar" aria-label="Language / Taal">
+  <button type="button" data-lang="en" aria-pressed="true">English</button>
+  <button type="button" data-lang="nl" aria-pressed="false">Nederlands</button>
+</nav>
+
 <header class="top" id="top">
-  <div class="kicker">Rainwater at the house near Prayssac, Lot</div>
+  <div class="kicker"><span lang="en">Rainwater at the house near Prayssac, Lot</span><span lang="nl">Regenwater bij het huis bij Prayssac, Lot</span></div>
   <h1 id="st_h1">Will the rainwater last the summer?</h1>
   <p class="lead" id="st_today">Working it out…</p>
 
@@ -227,42 +238,43 @@
   <p class="tiny" id="strip_note"></p>
 
   <div class="blk fixblk">
-    <div class="blk-label">Two fixes, both needed</div>
-    <p><b>1. Gutter the yoga building, car port and house terrace.</b> More of each rainstorm then reaches the tanks, using buildings that are already there. <span class="notenough" id="st_s1"></span></p>
-    <p><b id="st_s2">2. Add a buried tank.</b> It carries the house through the dry weeks between storms.</p>
+    <div class="blk-label"><span lang="en">Two fixes, both needed</span><span lang="nl">Twee oplossingen, allebei nodig</span></div>
+    <p><b lang="en">1. Gutter the yoga building, car port and house terrace.</b><b lang="nl">1. Leg dakgoten aan op het yogagebouw, de carport en het terras bij het huis.</b>
+      <span lang="en">More of each rainstorm then reaches the tanks, using buildings that are already there.</span><span lang="nl">Dan komt meer van elke regenbui in de tanks, via gebouwen die er al staan.</span>
+      <span class="notenough" id="st_s1"></span></p>
+    <p><b id="st_s2">2. Add a buried tank.</b> <span lang="en">It carries the house through the dry weeks between storms.</span><span lang="nl">Die helpt het huis door de droge weken tussen de buien heen.</span></p>
     <p id="st_both"></p>
   </div>
 
   <div class="blk planblk">
-    <div class="blk-label">Plan B, which always works</div>
-    <p><b>Still short? Lay a rain sheet on the slope.</b> It can always be made bigger: more sheet catches more rain. <a href="#planb">How big?</a></p>
+    <div class="blk-label"><span lang="en">Plan B, which always works</span><span lang="nl">Plan B, dat altijd werkt</span></div>
+    <p lang="en"><b>Still short? Lay a rain sheet on the slope.</b> It can always be made bigger: more sheet catches more rain. <a href="#planb">How big?</a></p>
+    <p lang="nl"><b>Nog steeds te weinig? Leg een opvangfolie op de helling.</b> Die kan altijd groter: meer folie vangt meer regen op. <a href="#planb">Hoe groot?</a></p>
   </div>
-  <p class="small more"><a href="#why">Why it runs out</a> · <a href="#planb">Plan B</a> · <a href="#numbers">The numbers</a> · <a href="#try">Try it yourself</a></p>
+  <p class="small more" lang="en"><a href="#why">Why it runs out</a> · <a href="#planb">Plan B</a> · <a href="#numbers">The numbers</a> · <a href="#try">Try it yourself</a></p>
+  <p class="small more" lang="nl"><a href="#why">Waarom het opraakt</a> · <a href="#planb">Plan B</a> · <a href="#numbers">De cijfers</a> · <a href="#try">Probeer het zelf</a></p>
 </header>
 
 <section id="why">
-  <h2>Why it runs out</h2>
-  <p><b>The house uses water every day, but rain doesn't fall every day.</b> A full house uses <span id="why_use"></span> (<span id="why_parts"></span>). Full tanks hold enough for about <b><span class="why_tankw"></span> weeks</b>. The season is <b><span class="why_seasonw"></span> weeks</b> long, so the other <span id="why_need"></span> weeks' worth has to come from rain that falls during the summer itself.</p>
-  <p><b>Summer rain comes in bursts, with long gaps.</b> From <span class="why_season"></span>, an average year brings <span id="why_rain"></span> of rain, but <span id="why_heavy"></span> of it falls on a few stormy days of 10 mm or more. A dry spell of <span id="why_gap"></span> is normal, and the longest since <span class="why_from"></span> lasted <span id="why_gapmax"></span>.</p>
+  <h2><span lang="en">Why it runs out</span><span lang="nl">Waarom het opraakt</span></h2>
+  <div id="why_text"></div>
 
   <div class="chart-title" id="why_chart_title"></div>
   <div class="seg ex-switch"></div>
   <canvas id="why_chart" role="img"></canvas>
-  <p class="tiny">Lines: water left in the tanks, in weeks of use for a full house. Blue bars from the top: each day's rain. Nothing trucked in.</p>
+  <p class="tiny" lang="en">Lines: water left in the tanks, in weeks of use for a full house. Blue bars from the top: each day's rain. Nothing trucked in.</p>
+  <p class="tiny" lang="nl">Lijnen: het water dat nog in de tanks zit, in weken verbruik van een vol huis. Blauwe staven van boven: de regen per dag. Niets aangevoerd.</p>
 
-  <h3>So the house needs two things</h3>
-  <ol class="steps">
-    <li><b>More roof, so each storm brings in more.</b> A 20 mm downpour gives today's roofs <span id="why_storm_now"></span> of water. With step 1, the same downpour gives <span id="why_storm_s1"></span>.</li>
-    <li><b>More tank, to get through the gaps.</b> A bigger tank starts the summer with more weeks of water (<span class="why_tankw12"></span> instead of <span class="why_tankw"></span>), and keeps more of the big storms instead of letting them overflow.</li>
-  </ol>
-  <p><b>Neither is enough alone.</b> Since <span class="why_from"></span>, step 1 alone would still run dry in <span id="why_s1only"></span> summers, and the new tank alone in <span id="why_s2only"></span>. Both together: <span id="why_both"></span>.</p>
+  <h3><span lang="en">So the house needs two things</span><span lang="nl">Het huis heeft dus twee dingen nodig</span></h3>
+  <div id="why_two"></div>
 </section>
 
 <section class="planb" id="planb">
   <div class="planb-label">Plan B</div>
-  <h2>The fallback that always works: more sheet</h2>
-  <p>If the house still runs short after steps 1 and 2 (more guests, less rain reaching the tanks than assumed, drier summers to come), there is always one more lever: <b>a rubber rain sheet laid on the open slope south of the buildings</b>, draining by gravity into the main tanks. It isn't a building, needs no crane, and can always be made bigger. More sheet catches more rain.</p>
-  <label class="f">Sheet size: <span class="val" id="pb_area"></span> (<span id="pb_dims"></span>)
+  <h2><span lang="en">The fallback that always works: more sheet</span><span lang="nl">De uitweg die altijd werkt: meer folie</span></h2>
+  <p lang="en">If the house still runs short after steps 1 and 2 (more guests, less rain reaching the tanks than assumed, drier summers to come), there is always one more lever: <b>a rubber rain sheet laid on the open slope south of the buildings</b>, draining by gravity into the main tanks. It isn't a building, needs no crane, and can always be made bigger. More sheet catches more rain.</p>
+  <p lang="nl">Als het huis na stap 1 en 2 nog steeds tekortkomt (meer gasten, minder regen in de tanks dan aangenomen, drogere zomers in de toekomst), is er altijd nog een knop om aan te draaien: <b>een rubberen opvangfolie op de open helling ten zuiden van de gebouwen</b>, die onder vrij verval in de hoofdtanks loopt. Het is geen gebouw, er is geen kraan voor nodig en hij kan altijd groter. Meer folie vangt meer regen op.</p>
+  <label class="f"><span lang="en">Sheet size:</span><span lang="nl">Grootte van de folie:</span> <span class="val" id="pb_area"></span> (<span id="pb_dims"></span>)
     <input type="range" id="pb_slider" min="0" max="200" step="10" value="90"></label>
   <div class="live-box">
     <p id="pb_both"></p>
@@ -270,29 +282,39 @@
     <p class="tiny" id="pb_tankers"></p>
     <p class="tiny" id="pb_site"></p>
   </div>
-  <p class="small"><b>Its limit:</b> a sheet catches more rain but doesn't store any. With only today's tanks, a storm on a big sheet fills them and the rest overflows, so getting through every summer that way takes a very large sheet. It works best on top of the new tank.</p>
-  <div class="toolbar"><button type="button" id="pb_try">Try this in the simulator</button></div>
+  <p class="small" lang="en"><b>Its limit:</b> a sheet catches more rain but doesn't store any. With only today's tanks, a storm on a big sheet fills them and the rest overflows, so getting through every summer that way takes a very large sheet. It works best on top of the new tank.</p>
+  <p class="small" lang="nl"><b>De grens:</b> folie vangt meer regen op, maar slaat niets op. Met alleen de huidige tanks vult een bui op een grote folie ze in één keer en loopt de rest over. Elke zomer halen zonder nieuwe tank vraagt dus een heel grote folie. Het werkt het best bovenop de nieuwe tank.</p>
+  <div class="toolbar"><button type="button" id="pb_try"><span lang="en">Try this in the simulator</span><span lang="nl">Probeer dit in de simulator</span></button></div>
   <details>
-    <summary>Where the sheet goes</summary>
+    <summary><span lang="en">Where the sheet goes</span><span lang="nl">Waar de folie komt</span></summary>
     <div class="body">
       <figure>
         <a href="img/rain-sheet-site.jpg" target="_blank" rel="noopener"><img src="img/rain-sheet-site.jpg" width="1106" height="994" loading="lazy" alt="Elevation map of the slope south of the buildings from LiDAR, showing where the rain sheet would go, its collection trench and outlet, the diversion ditch above it and the pipe to the main tanks."></a>
-        <figcaption>Where the rain sheet would go, drawn at 20 × 4.5 m (90 m²). Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey, trees over 5 m hatched. The main tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
+        <figcaption lang="en">Where the rain sheet would go, drawn at 20 × 4.5 m (90 m²). Ground height from the IGN LiDAR HD survey (flown April 2022, 0.5 m grid), coloured by height with 1 m contours; buildings in grey, trees over 5 m hatched. The main tanks are at the southern corner of the north-east building. Tap the map to open it full size.</figcaption>
+        <figcaption lang="nl">Waar de opvangfolie zou komen, getekend op 20 × 4,5 m (90 m²). Terreinhoogte uit de IGN LiDAR HD-opname (gevlogen in april 2022, raster van 0,5 m), ingekleurd naar hoogte met hoogtelijnen per meter; gebouwen grijs, bomen hoger dan 5 m gearceerd. De hoofdtanks liggen bij de zuidhoek van het noordoostelijke gebouw. Tik op de kaart om hem op ware grootte te openen.</figcaption>
       </figure>
-      <ul class="checks">
+      <ul class="checks" lang="en">
         <li><b>The house sits on a saddle at about 229.5 m</b>, between two hollows. Bowl 1, to the south-west, is a closed limestone hollow (a doline) with its floor at about 224.5 m. Bowl 2, to the north-east, is the head of a dry valley that falls away north.</li>
         <li><b>The sheet goes on the slope just south of the buildings</b>, at the south-east end of bowl 1. The ground there rises from about 231 to 232 m at a steady 10°, facing west-north-west. It's open ground of grass and low scrub; the trees start at the top of the slope.</li>
         <li><b>It's square on the slope.</b> The 20 m edges run along the contour lines and the 4.5 m sides run straight down the slope, so every part of the sheet drains by the shortest route into one trench along the bottom edge.</li>
         <li><b>Gravity does the work.</b> The bottom edge, at about 231.2–231.6 m, is above the ground at the main tanks (about 229.5 m, at the southern corner of the north-east building). About 25 m of buried pipe runs north from the outlet to the tanks and falls about 2 m. The ground rises about half a metre beside the south-east building, so that stretch of pipe trench is up to about 2 m deep, close to the building and past tree roots.</li>
         <li><b>Hard to see.</b> A 20 × 4.5 m strip lies flat on the ground below the trees, so it shows little from a distance. A dark colour helps.</li>
       </ul>
-      <p class="tiny">Heights are from the IGN LiDAR HD survey (<a href="https://geoservices.ign.fr/lidarhd" target="_blank" rel="noopener">geoservices.ign.fr/lidarhd</a>), tiles 0557_6382 and 0558_6382, flown 11 April 2022.</p>
+      <ul class="checks" lang="nl">
+        <li><b>Het huis ligt op een zadel op ongeveer 229,5 m</b>, tussen twee kommen. Kom 1, in het zuidwesten, is een gesloten kalksteenkom (een doline) met de bodem op ongeveer 224,5 m. Kom 2, in het noordoosten, is het begin van een droog dal dat naar het noorden afloopt.</li>
+        <li><b>De folie komt op de helling net ten zuiden van de gebouwen</b>, aan de zuidoostkant van kom 1. Het terrein loopt daar gelijkmatig op van ongeveer 231 naar 232 m, onder 10°, op het west-noordwesten. Het is open terrein met gras en laag struikgewas; de bomen beginnen boven aan de helling.</li>
+        <li><b>Hij ligt haaks op de helling.</b> De randen van 20 m lopen langs de hoogtelijnen en de zijden van 4,5 m recht de helling af, zodat elk deel van de folie langs de kortste weg afwatert naar één greppel langs de onderrand.</li>
+        <li><b>De zwaartekracht doet het werk.</b> De onderrand, op ongeveer 231,2–231,6 m, ligt hoger dan het maaiveld bij de hoofdtanks (ongeveer 229,5 m, bij de zuidhoek van het noordoostelijke gebouw). Zo'n 25 m ingegraven leiding loopt van de uitloop naar het noorden naar de tanks en daalt daarbij ongeveer 2 m. Naast het zuidoostelijke gebouw loopt het terrein een halve meter op, dus daar is de leidingsleuf tot ongeveer 2 m diep, dicht bij het gebouw en langs boomwortels.</li>
+        <li><b>Nauwelijks te zien.</b> Een strook van 20 × 4,5 m ligt plat op de grond onder de bomen en valt van een afstand weinig op. Een donkere kleur helpt.</li>
+      </ul>
+      <p class="tiny" lang="en">Heights are from the IGN LiDAR HD survey (<a href="https://geoservices.ign.fr/lidarhd" target="_blank" rel="noopener">geoservices.ign.fr/lidarhd</a>), tiles 0557_6382 and 0558_6382, flown 11 April 2022.</p>
+      <p class="tiny" lang="nl">Hoogtes uit de IGN LiDAR HD-opname (<a href="https://geoservices.ign.fr/lidarhd" target="_blank" rel="noopener">geoservices.ign.fr/lidarhd</a>), tegels 0557_6382 en 0558_6382, gevlogen op 11 april 2022.</p>
     </div>
   </details>
 
   <details>
-    <summary>How the sheet is built</summary>
-    <div class="body">
+    <summary><span lang="en">How the sheet is built</span><span lang="nl">Hoe de folie wordt aangelegd</span></summary>
+    <div class="body" lang="en">
       <ol class="steps">
         <li><b>Clear the ground</b> between September and February, outside the bird nesting season and the spring flowering: cut the grass and bushes short and take out any woody roots that could push up under the sheet. No weedkiller.</li>
         <li><b>Smooth the ground.</b> Rake off stones bigger than about 2 cm and fill hollows so no water can pond. Shape the surface as a very shallow trough, with the middle 10–20 cm lower than the ends, so water runs down the middle.</li>
@@ -307,35 +329,60 @@
       <p class="small">Upkeep: sweep or blow off leaves before May and after summer storms, clean the leaf filter, and check the sheet once a year. Small tears are patched like a bicycle tyre.</p>
       <p class="small"><b>Why EPDM.</b> It's heavy enough that the wind doesn't lift it, lies flat on uneven ground, comes in one piece so there's nothing to weld, and lasts 20–40 years in the sun. HDPE plastic is cheaper but stiff and wrinkles in the heat; PVC liners go brittle in sunlight within about 10 years. Rigid roofing sheets on a frame would last as long but cost about €6,000–10,000, catch the wind, show from further away, and count as a building, which this zone of the local plan doesn't allow at that size.</p>
     </div>
+    <div class="body" lang="nl">
+      <ol class="steps">
+        <li><b>Maak het terrein vrij</b> tussen september en februari, buiten het broedseizoen en de voorjaarsbloei: maai gras en struiken kort en haal houtige wortels weg die onder de folie omhoog kunnen drukken. Geen onkruidbestrijdingsmiddel.</li>
+        <li><b>Maak de grond glad.</b> Hark stenen groter dan ongeveer 2 cm weg en vul kuilen op, zodat er nergens water blijft staan. Geef het oppervlak de vorm van een heel ondiepe goot, met het midden 10–20 cm lager dan de uiteinden, zodat het water door het midden afloopt.</li>
+        <li><b>Graaf de opvanggreppel</b> langs de onderrand, de hoogtelijn volgend, met een gelijkmatig verval van 1% (20 cm over 20 m) naar de uitloop aan de noordoostkant, het dichtst bij de tanks. Het terrein loopt naar die kant iets op, dus de greppel is aan de zuidwestkant ongeveer 30 cm diep en bij de uitloop ongeveer 90 cm. Bekleed hem met de onderrand van de folie.</li>
+        <li><b>Graaf ankersleuven</b> van ongeveer 30 × 30 cm langs de bovenrand en beide zijkanten, en een ondiepe <b>afleidingsgreppel</b> boven de bovenrand die water en bladeren uit het bos om de folie heen leidt. De uiteinden lopen de bosrand in, dus houd ze daar ondiep en werk om de wortels heen.</li>
+        <li><b>Leg een beschermende onderlaag</b> van niet-geweven geotextiel (300 g/m², of 500 g/m² op rots of veel steen).</li>
+        <li><b>Leg de folie</b> vanaf de bovenkant, op een windstille, warme dag, als het rubber soepel is. Trek hem naar beneden zodat hij zonder plooien vlak ligt. Graaf de boven- en zijranden in de ankersleuven in en laat de onderrand in de opvanggreppel overlappen.</li>
+        <li><b>Graaf de leidingsleuf</b> naar de tanks, ongeveer 25 m, met overal een gelijkmatig verval. Waar het terrein naast het zuidoostelijke gebouw oploopt, is hij tot ongeveer 2 m diep: gebruik de graafmachine en blijf uit de buurt van de fundering.</li>
+        <li><b>Monteer de uitloop</b>: een EPDM-doorvoer in een PVC-buis van 110 mm in de leidingsleuf, met een zelfreinigend bladfilter waar de buis de hoofdtanks in gaat.</li>
+        <li><b>Zet er een hek om</b> tegen wilde zwijnen en reeën, en houd gasten erbuiten: nat rubber op een helling is erg glad. Snoei takken die erboven hangen terug.</li>
+      </ol>
+      <p class="small">Onderhoud: veeg of blaas voor mei en na zomerse buien de bladeren eraf, maak het bladfilter schoon en controleer de folie eens per jaar. Kleine scheurtjes plak je als een fietsband.</p>
+      <p class="small"><b>Waarom EPDM.</b> Het is zwaar genoeg om niet door de wind opgetild te worden, ligt vlak op oneffen grond, komt in één stuk zodat er niets gelast hoeft te worden, en gaat 20–40 jaar mee in de zon. HDPE-folie is goedkoper maar stijf en gaat plooien in de hitte; PVC-folie wordt binnen ongeveer 10 jaar bros in het zonlicht. Harde dakplaten op een frame gaan net zo lang mee, maar kosten ongeveer € 6.000–10.000, vangen wind, zijn van verder te zien en tellen als bouwwerk, wat deze zone van het bestemmingsplan op die grootte niet toestaat.</p>
+    </div>
   </details>
 </section>
 
 <section id="numbers">
-  <h2>The numbers behind it</h2>
-  <p class="small muted">Worked out by this page from the default settings, over every complete summer since <span class="why_from"></span>. "Without water" assumes nothing is trucked in. The tanker columns assume a 12 m³ tanker is called whenever the tanks run low; the aim is no summer with more than 3 deliveries.</p>
+  <h2><span lang="en">The numbers behind it</span><span lang="nl">De cijfers erachter</span></h2>
+  <p class="small muted" lang="en">Worked out by this page from the default settings, over every complete summer since <span class="why_from"></span>. "Without water" assumes nothing is trucked in. The tanker columns assume a 12 m³ tanker is called whenever the tanks run low; the aim is no summer with more than 3 deliveries.</p>
+  <p class="small muted" lang="nl">Door deze pagina berekend met de standaardinstellingen, over elke volledige zomer sinds <span class="why_from"></span>. "Zonder water" gaat ervan uit dat er niets wordt aangevoerd. De kolommen met tankwagens gaan ervan uit dat er een tankwagen van 12 m³ komt zodra de tanks bijna leeg zijn; het doel is geen zomer met meer dan 3 leveringen.</p>
   <div class="table-wrap"><table id="options"></table></div>
-  <p class="tiny">Other ideas, and why not: a <b>borehole</b> (water at least about 110 m down, a 1 in 5 chance the first hole is dry, about €20,000–33,000; see below); <b>air-to-water machines</b> (12–20 litres a day each, enough for drinking but nowhere near showers); a <b>mains connection</b> (the nearest main is about 800 m away and 50 m lower); taking water from <b>the Lot</b> (far away and far below the house); an <b>open pond</b> (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
+  <p class="tiny" lang="en">Other ideas, and why not: a <b>borehole</b> (water at least about 110 m down, a 1 in 5 chance the first hole is dry, about €20,000–33,000; see below); <b>air-to-water machines</b> (12–20 litres a day each, enough for drinking but nowhere near showers); a <b>mains connection</b> (the nearest main is about 800 m away and 50 m lower); taking water from <b>the Lot</b> (far away and far below the house); an <b>open pond</b> (summer evaporation of about 4 mm a day would lose almost as much as the guests use).</p>
+  <p class="tiny" lang="nl">Andere ideeën, en waarom niet: een <b>boorput</b> (water op minstens zo'n 110 m diepte, 1 op 5 kans dat het eerste gat droog is, ongeveer € 20.000–33.000; zie hieronder); <b>machines die water uit de lucht halen</b> (12–20 liter per dag per stuk, genoeg om te drinken maar lang niet genoeg om te douchen); een <b>aansluiting op de waterleiding</b> (de dichtstbijzijnde leiding ligt zo'n 800 m verderop en 50 m lager); water uit <b>de Lot</b> halen (ver weg en ver beneden het huis); een <b>open vijver</b> (de verdamping in de zomer, zo'n 4 mm per dag, kost bijna net zoveel als de gasten verbruiken).</p>
 
-  <h3>How much roof and tank it takes</h3>
-  <p class="small">Tanker deliveries in the worst summer since <span class="why_from"></span>, for different roof areas and tank sizes, with how many summers needed any. Green is within 3. There's no fixed ratio between roof and tank. Below a certain roof area, the roofs can't catch a season's water even over a whole year, so no tank helps (the top rows). Above it, more roof lets the tank be smaller, but only slowly.</p>
+  <h3><span lang="en">How much roof and tank it takes</span><span lang="nl">Hoeveel dak en tank er nodig is</span></h3>
+  <p class="small" lang="en">Tanker deliveries in the worst summer since <span class="why_from"></span>, for different roof areas and tank sizes, with how many summers needed any. Green is within 3. There's no fixed ratio between roof and tank. Below a certain roof area, the roofs can't catch a season's water even over a whole year, so no tank helps (the top rows). Above it, more roof lets the tank be smaller, but only slowly.</p>
+  <p class="small" lang="nl">Het aantal tankwagens in de slechtste zomer sinds <span class="why_from"></span>, voor verschillende dakoppervlakken en tankgroottes, met het aantal zomers waarin er één nodig was. Groen is binnen de 3. Er is geen vaste verhouding tussen dak en tank. Onder een bepaald dakoppervlak vangen de daken zelfs over een heel jaar niet genoeg water op voor één seizoen, en helpt geen enkele tank (de bovenste rijen). Daarboven kan de tank met meer dak kleiner, maar maar langzaam.</p>
   <div class="table-wrap"><table id="sizing" class="sizing"></table></div>
-  <p class="tiny">Small ups and downs along a row come from when deliveries happen to fall: a lorry always brings a full load, and is called when the tanks fall to 5%.</p>
+  <p class="tiny" lang="en">Small ups and downs along a row come from when deliveries happen to fall: a lorry always brings a full load, and is called when the tanks fall to 5%.</p>
+  <p class="tiny" lang="nl">Kleine sprongen op en neer in een rij komen door het moment waarop leveringen toevallig vallen: een tankwagen brengt altijd een volle lading en wordt gebeld als de tanks op 5% staan.</p>
 
   <details>
-    <summary>Step 1: guttering the yoga building, car port and house terrace</summary>
+    <summary><span lang="en">Step 1: guttering the yoga building, car port and house terrace</span><span lang="nl">Stap 1: dakgoten op het yogagebouw, de carport en het terras bij het huis</span></summary>
     <div class="body">
-      <ul class="checks small">
+      <ul class="checks small" lang="en">
         <li><b>Each roof</b> needs gutters, downpipes, a leaf guard and a first-flush diverter that throws away the dirtiest first rain, then a buried pipe to the main tanks. Lay the pipe with a steady fall; if a building turns out to be lower than the tank inlet, a small solar pump does the job.</li>
         <li><b>The house terrace</b> sits right above the house tank, so it's the simplest: a surface drain and a filter straight into the tank. Paving sheds a little less rain than a roof, which barely changes the numbers.</li>
         <li><b>The car port</b> was meant to top up a swimming pool. Its pipe can feed the house tanks first and overflow to the pool when they're full, so the pool still gets the surplus.</li>
         <li><b>Rough cost:</b> a few hundred euros to about €2,000 per building, depending on how far it is from the tanks: about €1,500–5,000 for all three. A guess, not a quote.</li>
       </ul>
+      <ul class="checks small" lang="nl">
+        <li><b>Elk dak</b> heeft dakgoten nodig, regenpijpen, een bladvanger en een first-flush-afscheider die de vuilste eerste regen weggooit, en dan een ingegraven leiding naar de hoofdtanks. Leg de leiding met een gelijkmatig verval; als een gebouw lager blijkt te liggen dan de inlaat van de tank, doet een kleine pomp op zonne-energie het werk.</li>
+        <li><b>Het terras bij het huis</b> ligt recht boven de huistank en is dus het eenvoudigst: een afvoerputje en een filter, rechtstreeks de tank in. Bestrating laat iets minder regen afstromen dan een dak, wat de cijfers nauwelijks verandert.</li>
+        <li><b>De carport</b> was bedoeld om een zwembad bij te vullen. De leiding kan eerst de tanks van het huis vullen en naar het zwembad overlopen als die vol zijn, zodat het zwembad het overschot nog krijgt.</li>
+        <li><b>Ruwe kosten:</b> een paar honderd tot zo'n € 2.000 per gebouw, afhankelijk van de afstand tot de tanks: ongeveer € 1.500–5.000 voor alle drie. Een schatting, geen offerte.</li>
+      </ul>
     </div>
   </details>
 
   <details>
-    <summary>Step 2: the new buried tank</summary>
-    <div class="body">
+    <summary><span lang="en">Step 2: the new buried tank</span><span lang="nl">Stap 2: de nieuwe ondergrondse tank</span></summary>
+    <div class="body" lang="en">
       <p class="small"><b>Size.</b> The page assumes about 25 m³ (4 × 2.5 m and 2.5 m deep), on top of the 60 m³ of the solar building tank and the house tank. Change it under <i>Tanks</i> in the simulator to see what a bigger or smaller one does. Only part of any tank can be used: water below the pump intake and above the overflow pipe can't, so the page counts 90%. Measuring the height of the pump intake in the existing tanks would firm that up.</p>
       <p class="small"><b>What to build it from:</b></p>
       <ul class="checks small">
@@ -346,11 +393,22 @@
       <p class="small">Place it where the roofs' pipes can reach it with a steady fall, and link it to the main tanks. If it sits lower than the main tanks, a small solar pump with a float switch moves the water across when they have room. Whatever it's made of, it must be closed and dark, with fine insect mesh on the vents and overflow.</p>
       <p class="small"><b>Cost:</b> to be quoted.</p>
     </div>
+    <div class="body" lang="nl">
+      <p class="small"><b>Grootte.</b> De pagina gaat uit van ongeveer 25 m³ (4 × 2,5 m en 2,5 m diep), bovenop de 60 m³ van de tank bij het zonnegebouw en de huistank. Verander het onder <i>Tanks</i> in de simulator om te zien wat een grotere of kleinere tank doet. Van een tank is maar een deel bruikbaar: water onder de aanzuiging van de pomp en boven de overloop niet. De pagina rekent daarom met 90%. Door de hoogte van de pompaanzuiging in de bestaande tanks te meten, wordt dat getal zekerder.</p>
+      <p class="small"><b>Waarvan hij gemaakt kan worden:</b></p>
+      <ul class="checks small">
+        <li><b>Een prefab betonnen regenwatertank</b>, ingegraven, van een betonfabriek in de buurt. Beton geeft niets schadelijks af en verhoogt de pH van zuur regenwater een beetje. Een nieuwe tank geeft eerst kalk af: vul hem een of twee keer en laat hem leeglopen voor gebruik, en vraag naar een tank die is goedgekeurd voor drinkwater (ACS). Er is een kraan of grote graafmachine nodig om hem erin te zetten.</li>
+        <li><b>Meerdere gekoppelde ondergrondse kunststof regenwatertanks</b>, als een kraan er niet bij kan.</li>
+        <li><b>Een flexibele watertank (waterzak)</b> op de grond is het goedkoopst per m³, maar is zichtbaar en heeft een vlakke, beschutte plek nodig.</li>
+      </ul>
+      <p class="small">Zet hem waar de leidingen van de daken met een gelijkmatig verval bij kunnen, en koppel hem aan de hoofdtanks. Ligt hij lager dan de hoofdtanks, dan pompt een kleine pomp op zonne-energie met een vlotterschakelaar het water over als daar ruimte is. Waarvan hij ook gemaakt is: hij moet dicht en donker zijn, met fijn insectengaas op de ontluchting en de overloop.</p>
+      <p class="small"><b>Kosten:</b> nog offerte aanvragen.</p>
+    </div>
   </details>
 
   <details>
-    <summary>Costs, and where to buy: rough guesses until there are quotes</summary>
-    <div class="body">
+    <summary><span lang="en">Costs, and where to buy: rough guesses until there are quotes</span><span lang="nl">Kosten, en waar te kopen: ruwe schattingen tot er offertes zijn</span></summary>
+    <div class="body" lang="en">
       <div class="table-wrap">
         <table>
           <thead><tr><th>Item</th><th class="num">Rough cost</th></tr></thead>
@@ -380,24 +438,61 @@
       </ul>
       <p class="small">Ask for: EPDM geomembrane 1.14–1.2 mm in one piece, about 6.4 × 21.6 m made to measure (a standard 6.1 × 21.35 m panel also works, with slightly narrower trench laps); about 140 m² of geotextile; delivery on a pallet to the house (mention the track and ask about a tail lift). The folded sheet weighs about 200 kg, so plan on three or four people to move it.</p>
     </div>
+    <div class="body" lang="nl">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Onderdeel</th><th class="num">Ruwe kosten</th></tr></thead>
+          <tbody>
+            <tr><th colspan="2">Stap 1: dakgoten op het yogagebouw, de carport en het terras bij het huis</th></tr>
+            <tr><td>Dakgoten, regenpijpen, bladvangers, first-flush-afscheiders en ingegraven leidingen voor het yogagebouw, de carport en het terras bij het huis</td><td class="num">€ 1.500–5.000</td></tr>
+            <tr><th colspan="2">Stap 2: een nieuwe ondergrondse tank van ongeveer 25 m³</th></tr>
+            <tr><td>Prefab beton of gekoppelde kunststof tanks, geleverd en geplaatst, met leidingwerk</td><td class="num">Offerte aanvragen</td></tr>
+            <tr><th colspan="2">Plan B: opvangfolie van 90 m²</th></tr>
+            <tr><td>EPDM-folie uit één stuk, ongeveer 6,4 × 21,6 m op maat (1,14–1,2 mm), inclusief de greppels</td><td class="num">€ 1.250–1.800</td></tr>
+            <tr><td>Geotextiel als onderlaag, ongeveer 140 m²</td><td class="num">€ 150–300</td></tr>
+            <tr><td>Doorvoer, bladfilter en ongeveer 25 m buis van 110 mm</td><td class="num">€ 400–800</td></tr>
+            <tr><td>Hek tegen wilde zwijnen en reeën</td><td class="num">€ 400–800</td></tr>
+            <tr><td>Kleine graafmachine met bestuurder, ongeveer een dag: vrijmaken, de greppels en het diepe stuk leidingsleuf</td><td class="num">€ 300–800</td></tr>
+            <tr><th>Opvangfolie totaal</th><th class="num">€ 2.500–4.500</th></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small">Ter vergelijking: een Amerikaanse leverancier verkoopt een folie uit één stuk van 15,25 × 21,35 m (50 × 70 ft), veel groter dan hier nodig, voor $ 3.500, met een gewicht van ongeveer 475 kg (<a href="https://justpondliners.com/products/50-x-70-45mil-epdm-pond-liner" target="_blank" rel="noopener">Just Pond Liners</a>). Folies van dit formaat uit één stuk zijn heel gewoon: Elevate (voorheen Firestone) maakt ze tot 36 m breed, en Flexirub en ETOBA maken ze op maat tot 1.200–2.000 m².</p>
+      <h3>Leveranciers in Frankrijk</h3>
+      <ul class="checks small">
+        <li><b>Egide Systèmes</b>, Mérignac (Bordeaux), 05 56 02 76 39. Erkende Elevate-distributeur, het dichtst bij het huis.</li>
+        <li><b>EPDM Méditerranée</b>, Mudaison (Montpellier), 07 82 52 53 55. Erkende Elevate-distributeur.</li>
+        <li><b>Elevate</b> heeft ook een contactpersoon voor vijverfolie in Frankrijk (<a href="https://www.holcimelevate.com/content/dam/elevateemea/assets/pdf/CONTACTS_FRANCE.pdf" target="_blank" rel="noopener">contactlijst</a>, <a href="https://holcimelevate.com/uk-en/lining/geomembrane-applications/geosmart-epdm" target="_blank" rel="noopener">productpagina GeoSmart EPDM</a>).</li>
+        <li><b>Chausson Matériaux</b> (bouwmaterialenhandel in heel Zuidwest-Frankrijk) verkoopt de Aquafilma-EPDM van Flexirub op maat, uit één stuk tot 2.000 m², 1,2 mm, 20 jaar garantie (<a href="https://www.batiproduits.com/fiche/produits/geomembrane-epdm-pour-stockage-d-eau-ou-lagunage-p69097578.html" target="_blank" rel="noopener">productblad</a>).</li>
+        <li><b>ETOBA</b>, 01 34 84 04 64, contact@etoba.fr: rollen van 3–15 m breed, op maat tot 1.200 m² zonder naden (<a href="https://www.batiproduits.com/fiche/produits/bache-epdm-d-epaisseur-1-mm-pour-bassin-de-rete-p325177020.html" target="_blank" rel="noopener">productblad</a>).</li>
+      </ul>
+      <p class="small">Vraag naar: EPDM-geomembraan van 1,14–1,2 mm uit één stuk, ongeveer 6,4 × 21,6 m op maat (een standaardpaneel van 6,1 × 21,35 m kan ook, met iets smallere overlap in de greppels); ongeveer 140 m² geotextiel; levering op een pallet bij het huis (noem de toegangsweg en vraag naar een laadklep). De opgevouwen folie weegt ongeveer 200 kg: reken op drie of vier mensen om hem te verplaatsen.</p>
+    </div>
   </details>
 
   <details>
-    <summary>Rules and permissions</summary>
+    <summary><span lang="en">Rules and permissions</span><span lang="nl">Regels en vergunningen</span></summary>
     <div class="body">
-      <ul class="checks small">
+      <ul class="checks small" lang="en">
         <li><b>Planning.</b> A sheet lying on the ground has no height and no floor area, so it isn't a building, and the trenches are well below the size that needs a declaration. But the land is in zone Ntvb (natural area on a wildlife corridor) of the <a href="https://data.geopf.fr/annexes/gpu/documents/DU_244600433/ea9c13afe557d09858ad92d60ccc5b56/244600433_reglement_20260312.pdf" target="_blank" rel="noopener">PLUi Vallée du Lot et du Vignoble</a> (version of 12 March 2026), which aims to avoid sealing natural ground, bans digging out or raising the ground except for permitted works, and bans earthworks "covered by sheeting left visible". Those rules apply even to work that needs no permit. The same document quotes article L111-16 of the planning code, which says a permission can't be refused for systems that retain rainwater for the household's own needs if they fit into the landscape, but that only helps once a permit or declaration is being decided. <b>So ask the mairie first: send a sketch and keep their written answer.</b> A dark sheet helps.</li>
         <li><b>Nature.</b> The site is inside the ZNIEFF type 1 "<a href="https://inpn.mnhn.fr/zone/znieff/730030184" target="_blank" rel="noopener">Bois sec de Niaudon</a>", a 113-hectare inventory area noted for its semi-dry limestone grassland, the kind where wild orchids grow. The listing bans nothing by itself and the risk here is low: the sheet and its trench cover about 120 m² of ground right next to the buildings. Do the work in autumn or winter, not in spring or early summer, and leave the trees. The local plan maps no protected hedge, wood, dry grassland or wetland on this spot.</li>
         <li><b>Clearing.</b> Cutting grass and bushes isn't forest clearance, so no authorisation from the DDT is needed. Felling trees to make room would be, which is why the sheet goes on the open slope.</li>
         <li><b>The fence.</b> Since 2023, fences in natural zones must let wildlife through, but only those more than 150 m from a house (<a href="https://www.ofb.gouv.fr/sites/default/files/Fichiers/Plaquettes%20et%20rapports%20instit/OFB_Plaquette_Engrillagement_WEB.pdf" target="_blank" rel="noopener">OFB</a>). This one is closer, so a boar-proof fence is allowed. The local plan does ask fences in this zone to leave gaps for small wildlife where possible.</li>
         <li><b>Collecting the water.</b> Catching rain on your own land isn't an abstraction under water law; a declaration only applies to rainwater drainage schemes of 1 ha or more.</li>
       </ul>
+      <ul class="checks small" lang="nl">
+        <li><b>Ruimtelijke ordening.</b> Een folie op de grond heeft geen hoogte en geen vloeroppervlak, dus het is geen bouwwerk, en de greppels blijven ruim onder de omvang waarvoor een melding nodig is. Maar de grond ligt in zone Ntvb (natuurgebied op een ecologische verbindingszone) van het <a href="https://data.geopf.fr/annexes/gpu/documents/DU_244600433/ea9c13afe557d09858ad92d60ccc5b56/244600433_reglement_20260312.pdf" target="_blank" rel="noopener">PLUi Vallée du Lot et du Vignoble</a> (versie van 12 maart 2026). Dat plan wil voorkomen dat natuurlijke grond wordt afgedekt, verbiedt afgraven en ophogen behalve voor toegestane werken, en verbiedt grondwerken die "met zichtbaar blijvend zeil zijn afgedekt". Die regels gelden ook voor werk waarvoor geen vergunning nodig is. Hetzelfde document citeert artikel L111-16 van de Franse bouwwet: een vergunning mag niet worden geweigerd voor systemen die regenwater opvangen voor eigen huishoudelijk gebruik als ze in het landschap passen, maar dat helpt pas als er over een vergunning of melding wordt beslist. <b>Vraag het dus eerst aan de mairie: stuur een schets en bewaar hun schriftelijke antwoord.</b> Een donkere folie helpt.</li>
+        <li><b>Natuur.</b> Het terrein ligt binnen de ZNIEFF type 1 "<a href="https://inpn.mnhn.fr/zone/znieff/730030184" target="_blank" rel="noopener">Bois sec de Niaudon</a>", een inventarisgebied van 113 hectare dat bekendstaat om zijn halfdroge kalkgrasland, het soort waar wilde orchideeën groeien. De vermelding verbiedt op zich niets en het risico is hier klein: de folie en de greppel beslaan ongeveer 120 m² grond direct naast de gebouwen. Doe het werk in de herfst of winter, niet in het voorjaar of de vroege zomer, en laat de bomen staan. Het bestemmingsplan geeft op deze plek geen beschermde heg, bos, droog grasland of wetland aan.</li>
+        <li><b>Vrijmaken.</b> Gras en struiken maaien is geen bosontginning, dus er is geen toestemming van de DDT nodig. Bomen kappen om ruimte te maken zou dat wel zijn; daarom komt de folie op de open helling.</li>
+        <li><b>Het hek.</b> Sinds 2023 moeten hekken in natuurgebieden wild doorlaten, maar alleen hekken op meer dan 150 m van een woning (<a href="https://www.ofb.gouv.fr/sites/default/files/Fichiers/Plaquettes%20et%20rapports%20instit/OFB_Plaquette_Engrillagement_WEB.pdf" target="_blank" rel="noopener">OFB</a>). Dit hek staat dichterbij, dus een zwijnendicht hek mag. Het bestemmingsplan vraagt wel om in deze zone waar mogelijk openingen te laten voor klein wild.</li>
+        <li><b>Het water opvangen.</b> Regen opvangen op je eigen grond geldt onder de Franse waterwet niet als wateronttrekking; een melding geldt alleen voor afvoersystemen voor regenwater van 1 ha of meer.</li>
+      </ul>
     </div>
   </details>
 
   <details>
-    <summary>Why not a borehole</summary>
-    <div class="body">
+    <summary><span lang="en">Why not a borehole</span><span lang="nl">Waarom geen boorput</span></summary>
+    <div class="body" lang="en">
       <p class="small">The ground here is karst limestone: water runs through scattered cracks, and the rock above the water table is dry. Every borehole on record nearby is on a valley floor, far lower than the house, and they found water at very different levels: from 118 m above sea level down to below sea level. The springs nearby come out at about 100–110 m. The house is at 229 m, so <b>water is at least about 110 m down and could be much deeper</b>:</p>
       <div class="table-wrap">
         <table>
@@ -426,12 +521,41 @@
       <p class="small">There's paperwork too: a household borehole must be declared on <a href="https://www.ecologie.gouv.fr/actualites/forages-domestiques-louverture-tele-declaration" target="_blank" rel="noopener">DUPLOS</a> at least a month before drilling.</p>
       <p class="small"><b>Compared with that, guttering the roofs and adding a tank cost a fraction as much, can't come up dry, and use rain the record shows falls every summer.</b></p>
     </div>
+    <div class="body" lang="nl">
+      <p class="small">De ondergrond hier is karstkalksteen: water stroomt door verspreide scheuren en het gesteente boven de grondwaterspiegel is droog. Alle bekende boorputten in de buurt liggen in een dal, veel lager dan het huis, en vonden water op heel verschillende hoogtes: van 118 m boven zeeniveau tot onder zeeniveau. De bronnen in de buurt komen op ongeveer 100–110 m boven. Het huis ligt op 229 m, dus <b>het water zit minstens zo'n 110 m diep en mogelijk veel dieper</b>:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Boorput</th><th class="num">Maaiveld</th><th class="num">Diepte</th><th>Water gevonden op</th><th class="num">Waterstand boven zeeniveau</th></tr></thead>
+          <tbody>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS004HSGU" target="_blank" rel="noopener">Les Junies, La Mouline</a> (2023)</td><td class="num">123 m</td><td class="num">51 m</td><td>5 m onder maaiveld</td><td class="num">118 m</td></tr>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJSP" target="_blank" rel="noopener">Puy-l'Évêque, Les Balmes</a> (2011)</td><td class="num">102 m</td><td class="num">80 m</td><td>56 m onder maaiveld</td><td class="num">46 m</td></tr>
+            <tr><td><a href="http://ficheinfoterre.brgm.fr/InfoterreFiche/ficheBss.action?id=BSS002AJTS" target="_blank" rel="noopener">Prayssac, La Plaine Sud</a> (2014)</td><td class="num">105 m</td><td class="num">162 m</td><td>140 m onder maaiveld</td><td class="num">−35 m</td></tr>
+            <tr><td><b>Het huis</b></td><td class="num"><b>229 m</b></td><td class="num">?</td><td>minstens zo'n 110 m onder maaiveld</td><td class="num">?</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small" style="margin-top:10px">Water vinden is niet zeker: een boorgat kan tussen de watervoerende scheuren door gaan en droog blijven. Een ruwe inschatting voor deze plek, met een hydrogeoloog die de plek kiest, is 1 op 5 kans dat het eerste gat droog is. De kosten van alleen het boorgat, als er water wordt gevonden op ongeveer 140 m:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Uitkomst</th><th class="num">Ruwe kans</th><th class="num">Kosten</th></tr></thead>
+          <tbody>
+            <tr><td>Meteen water, op ongeveer 140 m</td><td class="num">80%</td><td class="num">ongeveer € 20.000</td></tr>
+            <tr><td>Eerste gat droog op 170 m en afgedicht, tweede vindt water</td><td class="num">15%</td><td class="num">ongeveer € 33.000</td></tr>
+            <tr><td>Beide gaten droog: stoppen zonder water</td><td class="num">5%</td><td class="num">ongeveer € 29.000</td></tr>
+            <tr><th>Gemiddelde uitkomst</th><th></th><th class="num">ongeveer € 22.000</th></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tiny">Uitgaande van een hydrogeoloog en bodemonderzoek om de plek te kiezen (€ 2.000), het opzetten van de boorinstallatie (€ 1.000; € 300 voor een tweede gat), boren voor € 70 per meter, verbuizen en afdichten voor € 40 per meter zodra er water is, een pomptest (€ 1.200), en € 1.000 om een droog gat af te dichten zoals de wet voorschrijft. Elke 10 m extra diepte kost ongeveer € 1.100 meer. Daarbovenop komt ongeveer € 5.000–9.000 voor een pomp die water 130 m of meer omhoog kan brengen, met aandrijving op zonne-energie, leidingwerk en waterbehandeling.</p>
+      <p class="small">Er is ook papierwerk: een boorput voor huishoudelijk gebruik moet minstens een maand voor het boren worden gemeld via <a href="https://www.ecologie.gouv.fr/actualites/forages-domestiques-louverture-tele-declaration" target="_blank" rel="noopener">DUPLOS</a>.</p>
+      <p class="small"><b>Daarmee vergeleken kosten dakgoten en een extra tank een fractie, kunnen ze niet droog uitvallen en gebruiken ze regen die volgens de metingen elke zomer valt.</b></p>
+    </div>
   </details>
 
   <details>
-    <summary>Before ordering</summary>
+    <summary><span lang="en">Before ordering</span><span lang="nl">Voordat er iets besteld wordt</span></summary>
     <div class="body">
-      <ol class="steps small">
+      <ol class="steps small" lang="en">
         <li><b>Gutter the yoga building, car port and house terrace</b>: needed whatever else is done.</li>
         <li><b>Get quotes for the new tank</b>, and check where a crane or digger can reach.</li>
         <li><b>Measure the height of the pump intake</b> in the existing tanks, to firm up how much of them can be used.</li>
@@ -439,47 +563,58 @@
         <li><b>If plan B is needed:</b> check the levels on site, check the slope is still open grass and low scrub (the survey is from April 2022), and email the mairie a sketch first.</li>
         <li><b>Plan the work for autumn or winter</b>, so it's ready before summer.</li>
       </ol>
+      <ol class="steps small" lang="nl">
+        <li><b>Leg dakgoten aan op het yogagebouw, de carport en het terras bij het huis</b>: nodig, wat er verder ook gebeurt.</li>
+        <li><b>Vraag offertes aan voor de nieuwe tank</b>, en kijk waar een kraan of graafmachine kan komen.</li>
+        <li><b>Meet de hoogte van de pompaanzuiging</b> in de bestaande tanks, om zeker te weten hoeveel ervan bruikbaar is.</li>
+        <li><b>Controleer hoeveel regen er echt in de tanks komt</b> met de peilstok-meting onderaan de pagina, als de dakgoten er eenmaal liggen.</li>
+        <li><b>Als plan B nodig is:</b> controleer de hoogtes ter plekke, kijk of de helling nog open gras en laag struikgewas is (de opname is van april 2022), en mail eerst een schets naar de mairie.</li>
+        <li><b>Plan het werk in de herfst of winter</b>, zodat het voor de zomer klaar is.</li>
+      </ol>
     </div>
   </details>
 
   <details>
-    <summary>Where else this is done</summary>
+    <summary><span lang="en">Where else this is done</span><span lang="nl">Waar dit al gedaan wordt</span></summary>
     <div class="body">
-      <ul class="checks small">
+      <ul class="checks small" lang="en">
         <li><a href="https://www.edenshalefarm.com/blog/eden-shale-farm-update-february-2021" target="_blank" rel="noopener">Eden Shale Farm</a>, Kentucky: a 40 × 80 ft PVC pond liner (about 230 m² once laid) on a gentle slope, a trench along the bottom edge into a collection box, and a gravity pipe to a tank. Almost exactly this design.</li>
         <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island</a>, South Australia: three 7 × 100 m plastic runs gave close to 100% runoff; ripples in the plastic cost the most in light rain on hot days. Lessons: clear the vegetation, lay the sheet flat, choose a slope above the storage so it flows by gravity, bury the edges.</li>
         <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ep/sheeted_catchments_meet_future_water_need.pdf" target="_blank" rel="noopener">Wharminda</a>, South Australia: a one-hectare sheet. Lessons: anchor it against wind, and store the water in closed tanks, not an open dam, because of evaporation and algae.</li>
         <li><a href="https://en.wikipedia.org/wiki/Great_Gibraltar_Sand_Dune" target="_blank" rel="noopener">Gibraltar</a> collected its water on sheeted slopes for most of the 20th century, and the Canary Islands have done it with plastered slopes (<i>alcogidas</i>) for centuries (<a href="https://www.lavozdelanzarote.com/en/news/more-news/the-eras-and-alcogidas-the-lifesavers-of-the-people-of-lanzarote-when-scarcity-reigned-on-the-island_230146_102.html" target="_blank" rel="noopener">La Voz de Lanzarote</a>).</li>
         <li>Design guidance: University of Kentucky <a href="https://bae.mgcafe.uky.edu/articles/aen-175-rain-traps-watering-livestock-remote-locations" target="_blank" rel="noopener">AEN-175</a> (slopes of 2–10% to one corner, gravel-filled edge ditches) and the US Department of Agriculture's <a href="https://www.nrcs.usda.gov/sites/default/files/2025-07/521-nhcp-cps-pond-sealing-lining-geomembrane-geosyn.pdf" target="_blank" rel="noopener">lining standard 521</a> (EPDM at least 1.14 mm, sheets running down the slope, upper sheets overlapping lower ones).</li>
       </ul>
+      <ul class="checks small" lang="nl">
+        <li><a href="https://www.edenshalefarm.com/blog/eden-shale-farm-update-february-2021" target="_blank" rel="noopener">Eden Shale Farm</a>, Kentucky: een PVC-vijverfolie van 40 × 80 ft (ongeveer 230 m² eenmaal gelegd) op een flauwe helling, een greppel langs de onderrand naar een opvangbak, en een leiding onder vrij verval naar een tank. Bijna precies dit ontwerp.</li>
+        <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">Kangaroo Island</a>, Zuid-Australië: drie stroken plastic van 7 × 100 m gaven bijna 100% afstroming; plooien in het plastic kostten het meest bij lichte regen op warme dagen. Lessen: maak de begroeiing vrij, leg de folie vlak, kies een helling boven de opslag zodat het water vanzelf stroomt, en graaf de randen in.</li>
+        <li><a href="https://cdn.environment.sa.gov.au/landscape/docs/ep/sheeted_catchments_meet_future_water_need.pdf" target="_blank" rel="noopener">Wharminda</a>, Zuid-Australië: een folie van een hectare. Lessen: veranker hem tegen de wind, en sla het water op in gesloten tanks, niet in een open bassin, vanwege verdamping en algen.</li>
+        <li><a href="https://en.wikipedia.org/wiki/Great_Gibraltar_Sand_Dune" target="_blank" rel="noopener">Gibraltar</a> ving het grootste deel van de 20e eeuw zijn water op met beklede hellingen, en op de Canarische Eilanden doen ze dat al eeuwen met gepleisterde hellingen (<i>alcogidas</i>) (<a href="https://www.lavozdelanzarote.com/en/news/more-news/the-eras-and-alcogidas-the-lifesavers-of-the-people-of-lanzarote-when-scarcity-reigned-on-the-island_230146_102.html" target="_blank" rel="noopener">La Voz de Lanzarote</a>).</li>
+        <li>Ontwerprichtlijnen: University of Kentucky <a href="https://bae.mgcafe.uky.edu/articles/aen-175-rain-traps-watering-livestock-remote-locations" target="_blank" rel="noopener">AEN-175</a> (hellingen van 2–10% naar één hoek, greppels langs de rand gevuld met grind) en <a href="https://www.nrcs.usda.gov/sites/default/files/2025-07/521-nhcp-cps-pond-sealing-lining-geomembrane-geosyn.pdf" target="_blank" rel="noopener">norm 521</a> van het Amerikaanse ministerie van Landbouw (EPDM minstens 1,14 mm, banen de helling af, hogere banen over de lagere heen).</li>
+      </ul>
     </div>
   </details>
 </section>
 
 <section>
-  <h2>How this simulation works</h2>
+  <h2><span lang="en">How this simulation works</span><span lang="nl">Hoe deze simulatie werkt</span></h2>
   <div class="flow" aria-hidden="true">
-    <div class="box"><span class="t">1. Rain</span>Measured every day at Anglars, 3 km away<span class="v" id="fl_rain"></span></div>
+    <div class="box"><span class="t"><span lang="en">1. Rain</span><span lang="nl">1. Regen</span></span><span lang="en">Measured every day at Anglars, 3 km away</span><span lang="nl">Elke dag gemeten in Anglars, 3 km verderop</span><span class="v" id="fl_rain"></span></div>
     <div class="arrow">→</div>
-    <div class="box"><span class="t">2. Roofs (and sheet)</span><span id="fl_area"></span><span class="v" id="fl_collect"></span></div>
+    <div class="box"><span class="t"><span lang="en">2. Roofs (and sheet)</span><span lang="nl">2. Daken (en folie)</span></span><span id="fl_area"></span><span class="v" id="fl_collect"></span></div>
     <div class="arrow">→</div>
-    <div class="box"><span class="t">3. Tanks</span>Excess overflows when full<span class="v" id="fl_tank"></span></div>
+    <div class="box"><span class="t">3. Tanks</span><span lang="en">Excess overflows when full</span><span lang="nl">Het teveel loopt over als ze vol zijn</span><span class="v" id="fl_tank"></span></div>
     <div class="arrow">→</div>
-    <div class="box"><span class="t">4. Guests</span><span id="fl_season"></span><span class="v" id="fl_use"></span></div>
+    <div class="box"><span class="t"><span lang="en">4. Guests</span><span lang="nl">4. Gasten</span></span><span id="fl_season"></span><span class="v" id="fl_use"></span></div>
   </div>
   <p class="tanker-note" id="fl_tanker"></p>
 
-  <ol class="steps">
-    <li><b>Rain falls on the roofs.</b> The page uses the rain actually measured each day by Météo-France's rain gauge at Anglars-Juillac, 3 km from the house: <span id="ex_rain"></span> a year on average since <span class="ex_from"></span>. One millimetre of rain on one square metre of roof is one litre of water.</li>
-    <li><b>Most of it reaches the tanks.</b> Of the rain landing on <span id="ex_area"></span> of collecting surface, <span id="ex_eff"></span> is counted as reaching the tanks. The rest is lost wetting the tiles, in the first rinse that washes dirt off the roof, and when gutters and filters spill in heavy downpours.</li>
-    <li><b>The tanks store it, up to a limit.</b> They hold <span id="ex_usable"></span> of usable water. Rain that arrives when they're already full overflows and is lost, which is why a wet winter can't be saved up for a dry summer.</li>
-    <li><b>Guests use it.</b> <span id="ex_use"></span> <span id="ex_tanker"></span></li>
-  </ol>
-  <p>The water level carries over from each day to the next, through every day since <span class="ex_from"></span>, wet years and dry. So the results below are what would have happened at this house, with these settings, in the weather that actually fell.</p>
+  <ol class="steps" id="ex_steps"></ol>
+  <p lang="en">The water level carries over from each day to the next, through every day since <span class="ex_from"></span>, wet years and dry. So the results below are what would have happened at this house, with these settings, in the weather that actually fell.</p>
+  <p lang="nl">Het waterpeil loopt door van dag tot dag, over elke dag sinds <span class="ex_from"></span>, natte en droge jaren. De resultaten hieronder zijn dus wat er bij dit huis zou zijn gebeurd, met deze instellingen, bij het weer dat er echt was.</p>
 
   <details>
-    <summary>Where the numbers come from</summary>
-    <div class="body table-wrap">
+    <summary><span lang="en">Where the numbers come from</span><span lang="nl">Waar de getallen vandaan komen</span></summary>
+    <div class="body table-wrap" lang="en">
       <table>
         <thead><tr><th>Setting</th><th>Default</th><th>Source</th></tr></thead>
         <tbody>
@@ -495,37 +630,67 @@
         </tbody>
       </table>
     </div>
+    <div class="body table-wrap" lang="nl">
+      <table>
+        <thead><tr><th>Instelling</th><th>Standaard</th><th>Bron</th></tr></thead>
+        <tbody>
+          <tr><td>Dagelijkse neerslag</td><td><span class="ex_range"></span></td><td>Regenmeter 46005001 van Météo-France in Anglars-Juillac, 2,9 km van het huis. De meter staat in het dal op 104 m en het huis op het plateau op ongeveer 229 m; hoger terrein krijgt eerder iets meer regen, dus de meter zit aan de voorzichtige kant. Gepubliceerd als <a href="https://www.data.gouv.fr/fr/datasets/donnees-climatologiques-de-base-quotidiennes/" target="_blank" rel="noopener">open data op data.gouv.fr</a>. Elke week op deze pagina bijgewerkt.</td></tr>
+          <tr><td>Dakoppervlakken</td><td>Huis 15 × 5 m, gîte 14 × 7 m</td><td>De grondvlakte van elk dak. Het is het oppervlak van bovenaf gezien dat regen opvangt, niet het grotere schuine pannendak.</td></tr>
+          <tr><td>Opvangfolie</td><td>Uit; 20 × 4,5 m, 85% komt in de tanks</td><td>De rubberen folie van plan B op de helling ten zuiden van de gebouwen (zie <a href="#planb">plan B</a>). Een met plastic bekleed opvangvlak op een boerderij in Zuid-Australië gaf bijna 100% afstroming, al verminderden plooien in het plastic dat bij lichte regen op warme dagen (<a href="https://cdn.environment.sa.gov.au/landscape/docs/ki/CASE-STUDY_CHIRGWIN-005.pdf" target="_blank" rel="noopener">casestudy Kangaroo Island</a>). 85% houdt daar rekening mee, en met bladeren, stof en de eerste spoeling.</td></tr>
+          <tr><td>Opvangrendement</td><td>75%</td><td>Ontwerpnormen voor regenwatersystemen (BS 8515 in het Verenigd Koninkrijk, DIN 1989 in Duitsland) gaan ervan uit dat ongeveer 80–90% van een schuin dak afstroomt en ongeveer 90% door het filter komt. Hier iets lager gezet vanwege kleipannen en zomerse wolkbreuken. Het echte getal kun je met je eigen tanks meten, onderaan de pagina.</td></tr>
+          <tr><td>Tanks</td><td>Tank bij het zonnegebouw 50 m³ en huistank 10 m³ (beide gerekend met 2,5 m diepte), 90% bruikbaar; de nieuwe tank (stap 2) ongeveer 25 m³</td><td>Het onderste stuk (onder de pompaanzuiging) en het bovenste stuk (boven de overloop) zijn niet bruikbaar. 90% is een schatting tot de hoogte van de pompaanzuiging is gemeten.</td></tr>
+          <tr><td>Waterverbruik</td><td>Ongeveer 82 liter per gast per dag, plus ongeveer 81 liter per dag voor de was en de vaatwasser van het huis</td><td>Opgebouwd uit douches (50 liter), toiletten, kranen (15 liter), was en vaatwasser, onder <i>Waterverbruik in detail</i>. De toiletten hebben een spoelknop met 6 en 2 liter. De Britse berekening van waterverbruik in nieuwe woningen rekent 1,46 grote en 2,96 kleine spoelingen per persoon per dag, ongeveer één grote op twee kleine (<a href="https://www.gov.uk/government/publications/the-water-efficiency-calculator-for-new-dwellings" target="_blank" rel="noopener">Water Efficiency Calculator for New Dwellings</a>, nu onderdeel van Approved Document G). Een spoeling is hier dus gemiddeld (6 + 2 × 2) ÷ 3 = 3,3 liter, bij 5 spoelingen per gast per dag. Ter vergelijking: het Franse gemiddelde is ongeveer 145 liter per persoon per dag, inclusief drinken, koken en tuin (<a href="https://chiffrecle.oieau.fr/3049" target="_blank" rel="noopener">Eau France, 2023</a>).</td></tr>
+          <tr><td>Waterprijs</td><td>€ 2,80 per m³</td><td>Officiële gemiddelde drinkwaterprijs in de Lot, 2025 (<a href="https://www.services.eaufrance.fr/departement/46/2025" target="_blank" rel="noopener">SISPEA</a>).</td></tr>
+          <tr><td>Levering per tankwagen</td><td>12 m³ uit Parnac (15,6 km): € 150 vast + € 3 per km + water</td><td>Elke levering kost een vast bedrag, plus een bedrag per kilometer voor de rit heen en terug, plus het water. Het vaste bedrag is ongeveer 1 tot 1,5 uur vrachtwagen met chauffeur tegen de € 90 tot € 130 per uur die vervoerders rekenen. Het tarief per km is de Franse kostprijs van wegvervoer van ongeveer € 1,80 tot € 2,30 per km (<a href="https://www.cnr.fr/" target="_blank" rel="noopener">CNR</a>) plus een marge, in lijn met de € 2 tot € 4 per km die bezorgbedrijven noemen (<a href="https://eausourcedistribution.fr/quels-sont-les-couts-dune-livraison-deau-par-camion-citerne/" target="_blank" rel="noopener">voorbeeld</a>). Twee echte bedragen als controle: ongeveer € 300 voor een kleine particuliere levering, en de ruwweg € 10 per m³ die Figeac in zijn droogteplan van augustus 2026 begrootte voor tankwagens, ongeveer € 10.000 per dag voor maximaal ongeveer 1.000 m³ (<a href="https://france3-regions.franceinfo.fr/occitanie/lot/cahors/on-va-aller-chercher-de-l-eau-avec-des-camions-citernes-comment-le-maire-de-cette-ville-de-10-000-habitants-anticipe-une-situation-de-crise-face-a-la-secheresse-3401143.html" target="_blank" rel="noopener">France 3</a>). De vervoerders in de buurt en hun afstanden staan onder <i>Tankwagen in detail</i>. Vervang dit door een echte offerte zodra die er is.</td></tr>
+          <tr><td>Klimaatverwachting</td><td>Uit (recent weer)</td><td>Projecties van Météo-France voor Occitanie rond 2050: zomerregen −15%, winterregen +12% (<a href="https://meteofrance.com/changement-climatique/quel-climat-futur-en-occitanie" target="_blank" rel="noopener">Météo-France</a>).</td></tr>
+        </tbody>
+      </table>
+    </div>
   </details>
 
   <details>
-    <summary>How we checked it</summary>
+    <summary><span lang="en">How we checked it</span><span lang="nl">Hoe het is gecontroleerd</span></summary>
     <div class="body">
-      <ul class="checks">
+      <ul class="checks" lang="en">
         <li><b>The rain gauge agrees with its neighbours.</b> From 2010 to 2025, rain between May and October averaged 384 mm at Anglars, 381 mm at Montcuq, 374 mm at Le Montat and 382 mm at Gourdon, all Météo-France gauges within 31 km.</li>
-        <li><b>An independent source tells the same story.</b> ERA5, a completely separate reconstruction of the weather from satellites and weather models, averages <span id="chk_era"></span> a year here, against the gauge's <span id="chk_gauge"></span> (<span id="chk_years"></span>). With the settings on this page it gives <span id="chk_alt"></span>. It reads wetter than the gauge in several recent summers, so the gauge is the cautious choice. You can switch to it under <i>Rainfall data and climate</i>.</li>
+        <li class="chk_li"></li>
         <li><b>It matches what's been seen at the house.</b> With light use (a few guests for part of the season), the model has the tanks full again by January 2026, which is what happened. With the house full all summer, the same winter would have left them only about half full.</li>
         <li><b>You can check it against your own tanks.</b> The tool at the bottom of the page turns a few dipstick readings into this house's real collection and water use, and plugs them in.</li>
+      </ul>
+      <ul class="checks" lang="nl">
+        <li><b>De regenmeter klopt met zijn buren.</b> Van 2010 tot 2025 viel er van mei tot oktober gemiddeld 384 mm in Anglars, 381 mm in Montcuq, 374 mm in Le Montat en 382 mm in Gourdon, allemaal meters van Météo-France binnen 31 km.</li>
+        <li class="chk_li"></li>
+        <li><b>Het klopt met wat er bij het huis is gezien.</b> Bij licht gebruik (een paar gasten voor een deel van het seizoen) zijn de tanks in het model in januari 2026 weer vol, en zo ging het ook. Met het huis de hele zomer vol zouden ze na dezelfde winter maar ongeveer half vol zijn geweest.</li>
+        <li><b>Je kunt het controleren met je eigen tanks.</b> De meting onderaan de pagina maakt van een paar peilstokmetingen de echte opvang en het echte verbruik van dit huis, en vult die in.</li>
       </ul>
     </div>
   </details>
 
   <details>
-    <summary>What it doesn't capture</summary>
+    <summary><span lang="en">What it doesn't capture</span><span lang="nl">Wat het niet meeneemt</span></summary>
     <div class="body">
-      <ul class="checks">
+      <ul class="checks" lang="en">
         <li>Rain is measured 3 km away. A single summer storm can soak one village and miss the next, but over months and years the totals agree closely.</li>
         <li>Occupancy below 100% is spread evenly through the season rather than modelled as empty weeks. The seasonal total is the same; a full fortnight in a dry spell is slightly harder than shown.</li>
         <li>The weather won't repeat itself exactly. The record covers more than 30 wet and dry years, and the climate setting shifts all of them towards the expected future, but nobody can say which coming years will be dry.</li>
         <li>Roof areas, the usable share of the tanks and collection efficiency are estimates until they're measured.</li>
         <li>Only the amount of water is modelled, not its quality.</li>
       </ul>
+      <ul class="checks" lang="nl">
+        <li>De regen wordt 3 km verderop gemeten. Eén zomerse bui kan het ene dorp doorweken en het volgende missen, maar over maanden en jaren komen de totalen goed overeen.</li>
+        <li>Een bezetting onder de 100% wordt gelijk over het seizoen verdeeld in plaats van als lege weken gerekend. Het seizoenstotaal is hetzelfde; twee volle weken in een droge periode zijn iets zwaarder dan hier te zien is.</li>
+        <li>Het weer herhaalt zich niet precies. De metingen beslaan meer dan 30 natte en droge jaren, en de klimaatinstelling schuift ze allemaal richting de verwachte toekomst, maar niemand kan zeggen welke komende jaren droog worden.</li>
+        <li>De dakoppervlakken, het bruikbare deel van de tanks en het opvangrendement zijn schattingen tot ze gemeten zijn.</li>
+        <li>Alleen de hoeveelheid water wordt gerekend, niet de kwaliteit.</li>
+      </ul>
     </div>
   </details>
 </section>
 
 <section class="answer" id="try" aria-live="polite">
-  <div class="answer-label">Try it yourself</div>
-  <p class="small muted" style="margin:-2px 0 8px">The answer with the settings below. Change anything and it recalculates; the story at the top always uses the default settings.</p>
+  <div class="answer-label"><span lang="en">Try it yourself</span><span lang="nl">Probeer het zelf</span></div>
+  <p class="small muted" style="margin:-2px 0 8px" lang="en">The answer with the settings below. Change anything and it recalculates; the story at the top always uses the default settings.</p>
+  <p class="small muted" style="margin:-2px 0 8px" lang="nl">Het antwoord met de instellingen hieronder. Verander iets en het rekent opnieuw; het verhaal bovenaan gebruikt altijd de standaardinstellingen.</p>
   <p class="headline" id="headline">Calculating…</p>
   <p class="compare" id="compare"></p>
   <div class="toolbar" style="margin:12px 0 0"><button type="button" id="fix_btn">Step 1: gutter the three roofs</button>
@@ -534,197 +699,220 @@
 </section>
 
 <section id="settings">
-  <h2>Settings</h2>
+  <h2><span lang="en">Settings</span><span lang="nl">Instellingen</span></h2>
   <div class="toolbar">
-    <span class="small muted">Change anything and the results update straight away.</span>
-    <button type="button" id="share">Copy link to these settings</button>
-    <button type="button" id="reset">Reset to defaults</button>
+    <span class="small muted"><span lang="en">Change anything and the results update straight away.</span><span lang="nl">Verander iets en de resultaten passen zich meteen aan.</span></span>
+    <button type="button" id="share"><span lang="en">Copy link to these settings</span><span lang="nl">Kopieer de link naar deze instellingen</span></button>
+    <button type="button" id="reset"><span lang="en">Reset to defaults</span><span lang="nl">Terug naar standaard</span></button>
     <span class="small good" id="share_o"></span>
   </div>
   <input type="text" id="share_url" readonly style="display:none;width:100%;margin-bottom:10px">
 
   <div class="panel">
-    <h3>Guests</h3>
+    <h3><span lang="en">Guests</span><span lang="nl">Gasten</span></h3>
     <div class="grid">
-      <label class="f">Guests in the house: <span class="val" id="o_guests"></span>
+      <label class="f"><span lang="en">Guests in the house:</span><span lang="nl">Gasten in huis:</span> <span class="val" id="o_guests"></span>
         <input type="range" data-k="guests" min="0" max="16" step="1"></label>
-      <label class="f">Share of the season the house is full: <span class="val" id="o_occ"></span>
+      <label class="f"><span lang="en">Share of the season the house is full:</span><span lang="nl">Deel van het seizoen dat het huis vol is:</span> <span class="val" id="o_occ"></span>
         <input type="range" data-k="occ" min="0" max="100" step="5"></label>
-      <label class="f">Season starts
+      <label class="f"><span lang="en">Season starts</span><span lang="nl">Seizoen begint</span>
         <select data-k="s0" class="months"></select></label>
-      <label class="f">Season ends
+      <label class="f"><span lang="en">Season ends</span><span lang="nl">Seizoen eindigt</span>
         <select data-k="s1" class="months"></select></label>
     </div>
-    <p class="derived">Water use: <b id="o_lpd"></b> litres per guest per day, <b id="o_day"></b> litres a day for the house. <a href="#d_water" id="open_water">Adjust water use</a></p>
+    <p class="derived"><span id="o_water"></span> <a href="#d_water" id="open_water"><span lang="en">Adjust water use</span><span lang="nl">Waterverbruik aanpassen</span></a></p>
   </div>
 
   <div class="panel">
-    <h3>Roofs, terraces and ground sheet collecting rain</h3>
-    <p class="small muted">Tick what's connected to the tanks. Sizes are length × width seen from above, in metres. Leave the "% reaches tanks" box empty to use the general setting under <i>Collection in detail</i>; the ground sheet has its own figure because a smooth sheet sheds more than a tiled roof.</p>
+    <h3><span lang="en">Roofs, terraces and ground sheet collecting rain</span><span lang="nl">Daken, terrassen en opvangfolie die regen opvangen</span></h3>
+    <p class="small muted" lang="en">Tick what's connected to the tanks. Sizes are length × width seen from above, in metres. Leave the "% reaches tanks" box empty to use the general setting under <i>Collection in detail</i>; the ground sheet has its own figure because a smooth sheet sheds more than a tiled roof.</p>
+    <p class="small muted" lang="nl">Vink aan wat op de tanks is aangesloten. Maten zijn lengte × breedte van bovenaf gezien, in meters. Laat het vakje "% naar tanks" leeg om de algemene instelling onder <i>Opvang in detail</i> te gebruiken; de opvangfolie heeft een eigen getal omdat een gladde folie meer laat afstromen dan een pannendak.</p>
     <div id="surfaces"></div>
     <div class="toolbar" style="margin:8px 0 0">
-      <button type="button" id="add_surface">Add another surface</button>
-      <span class="derived" style="margin:0">Total collecting area: <b id="o_area"></b></span>
+      <button type="button" id="add_surface"><span lang="en">Add another surface</span><span lang="nl">Nog een oppervlak toevoegen</span></button>
+      <span class="derived" style="margin:0"><span lang="en">Total collecting area:</span><span lang="nl">Totaal opvangoppervlak:</span> <b id="o_area"></b></span>
     </div>
   </div>
 
   <div class="panel">
     <h3>Tanks</h3>
-    <p class="small muted">The solar building tank is 50 m³ and the house tank 10 m³. The new buried tank is step 2 of the fix. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
+    <p class="small muted" lang="en">The solar building tank is 50 m³ and the house tank 10 m³. The new buried tank is step 2 of the fix. Tick the tanks in use. Inside dimensions in metres: length × width × depth for a box-shaped tank, diameter × depth for a round one. The extra tank (sheet only) only takes water from the ground sheet, and empties into the other tanks whenever they have room.</p>
+    <p class="small muted" lang="nl">De tank bij het zonnegebouw is 50 m³ en de huistank 10 m³. De nieuwe ondergrondse tank is stap 2 van de oplossing. Vink de tanks aan die in gebruik zijn. Binnenmaten in meters: lengte × breedte × diepte voor een rechthoekige tank, diameter × diepte voor een ronde. De extra tank (alleen folie) krijgt alleen water van de opvangfolie en loopt leeg in de andere tanks zodra daar ruimte is.</p>
     <div id="tanks"></div>
     <div class="toolbar" style="margin:8px 0 0">
-      <button type="button" id="add_tank">Add another tank</button>
-      <span class="derived" style="margin:0">Total <b id="o_tankvol"></b>, of which <b id="o_usable"></b> usable.</span>
+      <button type="button" id="add_tank"><span lang="en">Add another tank</span><span lang="nl">Nog een tank toevoegen</span></button>
+      <span class="derived" style="margin:0" id="o_tanktot"></span>
     </div>
   </div>
 
   <div class="panel">
-    <h3>Tanker top-ups</h3>
-    <label class="inline small"><input type="checkbox" data-k="tanker"> Call a tanker when the tanks run low</label>
+    <h3><span lang="en">Tanker top-ups</span><span lang="nl">Bijvullen met een tankwagen</span></h3>
+    <label class="inline small"><input type="checkbox" data-k="tanker"> <span lang="en">Call a tanker when the tanks run low</span><span lang="nl">Bel een tankwagen als de tanks bijna leeg zijn</span></label>
     <p class="derived" id="o_tanker"></p>
   </div>
 
   <details id="d_water">
-    <summary>Water use in detail</summary>
+    <summary><span lang="en">Water use in detail</span><span lang="nl">Waterverbruik in detail</span></summary>
     <div class="body">
       <div class="radio-row small">
-        <label class="inline"><input type="radio" name="mode" data-k="mode" value="build"> Build it up from showers, toilets and so on</label>
-        <label class="inline"><input type="radio" name="mode" data-k="mode" value="direct"> Enter one figure per guest</label>
+        <label class="inline"><input type="radio" name="mode" data-k="mode" value="build"> <span lang="en">Build it up from showers, toilets and so on</span><span lang="nl">Opbouwen uit douches, toiletten enzovoort</span></label>
+        <label class="inline"><input type="radio" name="mode" data-k="mode" value="direct"> <span lang="en">Enter one figure per guest</span><span lang="nl">Eén getal per gast invullen</span></label>
       </div>
       <div id="direct_box">
-        <label class="f">Litres per guest per day
+        <label class="f"><span lang="en">Litres per guest per day</span><span lang="nl">Liter per gast per dag</span>
           <input type="number" data-k="direct" min="0" max="500" step="1"></label>
       </div>
       <div id="build_box" class="table-wrap">
         <table class="builder">
-          <thead><tr><th>Use</th><th>Setting</th><th class="num">Litres a day</th></tr></thead>
+          <thead><tr><th><span lang="en">Use</span><span lang="nl">Gebruik</span></th><th><span lang="en">Setting</span><span lang="nl">Instelling</span></th><th class="num"><span lang="en">Litres a day</span><span lang="nl">Liter per dag</span></th></tr></thead>
           <tbody>
-            <tr><td>Showers</td><td><span class="inline"><input type="number" data-k="shN" min="0" max="5" step="0.1"> per guest per day ×
-              <input type="number" data-k="shL" min="0" max="200" step="1"> litres each</span><br><span class="tiny">An 8-minute shower at 6 litres a minute is about 50 litres.</span></td><td class="num" id="b_shower"></td></tr>
-            <tr><td>Toilets</td><td><span class="inline"><select data-k="toilet">
+            <tr><td><span lang="en">Showers</span><span lang="nl">Douches</span></td><td><span class="inline"><input type="number" data-k="shN" min="0" max="5" step="0.1"> <span lang="en">per guest per day ×</span><span lang="nl">per gast per dag ×</span>
+              <input type="number" data-k="shL" min="0" max="200" step="1"> <span lang="en">litres each</span><span lang="nl">liter per keer</span></span><br><span class="tiny" lang="en">An 8-minute shower at 6 litres a minute is about 50 litres.</span><span class="tiny" lang="nl">Een douche van 8 minuten met 6 liter per minuut is ongeveer 50 liter.</span></td><td class="num" id="b_shower"></td></tr>
+            <tr><td><span lang="en">Toilets</span><span lang="nl">Toiletten</span></td><td><span class="inline"><select data-k="toilet" id="toilet_select">
                 <option value="std">Standard flush (9 L)</option>
                 <option value="low">Low flush (6 L)</option>
                 <option value="dual">Dual flush 6/2 L (average 3.3 L)</option>
                 <option value="dry">Dry / composting (no water)</option>
                 <option value="grey">Flushed with used shower water</option>
               </select> ×
-              <input type="number" data-k="flush" min="0" max="20" step="1"> flushes per guest per day</span></td><td class="num" id="b_toilet"></td></tr>
-            <tr><td>Taps</td><td><span class="inline"><input type="number" data-k="taps" min="0" max="100" step="1"> litres per guest per day</span><br><span class="tiny">Washing hands, teeth, kitchen sink, cooking.</span></td><td class="num" id="b_taps"></td></tr>
-            <tr><td>Washing machine</td><td><span class="inline"><input type="number" data-k="wmLoads" min="0" max="50" step="1"> loads a week ×
-              <input type="number" data-k="wmL" min="0" max="150" step="1"> litres each</span><br><span class="tiny">For the whole house.</span></td><td class="num" id="b_wm"></td></tr>
-            <tr><td>Dishwasher</td><td><span class="inline"><input type="number" data-k="dwRuns" min="0" max="10" step="0.5"> runs a day ×
-              <input type="number" data-k="dwL" min="0" max="50" step="1"> litres each</span></td><td class="num" id="b_dw"></td></tr>
-            <tr><td>Anything else</td><td><span class="inline"><input type="number" data-k="otherL" min="0" max="5000" step="10"> litres a day for the house</span><br><span class="tiny">Watering, cleaning, a hot tub top-up…</span></td><td class="num" id="b_other"></td></tr>
-            <tr><th>Total</th><th id="b_pp"></th><th class="num" id="b_total"></th></tr>
+              <input type="number" data-k="flush" min="0" max="20" step="1"> <span lang="en">flushes per guest per day</span><span lang="nl">keer doortrekken per gast per dag</span></span></td><td class="num" id="b_toilet"></td></tr>
+            <tr><td><span lang="en">Taps</span><span lang="nl">Kranen</span></td><td><span class="inline"><input type="number" data-k="taps" min="0" max="100" step="1"> <span lang="en">litres per guest per day</span><span lang="nl">liter per gast per dag</span></span><br><span class="tiny" lang="en">Washing hands, teeth, kitchen sink, cooking.</span><span class="tiny" lang="nl">Handen wassen, tanden poetsen, aanrecht, koken.</span></td><td class="num" id="b_taps"></td></tr>
+            <tr><td><span lang="en">Washing machine</span><span lang="nl">Wasmachine</span></td><td><span class="inline"><input type="number" data-k="wmLoads" min="0" max="50" step="1"> <span lang="en">loads a week ×</span><span lang="nl">wassen per week ×</span>
+              <input type="number" data-k="wmL" min="0" max="150" step="1"> <span lang="en">litres each</span><span lang="nl">liter per keer</span></span><br><span class="tiny" lang="en">For the whole house.</span><span class="tiny" lang="nl">Voor het hele huis.</span></td><td class="num" id="b_wm"></td></tr>
+            <tr><td><span lang="en">Dishwasher</span><span lang="nl">Vaatwasser</span></td><td><span class="inline"><input type="number" data-k="dwRuns" min="0" max="10" step="0.5"> <span lang="en">runs a day ×</span><span lang="nl">keer per dag ×</span>
+              <input type="number" data-k="dwL" min="0" max="50" step="1"> <span lang="en">litres each</span><span lang="nl">liter per keer</span></span></td><td class="num" id="b_dw"></td></tr>
+            <tr><td><span lang="en">Anything else</span><span lang="nl">Overig</span></td><td><span class="inline"><input type="number" data-k="otherL" min="0" max="5000" step="10"> <span lang="en">litres a day for the house</span><span lang="nl">liter per dag voor het huis</span></span><br><span class="tiny" lang="en">Watering, cleaning, a hot tub top-up…</span><span class="tiny" lang="nl">Water geven, schoonmaken, een hottub bijvullen…</span></td><td class="num" id="b_other"></td></tr>
+            <tr><th><span lang="en">Total</span><span lang="nl">Totaal</span></th><th id="b_pp"></th><th class="num" id="b_total"></th></tr>
           </tbody>
         </table>
       </div>
       <div class="grid" style="margin-top:12px">
-        <label class="f">People in the house outside the season (average): <span class="val" id="o_off"></span>
+        <label class="f"><span lang="en">People in the house outside the season (average):</span><span lang="nl">Mensen in huis buiten het seizoen (gemiddeld):</span> <span class="val" id="o_off"></span>
           <input type="range" data-k="offPeople" min="0" max="8" step="0.5"></label>
       </div>
-      <p class="tiny" style="margin-top:6px">Outside the season each person uses the same per-guest amount, without laundry or dishwasher.</p>
+      <p class="tiny" style="margin-top:6px" lang="en">Outside the season each person uses the same per-guest amount, without laundry or dishwasher.</p>
+      <p class="tiny" style="margin-top:6px" lang="nl">Buiten het seizoen verbruikt elke persoon hetzelfde als een gast, zonder was en vaatwasser.</p>
     </div>
   </details>
 
   <details>
-    <summary>Collection in detail</summary>
+    <summary><span lang="en">Collection in detail</span><span lang="nl">Opvang in detail</span></summary>
     <div class="body grid">
-      <label class="f">Share of rain that reaches the tanks: <span class="val" id="o_eff"></span>
+      <label class="f"><span lang="en">Share of rain that reaches the tanks:</span><span lang="nl">Deel van de regen dat in de tanks komt:</span> <span class="val" id="o_eff"></span>
         <input type="range" data-k="eff" min="40" max="100" step="1"></label>
-      <label class="f">Rain lost at the start of each wet day: <span class="val" id="o_loss"></span>
+      <label class="f"><span lang="en">Rain lost at the start of each wet day:</span><span lang="nl">Regen die aan het begin van elke natte dag verloren gaat:</span> <span class="val" id="o_loss"></span>
         <input type="range" data-k="loss" min="0" max="5" step="0.1">
-        <span class="tiny">Wetting the roof, first-flush diverter. 0 = included in the share above.</span></label>
-      <label class="f">Gutters and filter overflow above: <span class="val" id="o_cap"></span>
+        <span class="tiny" lang="en">Wetting the roof, first-flush diverter. 0 = included in the share above.</span><span class="tiny" lang="nl">Het dak nat maken, de first-flush-afscheider. 0 = zit al in het deel hierboven.</span></label>
+      <label class="f"><span lang="en">Gutters and filter overflow above:</span><span lang="nl">Dakgoten en filter lopen over boven:</span> <span class="val" id="o_cap"></span>
         <input type="range" data-k="cap" min="0" max="80" step="1">
-        <span class="tiny">Daily rain beyond this is lost. 0 = no limit.</span></label>
+        <span class="tiny" lang="en">Daily rain beyond this is lost. 0 = no limit.</span><span class="tiny" lang="nl">Regen per dag boven deze grens gaat verloren. 0 = geen grens.</span></label>
     </div>
   </details>
 
   <details>
-    <summary>Tanks in detail</summary>
+    <summary><span lang="en">Tanks in detail</span><span lang="nl">Tanks in detail</span></summary>
     <div class="body grid">
-      <label class="f">Usable share of the tank volume: <span class="val" id="o_usable_pct"></span>
+      <label class="f"><span lang="en">Usable share of the tank volume:</span><span lang="nl">Bruikbaar deel van de tankinhoud:</span> <span class="val" id="o_usable_pct"></span>
         <input type="range" data-k="usable" min="50" max="100" step="1">
-        <span class="tiny">Water below the pump intake and above the overflow pipe can't be used.</span></label>
-      <label class="f">How full the tanks were at the start: <span class="val" id="o_fill"></span>
+        <span class="tiny" lang="en">Water below the pump intake and above the overflow pipe can't be used.</span><span class="tiny" lang="nl">Water onder de pompaanzuiging en boven de overloop is niet bruikbaar.</span></label>
+      <label class="f"><span lang="en">How full the tanks were at the start:</span><span lang="nl">Hoe vol de tanks bij de start waren:</span> <span class="val" id="o_fill"></span>
         <input type="range" data-k="fill" min="0" max="100" step="5"></label>
     </div>
   </details>
 
   <details>
-    <summary>Tanker in detail</summary>
+    <summary><span lang="en">Tanker in detail</span><span lang="nl">Tankwagen in detail</span></summary>
     <div class="body">
       <div class="grid">
-        <label class="f">Supplier
+        <label class="f"><span lang="en">Supplier</span><span lang="nl">Leverancier</span>
           <select data-k="supplier" id="supplier_select"></select></label>
-        <label class="f">Road distance from their base (km, one way)
+        <label class="f"><span lang="en">Road distance from their base (km, one way)</span><span lang="nl">Afstand over de weg vanaf hun vestiging (km, enkele reis)</span>
           <input type="number" data-k="km" min="0" max="1000" step="0.1"></label>
-        <label class="f">Tanker
+        <label class="f"><span lang="en">Tanker</span><span lang="nl">Tankwagen</span>
           <select data-k="truck" id="truck_select"></select></label>
-        <label class="f">Water per delivery (m³)
+        <label class="f"><span lang="en">Water per delivery (m³)</span><span lang="nl">Water per levering (m³)</span>
           <input type="number" data-k="load" min="1" max="40" step="1"></label>
       </div>
       <p class="tiny" id="o_supplier" style="margin-top:6px"></p>
 
       <div class="grid" style="margin-top:10px">
-        <label class="f">Fixed charge per delivery (€)
+        <label class="f"><span lang="en">Fixed charge per delivery (€)</span><span lang="nl">Vast bedrag per levering (€)</span>
           <input type="number" data-k="fixed" min="0" max="3000" step="10">
-          <span class="tiny">Loading, hooking up and pumping: about 1 to 1.5 hours of lorry and driver.</span></label>
-        <label class="f">Charge per kilometre (€)
+          <span class="tiny" lang="en">Loading, hooking up and pumping: about 1 to 1.5 hours of lorry and driver.</span><span class="tiny" lang="nl">Laden, aansluiten en pompen: ongeveer 1 tot 1,5 uur vrachtwagen met chauffeur.</span></label>
+        <label class="f"><span lang="en">Charge per kilometre (€)</span><span lang="nl">Bedrag per kilometer (€)</span>
           <input type="number" data-k="perKm" min="0" max="20" step="0.1">
-          <span class="tiny">Charged on the round trip, as the lorry drives back empty.</span></label>
-        <label class="f">Water price (€ per m³)
+          <span class="tiny" lang="en">Charged on the round trip, as the lorry drives back empty.</span><span class="tiny" lang="nl">Gerekend over heen en terug, want de wagen rijdt leeg terug.</span></label>
+        <label class="f"><span lang="en">Water price (€ per m³)</span><span lang="nl">Waterprijs (€ per m³)</span>
           <input type="number" data-k="price" min="0" max="50" step="0.1"></label>
       </div>
       <p class="derived" id="o_cost_breakdown"></p>
 
       <div class="grid" style="margin-top:6px">
-        <label class="f">Order a tanker when the tanks fall to: <span class="val" id="o_trig"></span>
+        <label class="f"><span lang="en">Order a tanker when the tanks fall to:</span><span lang="nl">Bestel een tankwagen als de tanks dalen tot:</span> <span class="val" id="o_trig"></span>
           <input type="range" data-k="trig" min="0" max="50" step="1"></label>
-        <label class="f">Days from ordering to delivery: <span class="val" id="o_lead"></span>
+        <label class="f"><span lang="en">Days from ordering to delivery:</span><span lang="nl">Dagen tussen bestellen en levering:</span> <span class="val" id="o_lead"></span>
           <input type="range" data-k="lead" min="0" max="14" step="1"></label>
       </div>
 
-      <h3 style="margin-top:14px">Who could deliver</h3>
-      <p class="small muted">Researched October 2026. No firm in the Lot advertises water deliveries to homes, so these are hauliers near the house that run tankers. None has been asked for a quote yet.</p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Haulier</th><th>Base</th><th class="num">Road distance</th><th>What they run</th></tr></thead>
-          <tbody>
-            <tr><td>Transports Delrieu</td><td>Parnac</td><td class="num">15.6 km, 19 min</td><td>Four food-grade tanker semi-trailers (they carry bulk wine, including to private customers) and two 28 m³ tankers for other water. The nearest firm with food-grade tanks.</td></tr>
-            <tr><td>SARL Cassan</td><td>Prayssac</td><td class="num">1.6 km, 3 min</td><td>Fuel and liquids tankers within 40 km of Prayssac. A fuel tank can't be used for washing water, so only if they have a separate food-grade one.</td></tr>
-            <tr><td>Établissements Imbert</td><td>Fontanes</td><td class="num">42.7 km, 47 min</td><td>Haulage including bulk tanker work, per business directories. Tank type not confirmed.</td></tr>
-            <tr><td>Amichauf</td><td>Souillac</td><td class="num">86.7 km, 78 min</td><td>Listed as water treatment, transport and distribution. No tanker details found.</td></tr>
-            <tr><td>Transports Veynat</td><td>Tresses (Gironde)</td><td class="num">197 km, 2 h 43</td><td>Drinking-water tanker specialist, food-grade since the 1880s. Supplies towns in droughts. Far away, so the distance dominates the price.</td></tr>
-          </tbody>
-        </table>
+      <div lang="en">
+        <h3 style="margin-top:14px">Who could deliver</h3>
+        <p class="small muted">Researched October 2026. No firm in the Lot advertises water deliveries to homes, so these are hauliers near the house that run tankers. None has been asked for a quote yet.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Haulier</th><th>Base</th><th class="num">Road distance</th><th>What they run</th></tr></thead>
+            <tbody>
+              <tr><td>Transports Delrieu</td><td>Parnac</td><td class="num">15.6 km, 19 min</td><td>Four food-grade tanker semi-trailers (they carry bulk wine, including to private customers) and two 28 m³ tankers for other water. The nearest firm with food-grade tanks.</td></tr>
+              <tr><td>SARL Cassan</td><td>Prayssac</td><td class="num">1.6 km, 3 min</td><td>Fuel and liquids tankers within 40 km of Prayssac. A fuel tank can't be used for washing water, so only if they have a separate food-grade one.</td></tr>
+              <tr><td>Établissements Imbert</td><td>Fontanes</td><td class="num">42.7 km, 47 min</td><td>Haulage including bulk tanker work, per business directories. Tank type not confirmed.</td></tr>
+              <tr><td>Amichauf</td><td>Souillac</td><td class="num">86.7 km, 78 min</td><td>Listed as water treatment, transport and distribution. No tanker details found.</td></tr>
+              <tr><td>Transports Veynat</td><td>Tresses (Gironde)</td><td class="num">197 km, 2 h 43</td><td>Drinking-water tanker specialist, food-grade since the 1880s. Supplies towns in droughts. Far away, so the distance dominates the price.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tiny" style="margin-top:6px">Distances are by road from each base to Prayssac, assuming the lorry fills up close to the house. None of these firms sells water: they would fill up from the public network at a point the water operator authorises (fire hydrants are off limits without written permission). Prayssac's water comes from the Aquareso syndicate at Puy-l'Évêque, run by SOGEDO, so they're the people to ask where a tanker can fill. If the filling point is out of the way, enter the extra distance under <i>Other</i>.</p>
+        <h3 style="margin-top:14px">Which tanker can get to the house</h3>
+        <p class="small">Water weighs a tonne per cubic metre, so the lorry's legal weight limit sets how much it can carry: about 12 m³ on a two-axle lorry, 16 m³ on three axles, 20 m³ on four, and 25 to 30 m³ on an articulated tanker. A bigger load costs much less per cubic metre, because the fixed charge and the drive are the same. An articulated tanker needs a lane at least 3 m wide, 4 m of headroom, firm ground, somewhere to turn, and no weight limits on the road or bridges. The hose reaches about 30 m.</p>
       </div>
-      <p class="tiny" style="margin-top:6px">Distances are by road from each base to Prayssac, assuming the lorry fills up close to the house. None of these firms sells water: they would fill up from the public network at a point the water operator authorises (fire hydrants are off limits without written permission). Prayssac's water comes from the Aquareso syndicate at Puy-l'Évêque, run by SOGEDO, so they're the people to ask where a tanker can fill. If the filling point is out of the way, enter the extra distance under <i>Other</i>.</p>
-
-      <h3 style="margin-top:14px">Which tanker can get to the house</h3>
-      <p class="small">Water weighs a tonne per cubic metre, so the lorry's legal weight limit sets how much it can carry: about 12 m³ on a two-axle lorry, 16 m³ on three axles, 20 m³ on four, and 25 to 30 m³ on an articulated tanker. A bigger load costs much less per cubic metre, because the fixed charge and the drive are the same. An articulated tanker needs a lane at least 3 m wide, 4 m of headroom, firm ground, somewhere to turn, and no weight limits on the road or bridges. The hose reaches about 30 m.</p>
+      <div lang="nl">
+        <h3 style="margin-top:14px">Wie zou kunnen leveren</h3>
+        <p class="small muted">Uitgezocht in oktober 2026. Geen enkel bedrijf in de Lot adverteert met waterlevering aan huis, dus dit zijn vervoerders in de buurt met tankwagens. Er is nog bij geen van hen een offerte gevraagd.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Vervoerder</th><th>Vestiging</th><th class="num">Afstand over de weg</th><th>Wat ze hebben</th></tr></thead>
+            <tbody>
+              <tr><td>Transports Delrieu</td><td>Parnac</td><td class="num">15,6 km, 19 min</td><td>Vier voedselveilige tankopleggers (ze vervoeren wijn in bulk, ook voor particulieren) en twee tankwagens van 28 m³ voor ander water. Het dichtstbijzijnde bedrijf met voedselveilige tanks.</td></tr>
+              <tr><td>SARL Cassan</td><td>Prayssac</td><td class="num">1,6 km, 3 min</td><td>Tankwagens voor brandstof en vloeistoffen binnen 40 km van Prayssac. Een brandstoftank kan niet voor waswater worden gebruikt, dus alleen als ze een aparte voedselveilige tank hebben.</td></tr>
+              <tr><td>Établissements Imbert</td><td>Fontanes</td><td class="num">42,7 km, 47 min</td><td>Transport, inclusief bulktransport per tankwagen, volgens bedrijvengidsen. Type tank niet bevestigd.</td></tr>
+              <tr><td>Amichauf</td><td>Souillac</td><td class="num">86,7 km, 78 min</td><td>Vermeld voor waterbehandeling, -transport en -distributie. Geen gegevens over tankwagens gevonden.</td></tr>
+              <tr><td>Transports Veynat</td><td>Tresses (Gironde)</td><td class="num">197 km, 2 u 43</td><td>Gespecialiseerd in drinkwatertransport, voedselveilig sinds de jaren 1880. Bevoorraadt gemeenten bij droogte. Ver weg, dus de afstand bepaalt de prijs.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tiny" style="margin-top:6px">Afstanden over de weg van elke vestiging naar Prayssac, ervan uitgaande dat de wagen dicht bij het huis vult. Geen van deze bedrijven verkoopt water: ze vullen uit het openbare net op een punt dat de waterbeheerder aanwijst (brandkranen zijn zonder schriftelijke toestemming verboden). Het water van Prayssac komt van het syndicaat Aquareso in Puy-l'Évêque, beheerd door SOGEDO; daar moet je vragen waar een tankwagen kan vullen. Ligt het vulpunt uit de route, vul dan de extra afstand in onder <i>Anders</i>.</p>
+        <h3 style="margin-top:14px">Welke tankwagen bij het huis kan komen</h3>
+        <p class="small">Water weegt een ton per kubieke meter, dus het wettelijke maximumgewicht van de wagen bepaalt hoeveel hij kan meenemen: ongeveer 12 m³ op een vrachtwagen met twee assen, 16 m³ met drie, 20 m³ met vier, en 25 tot 30 m³ op een tankoplegger. Een grotere lading is per kubieke meter veel goedkoper, want het vaste bedrag en de rit blijven gelijk. Een tankoplegger heeft een weg van minstens 3 m breed nodig, 4 m vrije hoogte, stevige grond, een plek om te keren en geen gewichtsbeperkingen op wegen of bruggen. De slang reikt ongeveer 30 m.</p>
+      </div>
     </div>
   </details>
 
   <details>
-    <summary>Rainfall data and climate</summary>
+    <summary><span lang="en">Rainfall data and climate</span><span lang="nl">Neerslaggegevens en klimaat</span></summary>
     <div class="body">
       <div class="grid">
-        <label class="f">Rainfall source
+        <label class="f"><span lang="en">Rainfall source</span><span lang="nl">Bron van de neerslag</span>
           <select data-k="src" id="src_select"></select></label>
-        <label class="f">Start from the year
+        <label class="f"><span lang="en">Start from the year</span><span lang="nl">Beginnen in het jaar</span>
           <select data-k="from" id="from_select"></select></label>
       </div>
-      <p class="small" style="margin:12px 0 4px">Climate: shift the rainfall towards the expected future.</p>
+      <p class="small" style="margin:12px 0 4px"><span lang="en">Climate: shift the rainfall towards the expected future.</span><span lang="nl">Klimaat: verschuif de neerslag naar de verwachte toekomst.</span></p>
       <div class="presets">
-        <button type="button" data-preset="recent">Recent weather (no change)</button>
-        <button type="button" data-preset="2050">Météo-France 2050 outlook</button>
+        <button type="button" data-preset="recent"><span lang="en">Recent weather (no change)</span><span lang="nl">Recent weer (geen verandering)</span></button>
+        <button type="button" data-preset="2050"><span lang="en">Météo-France 2050 outlook</span><span lang="nl">Verwachting Météo-France voor 2050</span></button>
       </div>
       <div class="grid">
-        <label class="f">Summer rain (June to August): <span class="val" id="o_sum"></span>
+        <label class="f"><span lang="en">Summer rain (June to August):</span><span lang="nl">Zomerregen (juni tot augustus):</span> <span class="val" id="o_sum"></span>
           <input type="range" data-k="sumAdj" min="-50" max="50" step="1"></label>
-        <label class="f">Winter rain (December to February): <span class="val" id="o_win"></span>
+        <label class="f"><span lang="en">Winter rain (December to February):</span><span lang="nl">Winterregen (december tot februari):</span> <span class="val" id="o_win"></span>
           <input type="range" data-k="winAdj" min="-50" max="50" step="1"></label>
       </div>
     </div>
@@ -732,28 +920,28 @@
 </section>
 
 <section id="results">
-  <h2>Results</h2>
+  <h2><span lang="en">Results</span><span lang="nl">Resultaten</span></h2>
   <div class="cards">
-    <div class="card"><div class="k">Tanker deliveries</div><div class="v" id="c_del"></div><div class="s" id="c_del_s"></div></div>
-    <div class="card"><div class="k">Tanker cost</div><div class="v" id="c_cost"></div><div class="s" id="c_cost_s"></div></div>
-    <div class="card"><div class="k">Worst summer</div><div class="v" id="c_worst"></div><div class="s" id="c_worst_s"></div></div>
-    <div class="card"><div class="k">Days without water</div><div class="v" id="c_dry"></div><div class="s" id="c_dry_s"></div></div>
-    <div class="card"><div class="k">Lowest the tanks got</div><div class="v" id="c_min"></div><div class="s" id="c_min_s"></div></div>
-    <div class="card"><div class="k">Collected and used</div><div class="v" id="c_bal"></div><div class="s" id="c_bal_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Tanker deliveries</span><span lang="nl">Leveringen per tankwagen</span></div><div class="v" id="c_del"></div><div class="s" id="c_del_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Tanker cost</span><span lang="nl">Kosten tankwagens</span></div><div class="v" id="c_cost"></div><div class="s" id="c_cost_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Worst summer</span><span lang="nl">Slechtste zomer</span></div><div class="v" id="c_worst"></div><div class="s" id="c_worst_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Days without water</span><span lang="nl">Dagen zonder water</span></div><div class="v" id="c_dry"></div><div class="s" id="c_dry_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Lowest the tanks got</span><span lang="nl">Laagste stand van de tanks</span></div><div class="v" id="c_min"></div><div class="s" id="c_min_s"></div></div>
+    <div class="card"><div class="k"><span lang="en">Collected and used</span><span lang="nl">Opgevangen en verbruikt</span></div><div class="v" id="c_bal"></div><div class="s" id="c_bal_s"></div></div>
   </div>
 
   <div class="viewbar">
-    <span class="inline small">Chart from <input type="date" id="view_from" aria-label="Show the chart from"> to <input type="date" id="view_to" aria-label="Show the chart to"></span>
-    <span class="inline small">Year <select id="view_year" aria-label="Show one year"></select></span>
-    <button type="button" class="small-btn" data-view="12m">Last 12 months</button>
-    <button type="button" class="small-btn" data-view="5y">Last 5 years</button>
-    <button type="button" class="small-btn" data-view="all">Whole period</button>
+    <span class="inline small"><span lang="en">Chart from</span><span lang="nl">Grafiek van</span> <input type="date" id="view_from" aria-label="Show the chart from"> <span lang="en">to</span><span lang="nl">tot</span> <input type="date" id="view_to" aria-label="Show the chart to"></span>
+    <span class="inline small"><span lang="en">Year</span><span lang="nl">Jaar</span> <select id="view_year" aria-label="Show one year"></select></span>
+    <button type="button" class="small-btn" data-view="12m"><span lang="en">Last 12 months</span><span lang="nl">Laatste 12 maanden</span></button>
+    <button type="button" class="small-btn" data-view="5y"><span lang="en">Last 5 years</span><span lang="nl">Laatste 5 jaar</span></button>
+    <button type="button" class="small-btn" data-view="all"><span lang="en">Whole period</span><span lang="nl">Hele periode</span></button>
   </div>
   <div class="legend">
-    <span><i class="sw" style="background:var(--water)"></i>Water in the tanks</span>
-    <span id="lg_base"><i class="sw" style="background:none;border-top:2px dashed #8a8980;height:0"></i>Comparison setup</span>
-    <span><i class="sw" style="background:rgba(216,90,48,0.12)"></i>Guest season</span>
-    <span id="lg_tanker"><span style="color:var(--tanker)">▲</span>Tanker delivery</span>
+    <span><i class="sw" style="background:var(--water)"></i><span lang="en">Water in the tanks</span><span lang="nl">Water in de tanks</span></span>
+    <span id="lg_base"><i class="sw" style="background:none;border-top:2px dashed #8a8980;height:0"></i><span lang="en">Comparison setup</span><span lang="nl">Vergelijking</span></span>
+    <span><i class="sw" style="background:rgba(216,90,48,0.12)"></i><span lang="en">Guest season</span><span lang="nl">Gastenseizoen</span></span>
+    <span id="lg_tanker"><span style="color:var(--tanker)">▲</span><span lang="en">Tanker delivery</span><span lang="nl">Levering per tankwagen</span></span>
   </div>
   <div class="chart-wrap" id="chart_wrap">
     <canvas id="chart" role="img" aria-label="Water in the tanks every day over the whole period"></canvas>
@@ -761,39 +949,43 @@
     <div class="sel" id="sel"></div>
     <div class="tip" id="tip"></div>
   </div>
-  <p class="tiny">Move your finger or mouse over the chart to see any day. With a mouse, drag across the chart to zoom in on that stretch, and double-click to see the whole period again.</p>
+  <p class="tiny" lang="en">Move your finger or mouse over the chart to see any day. With a mouse, drag across the chart to zoom in on that stretch, and double-click to see the whole period again.</p>
+  <p class="tiny" lang="nl">Beweeg je vinger of muis over de grafiek om elke dag te zien. Met een muis sleep je over de grafiek om op dat stuk in te zoomen, en dubbelklik je om weer de hele periode te zien.</p>
 
   <div class="comparebox">
-    <div><b>Comparing with:</b> <span id="base_o"></span></div>
+    <div><b><span lang="en">Comparing with:</span><span lang="nl">Vergeleken met:</span></b> <span id="base_o"></span></div>
     <div class="row">
-      <button type="button" id="pin">Compare against the current settings</button>
-      <button type="button" id="unpin">Compare against the default setup</button>
+      <button type="button" id="pin"><span lang="en">Compare against the current settings</span><span lang="nl">Vergelijk met de huidige instellingen</span></button>
+      <button type="button" id="unpin"><span lang="en">Compare against the default setup</span><span lang="nl">Vergelijk met de standaardopzet</span></button>
     </div>
     <div class="row">
-      <label class="inline">Cost of the changes (€) <input type="number" data-k="upCost" min="0" step="100" style="width:7em"></label>
+      <label class="inline"><span lang="en">Cost of the changes (€)</span><span lang="nl">Kosten van de veranderingen (€)</span> <input type="number" data-k="upCost" min="0" step="100" style="width:7em"></label>
       <span id="payback_o"></span>
     </div>
   </div>
 
-  <h3>Year by year</h3>
+  <h3><span lang="en">Year by year</span><span lang="nl">Per jaar</span></h3>
   <div class="table-wrap"><table id="years"></table></div>
   <p class="tiny" id="years_note"></p>
 </section>
 
 <section>
   <details id="calib">
-    <summary>Check it against your own tanks</summary>
+    <summary><span lang="en">Check it against your own tanks</span><span lang="nl">Controleer het met je eigen tanks</span></summary>
     <div class="body">
-      <p class="small">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. The proposed ground sheet is left out of these checks, as it isn't built yet. This assumes the tanks are linked, so the water stands at the same level in each. The page looks up the rain measured at Anglars between your readings.</p>
+      <p class="small" lang="en">Measure the depth of water in the tanks with a dipstick, in centimetres, at the same spot each time. The proposed ground sheet is left out of these checks, as it isn't built yet. This assumes the tanks are linked, so the water stands at the same level in each. The page looks up the rain measured at Anglars between your readings.</p>
+      <p class="small" lang="nl">Meet de waterdiepte in de tanks met een peilstok, in centimeters, elke keer op dezelfde plek. De voorgestelde opvangfolie telt bij deze controles niet mee, want die is er nog niet. Dit gaat ervan uit dat de tanks met elkaar verbonden zijn, zodat het water in elke tank even hoog staat. De pagina zoekt de regen op die tussen je metingen in Anglars is gevallen.</p>
 
-      <h3>1. How much rain actually reaches the tanks</h3>
-      <p class="small muted">Take a reading before and after a rainy spell, when nobody is using water and the tanks aren't full (so nothing overflows). Morning readings line up best with the gauge.</p>
+      <h3><span lang="en">1. How much rain actually reaches the tanks</span><span lang="nl">1. Hoeveel regen er echt in de tanks komt</span></h3>
+      <p class="small muted" lang="en">Take a reading before and after a rainy spell, when nobody is using water and the tanks aren't full (so nothing overflows). Morning readings line up best with the gauge.</p>
+      <p class="small muted" lang="nl">Meet voor en na een regenachtige periode, als niemand water gebruikt en de tanks niet vol zijn (zodat er niets overloopt). Metingen in de ochtend passen het best bij de regenmeter.</p>
       <div class="table-wrap"><table id="cal_rain"></table></div>
-      <div class="toolbar" style="margin-top:8px"><button type="button" id="cal_rain_add">Add another rainy spell</button></div>
+      <div class="toolbar" style="margin-top:8px"><button type="button" id="cal_rain_add"><span lang="en">Add another rainy spell</span><span lang="nl">Nog een regenperiode toevoegen</span></button></div>
       <p class="derived" id="cal_rain_out"></p>
 
-      <h3 style="margin-top:14px">2. How much water guests actually use</h3>
-      <p class="small muted">Take a reading at the start and end of a stretch with guests in the house, ideally a dry week.</p>
+      <h3 style="margin-top:14px"><span lang="en">2. How much water guests actually use</span><span lang="nl">2. Hoeveel water gasten echt gebruiken</span></h3>
+      <p class="small muted" lang="en">Take a reading at the start and end of a stretch with guests in the house, ideally a dry week.</p>
+      <p class="small muted" lang="nl">Meet aan het begin en het eind van een periode met gasten in huis, liefst een droge week.</p>
       <div class="table-wrap"><table id="cal_use"></table></div>
       <p class="derived" id="cal_use_out"></p>
     </div>
@@ -801,8 +993,8 @@
 </section>
 
 <footer>
-  Rainfall: Météo-France (Anglars-Juillac gauge, open data) and ERA5 via Open-Meteo. Data runs <span class="ex_range"></span>, last updated <span id="updated_o"></span>.
-  Everything this page needs is contained in it, so it also works offline.
+  <span lang="en">Rainfall: Météo-France (Anglars-Juillac gauge, open data) and ERA5 via Open-Meteo. Data runs <span class="ex_range"></span>, last updated <span class="updated_o"></span>. Everything this page needs is contained in it, so it also works offline.</span>
+  <span lang="nl">Neerslag: Météo-France (regenmeter Anglars-Juillac, open data) en ERA5 via Open-Meteo. De gegevens lopen van <span class="ex_range"></span>, laatst bijgewerkt op <span class="updated_o"></span>. Alles wat deze pagina nodig heeft zit erin, dus hij werkt ook offline.</span>
 </footer>
 </div>
 <script src="rainfall.js"></script>
