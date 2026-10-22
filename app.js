@@ -1671,10 +1671,17 @@
     return s;
   }
 
+  // The address bar only ever shows the plain link (and the language), so whoever copies it from there
+  // shares the defaults. Settings travel only in a link made with "Copy link to these settings", and
+  // are cleared from the address once the page has read them.
   function writeHash() {
-    const h = toHash(state);
+    const h = LANG === 'nl' ? 'lang=nl' : '';
     try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch (e) { /* file:// in some browsers */ }
   }
+  const shareUrl = () => {
+    const h = toHash(state);
+    return location.href.split('#')[0] + (h ? '#' + h : '');
+  };
 
   // ---- Inputs --------------------------------------------------------------
 
@@ -1924,8 +1931,7 @@
     $('pin').addEventListener('click', () => { pinned = clone(state); schedule(); });
     $('unpin').addEventListener('click', () => { pinned = null; schedule(); });
     $('share').addEventListener('click', () => {
-      writeHash();
-      const url = location.href;
+      const url = shareUrl();
       const done = () => {
         setHTML('share_o', tr('Link copied. Paste it into a message to share these exact settings.',
           'Link gekopieerd. Plak hem in een bericht om precies deze instellingen te delen.'));
@@ -2079,12 +2085,18 @@
     wrap.addEventListener('dblclick', () => setView(null, null));
     wrap.addEventListener('pointerleave', () => { if (!drag) hideTip(); });
     window.addEventListener('resize', () => { drawChart(); drawWhyChart(); });
+    // A link pasted into an open tab: apply its settings and language, then the next update clears the
+    // address again.
     window.addEventListener('hashchange', () => {
-      if (location.hash.replace(/^#/, '') === toHash(state)) return;
-      state = fromHash(location.hash);
-      view = viewFromHash(location.hash);
-      setInputs();
-      schedule();
+      const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+      const lang = p.get('lang');
+      const settings = [...p.keys()].some((k) => k !== 'lang');
+      if (settings) {
+        state = fromHash(location.hash);
+        view = viewFromHash(location.hash);
+      }
+      if ((lang === 'nl' || lang === 'en') && lang !== LANG) switchLang(lang);
+      else if (settings) { setInputs(); schedule(); }
     });
 
     buildStory();

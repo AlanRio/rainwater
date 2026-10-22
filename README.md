@@ -6,7 +6,8 @@ A day-by-day water balance for an off-grid house near Prayssac (Lot, France) tha
 rain collected from its roofs. It replays every day of measured rainfall since 1994 through
 the roofs and tanks, takes off what guests use, and shows how often a tanker would be needed,
 what that costs, and whether the house would ever run dry. Every assumption is a setting on
-the page, and the settings are stored in the page address so a scenario can be shared as a link.
+the page. Everyone who opens the page starts from the same default settings; a scenario can be shared
+with the page's "Copy link to these settings" button.
 
 ## Files
 
@@ -123,7 +124,10 @@ spell give the real collection efficiency (water gained ÷ rain × area, after t
 surfaces with their own efficiency delivered); readings across a stretch with guests give real
 litres per guest per day (fall in level plus rain added).
 
-Settings live in the page address. Surfaces are written as
+Settings are shared through the page address, but only in a link made with "Copy link to these
+settings": the page reads them on opening and then clears them from the address, so the address bar
+only ever shows the plain link (plus `#lang=nl` in Dutch) and a reload starts from the defaults.
+In those links, surfaces are written as
 `on~length~width[~e<share>][~g][~name]` and tanks as `on~shape~length~width~depth[~g][~name]`,
 separated by `|`, where `g` marks the proposed ground sheet and its extra tank. Links made
 before these existed get them added, switched off. The calibration tool leaves both out, as
