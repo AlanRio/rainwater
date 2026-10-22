@@ -102,6 +102,7 @@
   ];
   const NEW_TANK = 'New buried tank';
   const SHEET_TANK_ROW = DEFAULT_TANKS.findIndex((t) => t.g);
+  const MAX_GUESTS = 8; // the house sleeps 8
   const DEFAULTS = {
     // guests and season
     guests: 8, occ: 100, s0: 5, s1: 10, offPeople: 0,
@@ -1662,6 +1663,7 @@
     if (!truck || (truck.load !== null && truck.load !== s.load)) s.truck = 'custom';
     if (!has(R.sources, s.src)) s.src = DEFAULTS.src;
     if (!has(TOILET_LITRES, s.toilet)) s.toilet = DEFAULTS.toilet;
+    s.guests = Math.min(MAX_GUESTS, Math.max(0, Math.round(s.guests)));
     s.s0 = Math.min(12, Math.max(1, Math.round(s.s0)));
     s.s1 = Math.min(12, Math.max(1, Math.round(s.s1)));
     if (s.mode !== 'direct') s.mode = 'build';
