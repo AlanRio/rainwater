@@ -185,7 +185,7 @@ about €1,100. A pump able to lift 130 m or more, its solar drive and treatment
 | Ground sheet | 20 × 4.5 m EPDM sheet, 85% reaching the tanks | Off by default; plan B (see above) |
 | Collection efficiency | 75% | BS 8515 / DIN 1989 use about 0.8–0.9 runoff × 0.9 filter; set lower for clay tiles and summer cloudbursts |
 | Tanks | Solar building tank 50 m³ (4.5 × 4.45 × 2.5 m) and house tank 10 m³ (2 × 2 × 2.5 m), 90% usable; new buried tank 25 m³ (4 × 2.5 × 2.5 m), off | Each tank has its own size and shape (box or round), and more can be added |
-| Guests | 8, house full, May to October | |
+| Guests | 8, house full, May to October | The most the house sleeps; the slider stops at 8 |
 | Water use | 82 L per guest per day plus 81 L for the house | Showers 1 × 50 L, dual flush 6/2 L × 5 (3.3 L average: one full for every two short, as in the UK water efficiency calculator, Approved Document G), taps 15 L; laundry 8 loads × 55 L a week and dishwasher 1.5 × 12 L a day for the house |
 | Tanker | On; ordered at 5%, arrives after 2 days | |
 | Supplier | Transports Delrieu, Parnac, 15.6 km by road | Nearest haulier with food-grade tanks |
